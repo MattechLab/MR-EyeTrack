@@ -1,0 +1,15 @@
+HCPh Control Task
+The "positive-control task" distributed within this product was derived from
+the fMRI-Control-Task codebase (see below).
+Copyright 2023 The Axon Lab
+
+fMRI-Control-Task (https://github.com/mattwall1103/fMRI-Control-Task)
+fMRI-Control-Task is distributed under the MIT License terms. Therefore, reusing
+this code or deriving from it must acknowledge the original authorship of
+Matthew B. Wall and cite:
+
+     Harvey J, Demetriou L, McGonigle J, Wall MB. 2018. A short, robust brain activation
+     control task optimised for pharmacological fMRI studies. PeerJ 6:e5540
+     doi:https://doi.org/10.7717/peerj.5540
+
+Copyright 2018 Matthew B. Wall
