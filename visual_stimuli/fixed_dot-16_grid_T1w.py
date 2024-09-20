@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
-    on septiembre 20, 2024, at 17:44
+    on septiembre 20, 2024, at 21:36
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -72,9 +72,9 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # --- Setup the Window ---
 win = visual.Window(
-    size=[800, 600], fullscr=True, screen=0, 
+    size=[2560, 1440], fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
-    monitor='testMonitor', color=[0,0,0], colorSpace='rgb',
+    monitor='testMonitor', color=[-1.0000, -1.0000, -1.0000], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
     units='norm')
@@ -146,27 +146,24 @@ etRecord = hardware.eyetracker.EyetrackerControl(
 )
 
 # --- Initialize components for Routine "dots" ---
-
-# Create a window with black background
-win = visual.Window([800, 600], color=[-1, -1, -1])
-
-# Define the size of the screen (normalized coordinates)
+dot = visual.ShapeStim(
+    win=win, name='dot',
+    size=(0.1, 0.1), vertices='circle',
+    ori=0.0, pos=(0, 0), anchor='center',
+    lineWidth=1.0,     colorSpace='rgb',  lineColor=[0.5, 0.5, 0.5], fillColor=[0.5000, 0.5000, 0.5000],
+    opacity=1.0, depth=0.0, interpolate=True)
+# Run 'Begin Experiment' code from code
+# Begin Experiment
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
 positions = []  # List of grid positions
-
 # Calculate grid positions
 for i in range(grid_size):
     for j in range(grid_size):
         x = -0.75 + i * 0.5  # Adjust the range of x coordinates
         y = -0.75 + j * 0.5  # Adjust the range of y coordinates
         positions.append((x, y))
-
-# Shuffle the positions to make them random
-shuffle(positions)
-
-# Create a grey dot stimulus
-dot = visual.Circle(win, radius=dot_size, fillColor='grey', lineColor='grey')
+shuffle(positions)  # Shuffle the positions
 
 # --- Initialize components for Routine "end" ---
 text = visual.TextStim(win=win, name='text',
@@ -441,6 +438,20 @@ for thisT1w_LIBRE in T1w_LIBRE:
     
     # --- Prepare to start Routine "dots" ---
     continueRoutine = True
+    # update component parameters for each repeat
+    # Run 'Begin Routine' code from code
+    # Begin Routine
+    current_position_index = 0  # Start with the first position
+    total_positions = len(positions)  # Track the total number of positions
+    # keep track of which components have finished
+    dotsComponents = [dot]
+    for thisComponent in dotsComponents:
+        thisComponent.tStart = None
+        thisComponent.tStop = None
+        thisComponent.tStartRefresh = None
+        thisComponent.tStopRefresh = None
+        if hasattr(thisComponent, 'status'):
+            thisComponent.status = NOT_STARTED
     # reset timers
     t = 0
     _timeToFirstFrame = win.getFutureFlipTime(clock="now")
@@ -448,7 +459,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
     
     # --- Run Routine "dots" ---
     routineForceEnded = not continueRoutine
-    while continueRoutine and routineTimer.getTime() < 5*16:  # TODO create a variable for the duration
+    while continueRoutine:
         # get current time
         t = routineTimer.getTime()
         tThisFlip = win.getFutureFlipTime(clock=routineTimer)
@@ -456,16 +467,33 @@ for thisT1w_LIBRE in T1w_LIBRE:
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
         
-        # Main loop to show the dot in each random position
-        for pos in positions:
-            dot.pos = pos  # Set dot position to a random section
-            dot.draw()  # Draw the dot on the window
-            win.flip()  # Update the window (show the dot)
-            core.wait(5)  # Wait for 5 seconds to show the dot # TODO create a variable for the duration
-
-            # Clear screen (black background) between trials
-            win.flip()  # Reset the window (clear the dot)
-            core.wait(0.5)  # Brief pause before showing the next dot # TODO create a variable for the duration
+        # *dot* updates
+        
+        # if dot is starting this frame...
+        if dot.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+            # keep track of start time/frame for later
+            dot.frameNStart = frameN  # exact frame index
+            dot.tStart = t  # local t and not account for scr refresh
+            dot.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(dot, 'tStartRefresh')  # time at next scr refresh
+            # add timestamp to datafile
+            thisExp.timestampOnFlip(win, 'dot.started')
+            # update status
+            dot.status = STARTED
+            dot.setAutoDraw(True)
+        
+        # if dot is active this frame...
+        if dot.status == STARTED:
+            # update params
+            pass
+        # Run 'Each Frame' code from code
+        # Each Frame
+        if current_position_index < total_positions:  # Ensure the index is within bounds
+            if t >= current_position_index * 5:  # Check if enough time has passed
+                dot.pos = positions[current_position_index]  # Update the dot position
+                current_position_index += 1  # Move to the next position
+        else:
+            continueRoutine = False  # End the routine when all positions have been shown
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -478,17 +506,21 @@ for thisT1w_LIBRE in T1w_LIBRE:
             routineForceEnded = True
             break
         continueRoutine = False  # will revert to True if at least one component still running
+        for thisComponent in dotsComponents:
+            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                continueRoutine = True
+                break  # at least one component has not yet finished
         
         # refresh the screen
         if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
             win.flip()
     
     # --- Ending Routine "dots" ---
-    # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
-    if routineForceEnded:
-        routineTimer.reset()
-    else:
-        routineTimer.addTime(-1.000000)
+    for thisComponent in dotsComponents:
+        if hasattr(thisComponent, "setAutoDraw"):
+            thisComponent.setAutoDraw(False)
+    # the Routine "dots" was not non-slip safe, so reset the non-slip timer
+    routineTimer.reset()
     thisExp.nextEntry()
     
 # completed 720.0 repeats of 'T1w_LIBRE'
