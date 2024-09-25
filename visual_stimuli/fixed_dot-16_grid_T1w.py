@@ -181,6 +181,7 @@ key_resp_3 = keyboard.Keyboard()
 
 # Create some handy timers
 globalClock = core.Clock()  # to track the time since experiment started
+ioServer.syncClock(globalClock)  # sync psychopy time with iohub time
 routineTimer = core.Clock()  # to track time remaining of each (possibly non-slip) routine 
 # define target for calibration_2
 calibration_2Target = visual.TargetStim(win, 
@@ -339,6 +340,7 @@ routineTimer.reset()
 continueRoutine = True
 # update component parameters for each repeat
 # keep track of which components have finished
+ioServer.getDevice('tracker').sendMessage("ET: Start recording")
 start_ETComponents = [etRecord]
 for thisComponent in start_ETComponents:
     thisComponent.tStart = None
@@ -441,6 +443,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
     # update component parameters for each repeat
     # Run 'Begin Routine' code from code
     # Begin Routine
+    ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
     current_position_index = 0  # Start with the first position
     total_positions = len(positions)  # Track the total number of positions
     # keep track of which components have finished
@@ -492,6 +495,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
             if t >= current_position_index * 5:  # Check if enough time has passed
                 dot.pos = positions[current_position_index]  # Update the dot position
                 current_position_index += 1  # Move to the next position
+                ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
         else:
             continueRoutine = False  # End the routine when all positions have been shown
         
@@ -516,6 +520,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
             win.flip()
     
     # --- Ending Routine "dots" ---
+    ioServer.getDevice('tracker').sendMessage("ET: End routine 'dots'")
     for thisComponent in dotsComponents:
         if hasattr(thisComponent, "setAutoDraw"):
             thisComponent.setAutoDraw(False)
@@ -532,6 +537,7 @@ continueRoutine = True
 key_resp_3.keys = []
 key_resp_3.rt = []
 _key_resp_3_allKeys = []
+# ioServer.getDevice('tracker').sendMessage("ET: Stop recording")
 # keep track of which components have finished
 endComponents = [text, ET_stop, key_resp_3]
 for thisComponent in endComponents:
