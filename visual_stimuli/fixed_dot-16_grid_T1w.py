@@ -74,7 +74,7 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 win = visual.Window(
     size=[2560, 1440], fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
-    monitor='testMonitor', color=[-1.0000, -1.0000, -1.0000], colorSpace='rgb',
+    monitor='testMonitor', color=[0.0000, 0.0000, 0.0000], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
     units='norm')
@@ -181,7 +181,6 @@ key_resp_3 = keyboard.Keyboard()
 
 # Create some handy timers
 globalClock = core.Clock()  # to track the time since experiment started
-ioServer.syncClock(globalClock)  # sync psychopy time with iohub time
 routineTimer = core.Clock()  # to track time remaining of each (possibly non-slip) routine 
 # define target for calibration_2
 calibration_2Target = visual.TargetStim(win, 
