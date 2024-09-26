@@ -468,6 +468,10 @@ for thisT1w_LIBRE in T1w_LIBRE:
     
     # --- Run Routine "dots" ---
     routineForceEnded = not continueRoutine
+    routinePhase = "PRE"  # Start with the dot at the center
+    preTimer = core.CountdownTimer(5)  # 5 seconds for the initial center dot
+    postTimer = core.CountdownTimer(5)  # 5 seconds for the final center dot
+
     while continueRoutine:
         # get current time
         t = routineTimer.getTime()
@@ -495,15 +499,27 @@ for thisT1w_LIBRE in T1w_LIBRE:
         if dot.status == STARTED:
             # update params
             pass
-        # Run 'Each Frame' code from code
-        # Each Frame
-        if current_position_index < total_positions:  # Ensure the index is within bounds
-            if t >= current_position_index * 5:  # Check if enough time has passed
-                dot.pos = positions[current_position_index]  # Update the dot position
-                current_position_index += 1  # Move to the next position
-                ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
-        else:
-            continueRoutine = False  # End the routine when all positions have been shown
+        
+        # Manage routine phases
+        if routinePhase == "PRE":
+            dot.pos = (0, 0)  # Center position
+            ioServer.getDevice('tracker').sendMessage("ET: dot at the center!")
+            if preTimer.getTime() <= 0:
+                routinePhase = "MAIN"  # Transition to main phase
+        elif routinePhase == "MAIN":
+            if current_position_index < total_positions:  # Ensure the index is within bounds
+                if t >= current_position_index * 5:  # Check if enough time has passed
+                    dot.pos = positions[current_position_index]  # Update the dot position
+                    current_position_index += 1  # Move to the next position
+                    ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
+            else:
+                routinePhase = "POST"  # Transition to post phase
+                postTimer.reset()  # Reset the timer for the final center dot display
+        elif routinePhase == "POST":
+            dot.pos = (0, 0)  # Center position again
+            ioServer.getDevice('tracker').sendMessage("ET: dot at the center!")
+            if postTimer.getTime() <= 0:
+                continueRoutine = False  # End the routine after the final center dot display
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
