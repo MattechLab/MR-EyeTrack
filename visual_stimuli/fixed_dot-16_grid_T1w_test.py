@@ -471,6 +471,8 @@ for thisT1w_LIBRE in T1w_LIBRE:
     routinePhase = "PRE"  # Start with the dot at the center
     preTimer = core.CountdownTimer(5)  # 5 seconds for the initial center dot
     postTimer = core.CountdownTimer(5)  # 5 seconds for the final center dot
+    mainRepeats = 6  # Number of times to repeat the MAIN phase
+    mainPhaseCount = 0  # Counter for the number of completed MAIN phases
 
     while continueRoutine:
         # get current time
@@ -513,8 +515,13 @@ for thisT1w_LIBRE in T1w_LIBRE:
                     current_position_index += 1  # Move to the next position
                     ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
             else:
-                routinePhase = "POST"  # Transition to post phase
-                postTimer.reset()  # Reset the timer for the final center dot display
+                mainPhaseCount += 1  # Increment the MAIN phase counter
+                if mainPhaseCount < mainRepeats:
+                    routinePhase = "MAIN"  # Repeat the MAIN phase
+                    current_position_index = 0  # Reset the index to start positions again
+                else:
+                    routinePhase = "POST"  # Transition to post phase
+                    postTimer.reset()  # Reset the timer for the final center dot display
         elif routinePhase == "POST":
             dot.pos = (0, 0)  # Center position again
             ioServer.getDevice('tracker').sendMessage("ET: dot at the center!")
