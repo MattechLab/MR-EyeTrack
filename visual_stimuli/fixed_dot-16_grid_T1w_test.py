@@ -19,7 +19,7 @@ from psychopy import plugins
 plugins.activatePlugins()
 prefs.hardware['audioLib'] = 'ptb'
 prefs.hardware['audioLatencyMode'] = '3'
-from psychopy import gui, visual, core, data, logging, hardware # 
+from psychopy import gui, visual, core, data, logging, hardware
 # from psychopy import sound, event, clock, colors, layout, iohub
 from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED, STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
 import socket
@@ -33,19 +33,14 @@ import sys  # to get file system encoding
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
 
-def send_message(message, addr="localhost", port=2023):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((addr, port))
-    client_socket.sendall(message)
-    client_socket.close()
-    
-    
+
+
 # Ensure that relative paths start from the same directory as this script
 _thisDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(_thisDir)
 # Store info about the experiment session
 psychopyVersion = '2023.1.2'
-expName = 'fixed_dot-16_grid_T1wd'  # from the Builder filename that created this script
+expName = 'fixed_dot-16_grid_T1w'  # from the Builder filename that created this script
 expInfo = {
     'participant': f"{randint(0, 999999):06.0f}",
     'session': '001',
@@ -95,24 +90,12 @@ else:
 ioConfig = {}
 
 # Setup eyetracking
-ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
+ioConfig['eyetracker.hw.mouse.EyeTracker'] = {
     'name': 'tracker',
-    'model_name': 'EYELINK 1000 DESKTOP',
-    'simulation_mode': False,
-    'network_settings': '100.1.1.1',
-    'default_native_data_file_name': 'EXPFILE',
-    'runtime_settings': {
-        'sampling_rate': 1000.0,
-        'track_eyes': 'RIGHT_EYE',
-        'sample_filtering': {
-            'sample_filtering': 'FILTER_LEVEL_2',
-            'elLiveFiltering': 'FILTER_LEVEL_OFF',
-        },
-        'vog_settings': {
-            'pupil_measure_types': 'PUPIL_AREA',
-            'tracking_mode': 'PUPIL_CR_TRACKING',
-            'pupil_center_algorithm': 'ELLIPSE_FIT',
-        }
+    'controls': {
+        'move': [],
+        'blink':('MIDDLE_BUTTON',),
+        'saccade_threshold': 0.5,
     }
 }
 
@@ -378,9 +361,6 @@ while continueRoutine:
         thisExp.timestampOnFlip(win, 'etRecord.started')
         # update status
         etRecord.status = STARTED
-        # Run 'Begin Routine' code from code_channel2
-        # send_message((signals.RUN | signals.ET_START_AND_STOP).to_bytes())
-        ioServer.getDevice('tracker').sendMessage("ET: recording started")
     
     # if etRecord is stopping this frame...
     if etRecord.status == STARTED:
@@ -393,11 +373,9 @@ while continueRoutine:
             thisExp.timestampOnFlip(win, 'etRecord.stopped')
             # update status
             etRecord.status = FINISHED
-            ioServer.getDevice('tracker').sendMessage("ET: recording stopped")
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        ioServer.getDevice('tracker').sendMessage("ET: escape pressed")
         core.quit()
     
     # check if all components have finished
@@ -433,7 +411,6 @@ thisExp.addLoop(T1w_LIBRE)  # add the loop to the experiment
 thisT1w_LIBRE = T1w_LIBRE.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisT1w_LIBRE.rgb)
 if thisT1w_LIBRE != None:
-    ioServer.getDevice('tracker').sendMessage("ET: T1w_LIBRE started")
     for paramName in thisT1w_LIBRE:
         exec('{} = thisT1w_LIBRE[paramName]'.format(paramName))
 
@@ -449,7 +426,6 @@ for thisT1w_LIBRE in T1w_LIBRE:
     # update component parameters for each repeat
     # Run 'Begin Routine' code from code
     # Begin Routine
-    ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
     current_position_index = 0  # Start with the first position
     total_positions = len(positions)  # Track the total number of positions
     # keep track of which components have finished
@@ -505,7 +481,6 @@ for thisT1w_LIBRE in T1w_LIBRE:
         # Manage routine phases
         if routinePhase == "PRE":
             dot.pos = (0, 0)  # Center position
-            ioServer.getDevice('tracker').sendMessage("ET: dot at the center!")
             if preTimer.getTime() <= 0:
                 routinePhase = "MAIN"  # Transition to main phase
         elif routinePhase == "MAIN":
@@ -524,13 +499,11 @@ for thisT1w_LIBRE in T1w_LIBRE:
                     postTimer.reset()  # Reset the timer for the final center dot display
         elif routinePhase == "POST":
             dot.pos = (0, 0)  # Center position again
-            ioServer.getDevice('tracker').sendMessage("ET: dot at the center!")
             if postTimer.getTime() <= 0:
                 continueRoutine = False  # End the routine after the final center dot display
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-            ioServer.getDevice('tracker').sendMessage("ET: escape pressed")
             core.quit()
         
         # check if all components have finished
@@ -553,7 +526,6 @@ for thisT1w_LIBRE in T1w_LIBRE:
             thisComponent.setAutoDraw(False)
     # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
     if routineForceEnded:
-        ioServer.getDevice('tracker').sendMessage("ET: T1w_LIBRE ended")
         routineTimer.reset()
     else:
         routineTimer.addTime(-1.000000)
@@ -624,7 +596,6 @@ while continueRoutine:
             thisExp.timestampOnFlip(win, 'ET_stop.stopped')
             # update status
             ET_stop.status = FINISHED
-            ioServer.getDevice('tracker').sendMessage("ET: eye-tracker stopped")
     
     # *key_resp_3* updates
     waitOnFlip = False

@@ -1,30 +1,31 @@
-﻿#!/usr/bin/env python
+﻿# flake8: noqa
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
-    on septiembre 20, 2024, at 21:36
-If you publish work using this script the most relevant publication is:
 
-    Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
-        PsychoPy2: Experiments in behavior made easy Behav Res 51: 195. 
-        https://doi.org/10.3758/s13428-018-01193-y
+# This experiment was created using PsychoPy3 Experiment Builder 
+# (v2023.1.2),
+#  on jeu 28 sep 2023 14:03:22
+# If you publish work using this script the most relevant publication is:
 
-"""
-
+# Peirce J, Gray JR, Simpson S, MacAskill M, 
+# Höchenberger R, Sogo H, Kastman E,Lindeløv JK. (2019) 
+# PsychoPy2: Experiments in behavior made easy Behav Res 51: 195. 
+# https://doi.org/10.3758/s13428-018-01193-y
 # --- Import packages ---
-from psychopy import locale_setup
+# https://github.com/TheAxonLab/HCPh-fMRI-tasks/blob/27f5112ef476e35bb8689fb85c0a903c2c2c1cda/task-bht_bold.py#L758
+# from psychopy import locale_setup
 from psychopy import prefs
 from psychopy import plugins
 plugins.activatePlugins()
 prefs.hardware['audioLib'] = 'ptb'
 prefs.hardware['audioLatencyMode'] = '3'
-from psychopy import sound, gui, visual, core, data, event, logging, clock, colors, layout, iohub, hardware
-from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED,
-                                STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
-
+from psychopy import gui, visual, core, data, logging, hardware
+# from psychopy import sound, event, clock, colors, layout, iohub
+from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED, STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
+import socket
+# from hcphsignals import signals
 import numpy as np  # whole numpy lib is available, prepend 'np.'
-from numpy import (sin, cos, tan, log, log10, pi, average,
-                   sqrt, std, deg2rad, rad2deg, linspace, asarray)
+from numpy import (sin, cos, tan, log, log10, pi, average, sqrt, std, deg2rad, rad2deg, linspace, asarray)
 from numpy.random import random, randint, normal, shuffle, choice as randchoice
 import os  # handy system and path functions
 import sys  # to get file system encoding
@@ -32,6 +33,11 @@ import sys  # to get file system encoding
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
 
+def send_message(message, addr="localhost", port=2023):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((addr, port))
+    client_socket.sendall(message)
+    client_socket.close()
 
 
 # Ensure that relative paths start from the same directory as this script
@@ -58,7 +64,7 @@ filename = _thisDir + os.sep + u'data/%s_%s_%s' % (expInfo['participant'], expNa
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name=expName, version='',
     extraInfo=expInfo, runtimeInfo=None,
-    originPath='C:\\Users\\TORRE\\Desktop\\repos\\mattechlab\\MR-EyeTrack\\visual_stimuli\\fixed_dot-16_grid_T1w.py',
+    originPath='/home/common/Desktop/repos/mattechlab/MR-EyeTrack/visual_stimuli/fixed_dot-16_grid_T1w.py',
     savePickle=True, saveWideText=True,
     dataFileName=filename)
 # save a log file for detail verbose info
@@ -72,9 +78,9 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # --- Setup the Window ---
 win = visual.Window(
-    size=[2560, 1440], fullscr=True, screen=0, 
+    size=[800, 600], fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
-    monitor='testMonitor', color=[0.0000, 0.0000, 0.0000], colorSpace='rgb',
+    monitor='testMonitor', color=[0,0,0], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
     units='norm')
@@ -304,8 +310,6 @@ while continueRoutine:
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-        if eyetracker:
-            eyetracker.setConnectionState(False)
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -339,7 +343,6 @@ routineTimer.reset()
 continueRoutine = True
 # update component parameters for each repeat
 # keep track of which components have finished
-ioServer.getDevice('tracker').sendMessage("ET: Start recording")
 start_ETComponents = [etRecord]
 for thisComponent in start_ETComponents:
     thisComponent.tStart = None
@@ -375,6 +378,9 @@ while continueRoutine:
         thisExp.timestampOnFlip(win, 'etRecord.started')
         # update status
         etRecord.status = STARTED
+        # Run 'Begin Routine' code from code_channel2
+        # send_message((signals.RUN | signals.ET_START_AND_STOP).to_bytes())
+        ioServer.getDevice('tracker').sendMessage("ET: recording started")
     
     # if etRecord is stopping this frame...
     if etRecord.status == STARTED:
@@ -387,12 +393,12 @@ while continueRoutine:
             thisExp.timestampOnFlip(win, 'etRecord.stopped')
             # update status
             etRecord.status = FINISHED
+            ioServer.getDevice('tracker').sendMessage("ET: recording stopped")
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        ioServer.getDevice('tracker').sendMessage("ET: escape pressed")
         core.quit()
-        if eyetracker:
-            eyetracker.setConnectionState(False)
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -427,6 +433,7 @@ thisExp.addLoop(T1w_LIBRE)  # add the loop to the experiment
 thisT1w_LIBRE = T1w_LIBRE.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisT1w_LIBRE.rgb)
 if thisT1w_LIBRE != None:
+    ioServer.getDevice('tracker').sendMessage("ET: T1w_LIBRE started")
     for paramName in thisT1w_LIBRE:
         exec('{} = thisT1w_LIBRE[paramName]'.format(paramName))
 
@@ -461,6 +468,12 @@ for thisT1w_LIBRE in T1w_LIBRE:
     
     # --- Run Routine "dots" ---
     routineForceEnded = not continueRoutine
+    routinePhase = "PRE"  # Start with the dot at the center
+    preTimer = core.CountdownTimer(5)  # 5 seconds for the initial center dot
+    postTimer = core.CountdownTimer(5)  # 5 seconds for the final center dot
+    mainRepeats = 6  # Number of times to repeat the MAIN phase
+    mainPhaseCount = 0  # Counter for the number of completed MAIN phases
+
     while continueRoutine:
         # get current time
         t = routineTimer.getTime()
@@ -488,21 +501,37 @@ for thisT1w_LIBRE in T1w_LIBRE:
         if dot.status == STARTED:
             # update params
             pass
-        # Run 'Each Frame' code from code
-        # Each Frame
-        if current_position_index < total_positions:  # Ensure the index is within bounds
-            if t >= current_position_index * 5:  # Check if enough time has passed
-                dot.pos = positions[current_position_index]  # Update the dot position
-                current_position_index += 1  # Move to the next position
-                ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
-        else:
-            continueRoutine = False  # End the routine when all positions have been shown
+        
+        # Manage routine phases
+        if routinePhase == "PRE":
+            dot.pos = (0, 0)  # Center position
+            ioServer.getDevice('tracker').sendMessage("ET: dot at the center!")
+            if preTimer.getTime() <= 0:
+                routinePhase = "MAIN"  # Transition to main phase
+        elif routinePhase == "MAIN":
+            if current_position_index < total_positions:  # Ensure the index is within bounds
+                if t >= current_position_index * 5:  # Check if enough time has passed
+                    dot.pos = positions[current_position_index]  # Update the dot position
+                    current_position_index += 1  # Move to the next position
+                    ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
+            else:
+                mainPhaseCount += 1  # Increment the MAIN phase counter
+                if mainPhaseCount < mainRepeats:
+                    routinePhase = "MAIN"  # Repeat the MAIN phase
+                    current_position_index = 0  # Reset the index to start positions again
+                else:
+                    routinePhase = "POST"  # Transition to post phase
+                    postTimer.reset()  # Reset the timer for the final center dot display
+        elif routinePhase == "POST":
+            dot.pos = (0, 0)  # Center position again
+            ioServer.getDevice('tracker').sendMessage("ET: dot at the center!")
+            if postTimer.getTime() <= 0:
+                continueRoutine = False  # End the routine after the final center dot display
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+            ioServer.getDevice('tracker').sendMessage("ET: escape pressed")
             core.quit()
-            if eyetracker:
-                eyetracker.setConnectionState(False)
         
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -519,12 +548,15 @@ for thisT1w_LIBRE in T1w_LIBRE:
             win.flip()
     
     # --- Ending Routine "dots" ---
-    ioServer.getDevice('tracker').sendMessage("ET: End routine 'dots'")
     for thisComponent in dotsComponents:
         if hasattr(thisComponent, "setAutoDraw"):
             thisComponent.setAutoDraw(False)
-    # the Routine "dots" was not non-slip safe, so reset the non-slip timer
-    routineTimer.reset()
+    # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
+    if routineForceEnded:
+        ioServer.getDevice('tracker').sendMessage("ET: T1w_LIBRE ended")
+        routineTimer.reset()
+    else:
+        routineTimer.addTime(-1.000000)
     thisExp.nextEntry()
     
 # completed 720.0 repeats of 'T1w_LIBRE'
@@ -536,7 +568,6 @@ continueRoutine = True
 key_resp_3.keys = []
 key_resp_3.rt = []
 _key_resp_3_allKeys = []
-# ioServer.getDevice('tracker').sendMessage("ET: Stop recording")
 # keep track of which components have finished
 endComponents = [text, ET_stop, key_resp_3]
 for thisComponent in endComponents:
@@ -593,6 +624,7 @@ while continueRoutine:
             thisExp.timestampOnFlip(win, 'ET_stop.stopped')
             # update status
             ET_stop.status = FINISHED
+            ioServer.getDevice('tracker').sendMessage("ET: eye-tracker stopped")
     
     # *key_resp_3* updates
     waitOnFlip = False
@@ -624,8 +656,6 @@ while continueRoutine:
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-        if eyetracker:
-            eyetracker.setConnectionState(False)
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -673,3 +703,4 @@ if eyetracker:
 thisExp.abort()  # or data files will save again on exit
 win.close()
 core.quit()
+
