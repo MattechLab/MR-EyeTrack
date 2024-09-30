@@ -1,31 +1,30 @@
-﻿# flake8: noqa
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
+    on septiembre 20, 2024, at 21:35
+If you publish work using this script the most relevant publication is:
 
-# This experiment was created using PsychoPy3 Experiment Builder 
-# (v2023.1.2),
-#  on jeu 28 sep 2023 14:03:22
-# If you publish work using this script the most relevant publication is:
+    Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
+        PsychoPy2: Experiments in behavior made easy Behav Res 51: 195. 
+        https://doi.org/10.3758/s13428-018-01193-y
 
-# Peirce J, Gray JR, Simpson S, MacAskill M, 
-# Höchenberger R, Sogo H, Kastman E,Lindeløv JK. (2019) 
-# PsychoPy2: Experiments in behavior made easy Behav Res 51: 195. 
-# https://doi.org/10.3758/s13428-018-01193-y
+"""
+
 # --- Import packages ---
-# https://github.com/TheAxonLab/HCPh-fMRI-tasks/blob/27f5112ef476e35bb8689fb85c0a903c2c2c1cda/task-bht_bold.py#L758
-# from psychopy import locale_setup
+from psychopy import locale_setup
 from psychopy import prefs
 from psychopy import plugins
 plugins.activatePlugins()
 prefs.hardware['audioLib'] = 'ptb'
 prefs.hardware['audioLatencyMode'] = '3'
-from psychopy import gui, visual, core, data, logging, hardware
-# from psychopy import sound, event, clock, colors, layout, iohub
-from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED, STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
-import socket
-# from hcphsignals import signals
+from psychopy import sound, gui, visual, core, data, event, logging, clock, colors, layout, iohub, hardware
+from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED,
+                                STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
+
 import numpy as np  # whole numpy lib is available, prepend 'np.'
-from numpy import (sin, cos, tan, log, log10, pi, average, sqrt, std, deg2rad, rad2deg, linspace, asarray)
+from numpy import (sin, cos, tan, log, log10, pi, average,
+                   sqrt, std, deg2rad, rad2deg, linspace, asarray)
 from numpy.random import random, randint, normal, shuffle, choice as randchoice
 import os  # handy system and path functions
 import sys  # to get file system encoding
@@ -59,7 +58,7 @@ filename = _thisDir + os.sep + u'data/%s_%s_%s' % (expInfo['participant'], expNa
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name=expName, version='',
     extraInfo=expInfo, runtimeInfo=None,
-    originPath='/home/common/Desktop/repos/mattechlab/MR-EyeTrack/visual_stimuli/fixed_dot-16_grid_T1w.py',
+    originPath='C:\\Users\\TORRE\\Desktop\\repos\\mattechlab\\MR-EyeTrack\\visual_stimuli\\fixed_dot-16_grid_T1w_NoET.py',
     savePickle=True, saveWideText=True,
     dataFileName=filename)
 # save a log file for detail verbose info
@@ -73,9 +72,9 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # --- Setup the Window ---
 win = visual.Window(
-    size=[800, 600], fullscr=True, screen=0, 
+    size=[1920, 1080], fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
-    monitor='testMonitor', color=[0,0,0], colorSpace='rgb',
+    monitor='testMonitor', color=[-1.0000, -1.0000, -1.0000], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
     units='norm')
@@ -90,12 +89,24 @@ else:
 ioConfig = {}
 
 # Setup eyetracking
-ioConfig['eyetracker.hw.mouse.EyeTracker'] = {
+ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
     'name': 'tracker',
-    'controls': {
-        'move': [],
-        'blink':('MIDDLE_BUTTON',),
-        'saccade_threshold': 0.5,
+    'model_name': 'EYELINK 1000 DESKTOP',
+    'simulation_mode': False,
+    'network_settings': '100.1.1.1',
+    'default_native_data_file_name': 'EXPFILE',
+    'runtime_settings': {
+        'sampling_rate': 1000.0,
+        'track_eyes': 'RIGHT_EYE',
+        'sample_filtering': {
+            'sample_filtering': 'FILTER_LEVEL_2',
+            'elLiveFiltering': 'FILTER_LEVEL_OFF',
+        },
+        'vog_settings': {
+            'pupil_measure_types': 'PUPIL_AREA',
+            'tracking_mode': 'PUPIL_CR_TRACKING',
+            'pupil_center_algorithm': 'ELLIPSE_FIT',
+        }
     }
 }
 
@@ -293,6 +304,8 @@ while continueRoutine:
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
+        if eyetracker:
+            eyetracker.setConnectionState(False)
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -377,6 +390,8 @@ while continueRoutine:
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
+        if eyetracker:
+            eyetracker.setConnectionState(False)
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -444,12 +459,6 @@ for thisT1w_LIBRE in T1w_LIBRE:
     
     # --- Run Routine "dots" ---
     routineForceEnded = not continueRoutine
-    routinePhase = "PRE"  # Start with the dot at the center
-    preTimer = core.CountdownTimer(5)  # 5 seconds for the initial center dot
-    postTimer = core.CountdownTimer(5)  # 5 seconds for the final center dot
-    mainRepeats = 6  # Number of times to repeat the MAIN phase
-    mainPhaseCount = 0  # Counter for the number of completed MAIN phases
-
     while continueRoutine:
         # get current time
         t = routineTimer.getTime()
@@ -477,34 +486,20 @@ for thisT1w_LIBRE in T1w_LIBRE:
         if dot.status == STARTED:
             # update params
             pass
-        
-        # Manage routine phases
-        if routinePhase == "PRE":
-            dot.pos = (0, 0)  # Center position
-            if preTimer.getTime() <= 0:
-                routinePhase = "MAIN"  # Transition to main phase
-        elif routinePhase == "MAIN":
-            if current_position_index < total_positions:  # Ensure the index is within bounds
-                if t >= current_position_index * 5:  # Check if enough time has passed
-                    dot.pos = positions[current_position_index]  # Update the dot position
-                    current_position_index += 1  # Move to the next position
-                    ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
-            else:
-                mainPhaseCount += 1  # Increment the MAIN phase counter
-                if mainPhaseCount < mainRepeats:
-                    routinePhase = "MAIN"  # Repeat the MAIN phase
-                    current_position_index = 0  # Reset the index to start positions again
-                else:
-                    routinePhase = "POST"  # Transition to post phase
-                    postTimer.reset()  # Reset the timer for the final center dot display
-        elif routinePhase == "POST":
-            dot.pos = (0, 0)  # Center position again
-            if postTimer.getTime() <= 0:
-                continueRoutine = False  # End the routine after the final center dot display
+        # Run 'Each Frame' code from code
+        # Each Frame
+        if current_position_index < total_positions:  # Ensure the index is within bounds
+            if t >= current_position_index * 0.5:  # Check if enough time has passed
+                dot.pos = positions[current_position_index]  # Update the dot position
+                current_position_index += 1  # Move to the next position
+        else:
+            continueRoutine = False  # End the routine when all positions have been shown
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
+            if eyetracker:
+                eyetracker.setConnectionState(False)
         
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -524,11 +519,8 @@ for thisT1w_LIBRE in T1w_LIBRE:
     for thisComponent in dotsComponents:
         if hasattr(thisComponent, "setAutoDraw"):
             thisComponent.setAutoDraw(False)
-    # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
-    if routineForceEnded:
-        routineTimer.reset()
-    else:
-        routineTimer.addTime(-1.000000)
+    # the Routine "dots" was not non-slip safe, so reset the non-slip timer
+    routineTimer.reset()
     thisExp.nextEntry()
     
 # completed 720.0 repeats of 'T1w_LIBRE'
@@ -627,6 +619,8 @@ while continueRoutine:
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
+        if eyetracker:
+            eyetracker.setConnectionState(False)
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -674,4 +668,3 @@ if eyetracker:
 thisExp.abort()  # or data files will save again on exit
 win.close()
 core.quit()
-
