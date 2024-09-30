@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
-    on Mon Sep 30 18:10:21 2024
+    on Mon Sep 30 18:13:18 2024
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -58,7 +58,7 @@ filename = _thisDir + os.sep + u'data/%s_%s_%s' % (expInfo['participant'], expNa
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name=expName, version='',
     extraInfo=expInfo, runtimeInfo=None,
-    originPath='/Users/jaimebarranco/Desktop/Repos/mattechlab/MR-EyeTrack/visual_stimuli/fixed_dot-16_grid_T1w_NoET.py',
+    originPath='/Users/jaimebarranco/Desktop/Repos/mattechlab/MR-EyeTrack/visual_stimuli/fixed_dot-16_grid_T1w_NoET_lastrun.py',
     savePickle=True, saveWideText=True,
     dataFileName=filename)
 # save a log file for detail verbose info
@@ -593,7 +593,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
         # Run 'Each Frame' code from code
         # Each Frame
         if current_position_index < total_positions:  # Ensure the index is within bounds
-            if t >= current_position_index * 3:  # Check if enough time has passed
+            if t >= current_position_index * 5:  # Check if enough time has passed
                 dot.pos = positions[current_position_index]  # Update the dot position
                 current_position_index += 1  # Move to the next position
                 ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
