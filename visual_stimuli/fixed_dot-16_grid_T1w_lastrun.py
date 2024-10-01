@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
-    on Tue Oct  1 16:35:36 2024
+    on Tue Oct  1 16:43:51 2024
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -157,10 +157,10 @@ dot = visual.ShapeStim(
     opacity=1.0, depth=0.0, interpolate=True)
 # Run 'Begin Experiment' code from code
 # Begin Experiment
-grid_size = 2  # 4x4 grid
+grid_size = 16  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
 positions = []  # List of grid positions
-t_dot = 3 # seconds of showing the dot per position
+t_dot = 5 # seconds of showing the dot per position
 # Calculate grid positions
 for i in range(grid_size):
     for j in range(grid_size):
