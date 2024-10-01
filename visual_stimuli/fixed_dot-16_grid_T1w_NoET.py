@@ -19,6 +19,7 @@ plugins.activatePlugins()
 prefs.hardware['audioLib'] = 'ptb'
 prefs.hardware['audioLatencyMode'] = '3'
 from psychopy import gui, visual, core, data, logging, hardware
+import socket
 # from psychopy import sound, event, clock, colors, layout, iohub
 from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED,
                                 STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
