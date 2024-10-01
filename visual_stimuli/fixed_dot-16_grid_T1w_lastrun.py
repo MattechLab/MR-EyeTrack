@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
-    on Tue Oct  1 16:43:51 2024
+    on Tue Oct  1 16:55:49 2024
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -118,7 +118,7 @@ waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
     pos=(0, -0.4), height=0.12, wrapWidth=1.7, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
     languageStyle='LTR',
-    depth=0.0)
+    depth=0.0);
 key_resp = keyboard.Keyboard()
 fix_desc = visual.TextStim(win=win, name='fix_desc',
     text='In this task you will see a dot moving randomly within 16 different positions on the screen. You have to follow the dot :)',
@@ -126,7 +126,7 @@ fix_desc = visual.TextStim(win=win, name='fix_desc',
     pos=(0, 0.25), height=0.12, wrapWidth=1.0, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
     languageStyle='LTR',
-    depth=-2.0)
+    depth=-2.0);
 
 # --- Initialize components for Routine "start_ET" ---
 etRecord = hardware.eyetracker.EyetrackerControl(
@@ -154,11 +154,11 @@ dot = visual.ShapeStim(
     win=win, name='dot',
     size=(0.1, 0.1), vertices='circle',
     ori=0.0, pos=(0, 0), anchor='center',
-    lineWidth=1.0,     colorSpace='rgb',  lineColor=[0.5, 0.5, 0.5], fillColor=[0.5000, 0.5000, 0.5000],
+    lineWidth=1.0,     colorSpace='rgb',  lineColor=[0.5, 0.5, 0.5], fillColor=[0.5, 0.5, 0.5],
     opacity=1.0, depth=0.0, interpolate=True)
 # Run 'Begin Experiment' code from code
 # Begin Experiment
-grid_size = 16  # 4x4 grid
+grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
 positions = []  # List of grid positions
 t_dot = 5 # seconds of showing the dot per position
