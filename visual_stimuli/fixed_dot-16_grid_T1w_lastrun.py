@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
-    on septiembre 20, 2024, at 21:35
+    on Tue Oct  1 16:35:36 2024
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -58,7 +58,7 @@ filename = _thisDir + os.sep + u'data/%s_%s_%s' % (expInfo['participant'], expNa
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name=expName, version='',
     extraInfo=expInfo, runtimeInfo=None,
-    originPath='C:\\Users\\TORRE\\Desktop\\repos\\mattechlab\\MR-EyeTrack\\visual_stimuli\\fixed_dot-16_grid_T1w_lastrun.py',
+    originPath='/Users/jaimebarranco/Desktop/Repos/mattechlab/MR-EyeTrack/visual_stimuli/fixed_dot-16_grid_T1w_lastrun.py',
     savePickle=True, saveWideText=True,
     dataFileName=filename)
 # save a log file for detail verbose info
@@ -72,7 +72,7 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # --- Setup the Window ---
 win = visual.Window(
-    size=[2560, 1440], fullscr=True, screen=0, 
+    size=[1920, 1080], fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
     monitor='testMonitor', color=[-1.0000, -1.0000, -1.0000], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
@@ -89,24 +89,12 @@ else:
 ioConfig = {}
 
 # Setup eyetracking
-ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
+ioConfig['eyetracker.hw.mouse.EyeTracker'] = {
     'name': 'tracker',
-    'model_name': 'EYELINK 1000 DESKTOP',
-    'simulation_mode': False,
-    'network_settings': '100.1.1.1',
-    'default_native_data_file_name': 'EXPFILE',
-    'runtime_settings': {
-        'sampling_rate': 1000.0,
-        'track_eyes': 'RIGHT_EYE',
-        'sample_filtering': {
-            'sample_filtering': 'FILTER_LEVEL_2',
-            'elLiveFiltering': 'FILTER_LEVEL_OFF',
-        },
-        'vog_settings': {
-            'pupil_measure_types': 'PUPIL_AREA',
-            'tracking_mode': 'PUPIL_CR_TRACKING',
-            'pupil_center_algorithm': 'ELLIPSE_FIT',
-        }
+    'controls': {
+        'move': [],
+        'blink':('MIDDLE_BUTTON',),
+        'saccade_threshold': 0.5,
     }
 }
 
@@ -132,7 +120,7 @@ waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
     depth=0.0);
 key_resp = keyboard.Keyboard()
 fix_desc = visual.TextStim(win=win, name='fix_desc',
-    text='In this task you will see a grating patterns on the screen. \nPlease keep your eyes on the fixation circle like the one below.',
+    text='In this task you will see a dot moving randomly within 16 different positions on the screen. You have to follow the dot :)',
     font='Open Sans',
     pos=(0, 0.25), height=0.12, wrapWidth=1.0, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
@@ -144,6 +132,21 @@ etRecord = hardware.eyetracker.EyetrackerControl(
     tracker=eyetracker,
     actionType='Start Only'
 )
+# Run 'Begin Experiment' code from code_2
+# Send logs to the ET
+def send_message(message, addr="localhost", port=2023):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((addr, port))
+    client_socket.sendall(message)
+    client_socket.close()
+
+# --- Initialize components for Routine "centered_dot" ---
+dot_centered = visual.ShapeStim(
+    win=win, name='dot_centered',
+    size=(0.1, 0.1), vertices='circle',
+    ori=0.0, pos=(0, 0), anchor='center',
+    lineWidth=1.0,     colorSpace='rgb',  lineColor=[0.5000, 0.5000, 0.5000], fillColor=[0.5000, 0.5000, 0.5000],
+    opacity=1.0, depth=0.0, interpolate=True)
 
 # --- Initialize components for Routine "dots" ---
 dot = visual.ShapeStim(
@@ -154,9 +157,10 @@ dot = visual.ShapeStim(
     opacity=1.0, depth=0.0, interpolate=True)
 # Run 'Begin Experiment' code from code
 # Begin Experiment
-grid_size = 4  # 4x4 grid
+grid_size = 2  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
 positions = []  # List of grid positions
+t_dot = 3 # seconds of showing the dot per position
 # Calculate grid positions
 for i in range(grid_size):
     for j in range(grid_size):
@@ -164,6 +168,14 @@ for i in range(grid_size):
         y = -0.75 + j * 0.5  # Adjust the range of y coordinates
         positions.append((x, y))
 shuffle(positions)  # Shuffle the positions
+
+# --- Initialize components for Routine "centered_dot" ---
+dot_centered = visual.ShapeStim(
+    win=win, name='dot_centered',
+    size=(0.1, 0.1), vertices='circle',
+    ori=0.0, pos=(0, 0), anchor='center',
+    lineWidth=1.0,     colorSpace='rgb',  lineColor=[0.5000, 0.5000, 0.5000], fillColor=[0.5000, 0.5000, 0.5000],
+    opacity=1.0, depth=0.0, interpolate=True)
 
 # --- Initialize components for Routine "end" ---
 text = visual.TextStim(win=win, name='text',
@@ -185,8 +197,8 @@ routineTimer = core.Clock()  # to track time remaining of each (possibly non-sli
 # define target for calibration_2
 calibration_2Target = visual.TargetStim(win, 
     name='calibration_2Target',
-    radius=0.15, fillColor=[-1, -1, -1], borderColor='black', lineWidth=2.0,
-    innerRadius=0.07, innerFillColor='green', innerBorderColor='black', innerLineWidth=2.0,
+    radius=0.15, fillColor=[0.5, 0.5, 0.5], borderColor=[0.5, 0.5, 0.5], lineWidth=2.0,
+    innerRadius=0.07, innerFillColor=[0.5, 0.5, 0.5], innerBorderColor=[0.5, 0.5, 0.5], innerLineWidth=2.0,
     colorSpace='rgb', units=None
 )
 # define parameters for calibration_2
@@ -338,6 +350,8 @@ routineTimer.reset()
 # --- Prepare to start Routine "start_ET" ---
 continueRoutine = True
 # update component parameters for each repeat
+# Run 'Begin Routine' code from code_2
+ioServer.getDevice('tracker').sendMessage("ET: recording started")
 # keep track of which components have finished
 start_ETComponents = [etRecord]
 for thisComponent in start_ETComponents:
@@ -417,8 +431,98 @@ if etRecord.status != FINISHED:
 # the Routine "start_ET" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
 
+# --- Prepare to start Routine "centered_dot" ---
+continueRoutine = True
+# update component parameters for each repeat
+# keep track of which components have finished
+centered_dotComponents = [dot_centered]
+for thisComponent in centered_dotComponents:
+    thisComponent.tStart = None
+    thisComponent.tStop = None
+    thisComponent.tStartRefresh = None
+    thisComponent.tStopRefresh = None
+    if hasattr(thisComponent, 'status'):
+        thisComponent.status = NOT_STARTED
+# reset timers
+t = 0
+_timeToFirstFrame = win.getFutureFlipTime(clock="now")
+frameN = -1
+
+# --- Run Routine "centered_dot" ---
+routineForceEnded = not continueRoutine
+while continueRoutine and routineTimer.getTime() < 5.0:
+    # get current time
+    t = routineTimer.getTime()
+    tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+    tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+    frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+    # update/draw components on each frame
+    
+    # *dot_centered* updates
+    
+    # if dot_centered is starting this frame...
+    if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        # keep track of start time/frame for later
+        dot_centered.frameNStart = frameN  # exact frame index
+        dot_centered.tStart = t  # local t and not account for scr refresh
+        dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
+        win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
+        # add timestamp to datafile
+        thisExp.timestampOnFlip(win, 'dot_centered.started')
+        # update status
+        dot_centered.status = STARTED
+        dot_centered.setAutoDraw(True)
+    
+    # if dot_centered is active this frame...
+    if dot_centered.status == STARTED:
+        # update params
+        pass
+    
+    # if dot_centered is stopping this frame...
+    if dot_centered.status == STARTED:
+        # is it time to stop? (based on global clock, using actual start)
+        if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
+            # keep track of stop time/frame for later
+            dot_centered.tStop = t  # not accounting for scr refresh
+            dot_centered.frameNStop = frameN  # exact frame index
+            # add timestamp to datafile
+            thisExp.timestampOnFlip(win, 'dot_centered.stopped')
+            # update status
+            dot_centered.status = FINISHED
+            dot_centered.setAutoDraw(False)
+    
+    # check for quit (typically the Esc key)
+    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        core.quit()
+        if eyetracker:
+            eyetracker.setConnectionState(False)
+    
+    # check if all components have finished
+    if not continueRoutine:  # a component has requested a forced-end of Routine
+        routineForceEnded = True
+        break
+    continueRoutine = False  # will revert to True if at least one component still running
+    for thisComponent in centered_dotComponents:
+        if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+            continueRoutine = True
+            break  # at least one component has not yet finished
+    
+    # refresh the screen
+    if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+        win.flip()
+
+# --- Ending Routine "centered_dot" ---
+for thisComponent in centered_dotComponents:
+    if hasattr(thisComponent, "setAutoDraw"):
+        thisComponent.setAutoDraw(False)
+# using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
+if routineForceEnded:
+    routineTimer.reset()
+else:
+    routineTimer.addTime(-5.000000)
+
 # set up handler to look after randomisation of conditions etc
-T1w_LIBRE = data.TrialHandler(nReps=720.0, method='random', 
+T1w_LIBRE = data.TrialHandler(nReps=2.0, method='random', 
     extraInfo=expInfo, originPath=-1,
     trialList=[None],
     seed=None, name='T1w_LIBRE')
@@ -443,6 +547,10 @@ for thisT1w_LIBRE in T1w_LIBRE:
     # Begin Routine
     current_position_index = 0  # Start with the first position
     total_positions = len(positions)  # Track the total number of positions
+    dot.pos = positions[current_position_index]  # Set initial dot position
+    time_of_last_change = 0  # Variable to store the time of the last position change
+    continueRoutine = True  # Ensure the routine continues
+    ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
     # keep track of which components have finished
     dotsComponents = [dot]
     for thisComponent in dotsComponents:
@@ -488,12 +596,17 @@ for thisT1w_LIBRE in T1w_LIBRE:
             pass
         # Run 'Each Frame' code from code
         # Each Frame
-        if current_position_index < total_positions:  # Ensure the index is within bounds
-            if t >= current_position_index * 0.5:  # Check if enough time has passed
+        t = routineTimer.getTime()  # Get the current time in the routine
+        
+        # Check if enough time has passed since the last position change
+        if t - time_of_last_change >= t_dot:
+            current_position_index += 1  # Move to the next position
+            if current_position_index < total_positions:  # Ensure the index is within bounds
                 dot.pos = positions[current_position_index]  # Update the dot position
-                current_position_index += 1  # Move to the next position
-        else:
-            continueRoutine = False  # End the routine when all positions have been shown
+                ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
+                time_of_last_change = t  # Reset the time of the last position change
+            else:
+                continueRoutine = False  # End the routine when all positions are visited
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -523,8 +636,98 @@ for thisT1w_LIBRE in T1w_LIBRE:
     routineTimer.reset()
     thisExp.nextEntry()
     
-# completed 720.0 repeats of 'T1w_LIBRE'
+# completed 2.0 repeats of 'T1w_LIBRE'
 
+
+# --- Prepare to start Routine "centered_dot" ---
+continueRoutine = True
+# update component parameters for each repeat
+# keep track of which components have finished
+centered_dotComponents = [dot_centered]
+for thisComponent in centered_dotComponents:
+    thisComponent.tStart = None
+    thisComponent.tStop = None
+    thisComponent.tStartRefresh = None
+    thisComponent.tStopRefresh = None
+    if hasattr(thisComponent, 'status'):
+        thisComponent.status = NOT_STARTED
+# reset timers
+t = 0
+_timeToFirstFrame = win.getFutureFlipTime(clock="now")
+frameN = -1
+
+# --- Run Routine "centered_dot" ---
+routineForceEnded = not continueRoutine
+while continueRoutine and routineTimer.getTime() < 5.0:
+    # get current time
+    t = routineTimer.getTime()
+    tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+    tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+    frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+    # update/draw components on each frame
+    
+    # *dot_centered* updates
+    
+    # if dot_centered is starting this frame...
+    if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        # keep track of start time/frame for later
+        dot_centered.frameNStart = frameN  # exact frame index
+        dot_centered.tStart = t  # local t and not account for scr refresh
+        dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
+        win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
+        # add timestamp to datafile
+        thisExp.timestampOnFlip(win, 'dot_centered.started')
+        # update status
+        dot_centered.status = STARTED
+        dot_centered.setAutoDraw(True)
+    
+    # if dot_centered is active this frame...
+    if dot_centered.status == STARTED:
+        # update params
+        pass
+    
+    # if dot_centered is stopping this frame...
+    if dot_centered.status == STARTED:
+        # is it time to stop? (based on global clock, using actual start)
+        if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
+            # keep track of stop time/frame for later
+            dot_centered.tStop = t  # not accounting for scr refresh
+            dot_centered.frameNStop = frameN  # exact frame index
+            # add timestamp to datafile
+            thisExp.timestampOnFlip(win, 'dot_centered.stopped')
+            # update status
+            dot_centered.status = FINISHED
+            dot_centered.setAutoDraw(False)
+    
+    # check for quit (typically the Esc key)
+    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        core.quit()
+        if eyetracker:
+            eyetracker.setConnectionState(False)
+    
+    # check if all components have finished
+    if not continueRoutine:  # a component has requested a forced-end of Routine
+        routineForceEnded = True
+        break
+    continueRoutine = False  # will revert to True if at least one component still running
+    for thisComponent in centered_dotComponents:
+        if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+            continueRoutine = True
+            break  # at least one component has not yet finished
+    
+    # refresh the screen
+    if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+        win.flip()
+
+# --- Ending Routine "centered_dot" ---
+for thisComponent in centered_dotComponents:
+    if hasattr(thisComponent, "setAutoDraw"):
+        thisComponent.setAutoDraw(False)
+# using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
+if routineForceEnded:
+    routineTimer.reset()
+else:
+    routineTimer.addTime(-5.000000)
 
 # --- Prepare to start Routine "end" ---
 continueRoutine = True
@@ -532,6 +735,8 @@ continueRoutine = True
 key_resp_3.keys = []
 key_resp_3.rt = []
 _key_resp_3_allKeys = []
+# Run 'Begin Routine' code from code_3
+ioServer.getDevice('tracker').sendMessage("ET: eye-tracker stopped")
 # keep track of which components have finished
 endComponents = [text, ET_stop, key_resp_3]
 for thisComponent in endComponents:

@@ -75,7 +75,7 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 win = visual.Window(
     size=[1920, 1080], fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
-    monitor='testMonitor', color=[0.0000, 0.0000, 0.0000], colorSpace='rgb',
+    monitor='testMonitor', color=[-1, -1, -1], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
     units='norm')
@@ -197,8 +197,8 @@ routineTimer = core.Clock()  # to track time remaining of each (possibly non-sli
 # define target for calibration_2
 calibration_2Target = visual.TargetStim(win, 
     name='calibration_2Target',
-    radius=0.15, fillColor=[-1, -1, -1], borderColor='black', lineWidth=2.0,
-    innerRadius=0.07, innerFillColor='green', innerBorderColor='black', innerLineWidth=2.0,
+    radius=0.15, fillColor=[0, 0, 0], borderColor=[0, 0, 0], lineWidth=2.0,
+    innerRadius=0.07, innerFillColor=[0, 0, 0], innerBorderColor=[0, 0, 0], innerLineWidth=2.0,
     colorSpace='rgb', units=None
 )
 # define parameters for calibration_2
@@ -594,7 +594,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
         # Run 'Each Frame' code from code
         # Each Frame
         if current_position_index < total_positions:  # Ensure the index is within bounds
-            if t >= current_position_index * 3:  # Check if enough time has passed
+            if t >= (current_position_index+1) * 5:  # Check if enough time has passed
                 dot.pos = positions[current_position_index]  # Update the dot position
                 current_position_index += 1  # Move to the next position
                 ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
