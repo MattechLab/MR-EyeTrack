@@ -21,7 +21,7 @@ prefs.hardware['audioLatencyMode'] = '3'
 from psychopy import sound, gui, visual, core, data, event, logging, clock, colors, layout, iohub, hardware
 from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED,
                                 STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
-
+import socket
 import numpy as np  # whole numpy lib is available, prepend 'np.'
 from numpy import (sin, cos, tan, log, log10, pi, average,
                    sqrt, std, deg2rad, rad2deg, linspace, asarray)
@@ -117,7 +117,7 @@ waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
     pos=(0, -0.4), height=0.12, wrapWidth=1.7, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
     languageStyle='LTR',
-    depth=0.0);
+    depth=0.0)
 key_resp = keyboard.Keyboard()
 fix_desc = visual.TextStim(win=win, name='fix_desc',
     text='In this task you will see a dot moving randomly within 16 different positions on the screen. You have to follow the dot :)',
@@ -125,7 +125,7 @@ fix_desc = visual.TextStim(win=win, name='fix_desc',
     pos=(0, 0.25), height=0.12, wrapWidth=1.0, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
     languageStyle='LTR',
-    depth=-2.0);
+    depth=-2.0)
 
 # --- Initialize components for Routine "start_ET" ---
 etRecord = hardware.eyetracker.EyetrackerControl(
