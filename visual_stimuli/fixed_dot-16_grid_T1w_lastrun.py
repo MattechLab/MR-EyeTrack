@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
-    on Tue Oct  1 16:55:49 2024
+    on Tue Oct  1 16:59:49 2024
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -523,7 +523,7 @@ else:
     routineTimer.addTime(-5.000000)
 
 # set up handler to look after randomisation of conditions etc
-T1w_LIBRE = data.TrialHandler(nReps=2.0, method='random', 
+T1w_LIBRE = data.TrialHandler(nReps=6.0, method='random', 
     extraInfo=expInfo, originPath=-1,
     trialList=[None],
     seed=None, name='T1w_LIBRE')
@@ -637,7 +637,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
     routineTimer.reset()
     thisExp.nextEntry()
     
-# completed 2.0 repeats of 'T1w_LIBRE'
+# completed 6.0 repeats of 'T1w_LIBRE'
 
 
 # --- Prepare to start Routine "centered_dot" ---

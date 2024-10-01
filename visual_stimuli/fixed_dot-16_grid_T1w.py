@@ -529,7 +529,7 @@ else:
     routineTimer.addTime(-5.000000)
 
 # set up handler to look after randomisation of conditions etc
-T1w_LIBRE = data.TrialHandler(nReps=16.0, method='random', 
+T1w_LIBRE = data.TrialHandler(nReps=6.0, method='random', 
     extraInfo=expInfo, originPath=-1,
     trialList=[None],
     seed=None, name='T1w_LIBRE')
