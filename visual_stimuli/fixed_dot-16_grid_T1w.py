@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2023.1.2),
-    on Tue Oct  1 16:38:22 2024
+    on Mon Sep 30 17:12:48 2024
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -34,6 +34,11 @@ import sys  # to get file system encoding
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
 
+def send_message(message, addr="localhost", port=2023):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((addr, port))
+    client_socket.sendall(message)
+    client_socket.close()
 
 
 # Ensure that relative paths start from the same directory as this script
@@ -60,7 +65,7 @@ filename = _thisDir + os.sep + u'data/%s_%s_%s' % (expInfo['participant'], expNa
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name=expName, version='',
     extraInfo=expInfo, runtimeInfo=None,
-    originPath='/Users/jaimebarranco/Desktop/Repos/mattechlab/MR-EyeTrack/visual_stimuli/fixed_dot-16_grid_T1w.py',
+    originPath='/Users/jaimebarranco/Desktop/Repos/mattechlab/MR-EyeTrack/visual_stimuli/fixed_dot-16_grid_T1w_lastrun.py',
     savePickle=True, saveWideText=True,
     dataFileName=filename)
 # save a log file for detail verbose info
@@ -91,12 +96,24 @@ else:
 ioConfig = {}
 
 # Setup eyetracking
-ioConfig['eyetracker.hw.mouse.EyeTracker'] = {
+ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
     'name': 'tracker',
-    'controls': {
-        'move': [],
-        'blink':('MIDDLE_BUTTON',),
-        'saccade_threshold': 0.5,
+    'model_name': 'EYELINK 1000 DESKTOP',
+    'simulation_mode': False,
+    'network_settings': '100.1.1.1',
+    'default_native_data_file_name': 'EXPFILE',
+    'runtime_settings': {
+        'sampling_rate': 1000.0,
+        'track_eyes': 'RIGHT_EYE',
+        'sample_filtering': {
+            'sample_filtering': 'FILTER_LEVEL_2',
+            'elLiveFiltering': 'FILTER_LEVEL_OFF',
+        },
+        'vog_settings': {
+            'pupil_measure_types': 'PUPIL_AREA',
+            'tracking_mode': 'PUPIL_CR_TRACKING',
+            'pupil_center_algorithm': 'ELLIPSE_FIT',
+        }
     }
 }
 
@@ -122,7 +139,7 @@ waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
     depth=0.0);
 key_resp = keyboard.Keyboard()
 fix_desc = visual.TextStim(win=win, name='fix_desc',
-    text='In this task you will see a dot moving randomly within 16 different positions on the screen. You have to follow the dot :)',
+    text='In this task you will see a grating patterns on the screen. \nPlease keep your eyes on the fixation circle like the one below.',
     font='Open Sans',
     pos=(0, 0.25), height=0.12, wrapWidth=1.0, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
@@ -134,13 +151,6 @@ etRecord = hardware.eyetracker.EyetrackerControl(
     tracker=eyetracker,
     actionType='Start Only'
 )
-# Run 'Begin Experiment' code from code_2
-# Send logs to the ET
-def send_message(message, addr="localhost", port=2023):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((addr, port))
-    client_socket.sendall(message)
-    client_socket.close()
 
 # --- Initialize components for Routine "centered_dot" ---
 dot_centered = visual.ShapeStim(
@@ -162,7 +172,6 @@ dot = visual.ShapeStim(
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
 positions = []  # List of grid positions
-t_dot = 5 # seconds of showing the dot per position
 # Calculate grid positions
 for i in range(grid_size):
     for j in range(grid_size):
@@ -199,8 +208,8 @@ routineTimer = core.Clock()  # to track time remaining of each (possibly non-sli
 # define target for calibration_2
 calibration_2Target = visual.TargetStim(win, 
     name='calibration_2Target',
-    radius=0.15, fillColor=[0.5, 0.5, 0.5], borderColor=[0.5, 0.5, 0.5], lineWidth=2.0,
-    innerRadius=0.07, innerFillColor=[0.5, 0.5, 0.5], innerBorderColor=[0.5, 0.5, 0.5], innerLineWidth=2.0,
+    radius=0.15, fillColor=[-1, -1, -1], borderColor='black', lineWidth=2.0,
+    innerRadius=0.07, innerFillColor='green', innerBorderColor='black', innerLineWidth=2.0,
     colorSpace='rgb', units=None
 )
 # define parameters for calibration_2
@@ -352,8 +361,6 @@ routineTimer.reset()
 # --- Prepare to start Routine "start_ET" ---
 continueRoutine = True
 # update component parameters for each repeat
-# Run 'Begin Routine' code from code_2
-ioServer.getDevice('tracker').sendMessage("ET: recording started")
 # keep track of which components have finished
 start_ETComponents = [etRecord]
 for thisComponent in start_ETComponents:
@@ -529,7 +536,7 @@ else:
     routineTimer.addTime(-5.000000)
 
 # set up handler to look after randomisation of conditions etc
-T1w_LIBRE = data.TrialHandler(nReps=6.0, method='random', 
+T1w_LIBRE = data.TrialHandler(nReps=16.0, method='random', 
     extraInfo=expInfo, originPath=-1,
     trialList=[None],
     seed=None, name='T1w_LIBRE')
@@ -537,6 +544,7 @@ thisExp.addLoop(T1w_LIBRE)  # add the loop to the experiment
 thisT1w_LIBRE = T1w_LIBRE.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisT1w_LIBRE.rgb)
 if thisT1w_LIBRE != None:
+    ioServer.getDevice('tracker').sendMessage("ET: T1w_LIBRE started")
     for paramName in thisT1w_LIBRE:
         exec('{} = thisT1w_LIBRE[paramName]'.format(paramName))
 
@@ -552,12 +560,9 @@ for thisT1w_LIBRE in T1w_LIBRE:
     # update component parameters for each repeat
     # Run 'Begin Routine' code from code
     # Begin Routine
+    ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
     current_position_index = 0  # Start with the first position
     total_positions = len(positions)  # Track the total number of positions
-    dot.pos = positions[current_position_index]  # Set initial dot position
-    time_of_last_change = 0  # Variable to store the time of the last position change
-    continueRoutine = True  # Ensure the routine continues
-    ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
     # keep track of which components have finished
     dotsComponents = [dot]
     for thisComponent in dotsComponents:
@@ -603,17 +608,13 @@ for thisT1w_LIBRE in T1w_LIBRE:
             pass
         # Run 'Each Frame' code from code
         # Each Frame
-        t = routineTimer.getTime()  # Get the current time in the routine
-        
-        # Check if enough time has passed since the last position change
-        if t - time_of_last_change >= t_dot:
-            current_position_index += 1  # Move to the next position
-            if current_position_index < total_positions:  # Ensure the index is within bounds
+        if current_position_index < total_positions:  # Ensure the index is within bounds
+            if t >= current_position_index * 5:  # Check if enough time has passed
                 dot.pos = positions[current_position_index]  # Update the dot position
+                current_position_index += 1  # Move to the next position
                 ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
-                time_of_last_change = t  # Reset the time of the last position change
-            else:
-                continueRoutine = False  # End the routine when all positions are visited
+        else:
+            continueRoutine = False  # End the routine when all positions have been shown
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -644,7 +645,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
     routineTimer.reset()
     thisExp.nextEntry()
     
-# completed 2.0 repeats of 'T1w_LIBRE'
+# completed 16.0 repeats of 'T1w_LIBRE'
 
 
 # --- Prepare to start Routine "centered_dot" ---
@@ -743,8 +744,6 @@ continueRoutine = True
 key_resp_3.keys = []
 key_resp_3.rt = []
 _key_resp_3_allKeys = []
-# Run 'Begin Routine' code from code_3
-ioServer.getDevice('tracker').sendMessage("ET: eye-tracker stopped")
 # keep track of which components have finished
 endComponents = [text, ET_stop, key_resp_3]
 for thisComponent in endComponents:
