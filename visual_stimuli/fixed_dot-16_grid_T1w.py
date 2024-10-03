@@ -173,14 +173,8 @@ dot = visual.ShapeStim(
 # Begin Experiment
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
-positions = []  # List of grid positions
+positions = [(0, 0.5), (0, -0.5), (0.5, 0), (-0.5, 0)]  # Define cross positions (up, down, right, left)
 t_dot = 5 # seconds of showing the dot per position
-# Calculate grid positions
-for i in range(grid_size):
-    for j in range(grid_size):
-        x = -0.75 + i * 0.5  # Adjust the range of x coordinates
-        y = -0.75 + j * 0.5  # Adjust the range of y coordinates
-        positions.append((x, y))
 shuffle(positions)  # Shuffle the positions
 
 # --- Initialize components for Routine "centered_dot" ---
