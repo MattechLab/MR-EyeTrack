@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" ?>
-<PsychoPy2experiment encoding="utf-8" version="2024.2.1">
+<PsychoPy2experiment encoding="utf-8" version="2023.1.2">
   <Settings>
     <Param val="3" valType="str" updates="None" name="Audio latency priority"/>
     <Param val="ptb" valType="str" updates="None" name="Audio lib"/>
@@ -81,7 +81,7 @@
   </Settings>
   <Routines>
     <Routine name="dots">
-      <RoutineSettingsComponent name="dots" plugin="None">
+      <UnknownPluginComponent name="dots_2" plugin="None">
         <Param val="none" valType="str" updates="None" name="backgroundFit"/>
         <Param val="" valType="str" updates="None" name="backgroundImg"/>
         <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
@@ -90,13 +90,17 @@
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="" valType="code" updates="None" name="durationEstim"/>
         <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
-        <Param val="dots" valType="code" updates="None" name="name"/>
+        <Param val="dots_2" valType="code" updates="None" name="name"/>
         <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
         <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="" valType="code" updates="None" name="startVal"/>
         <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
         <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="syncScreenRefresh"/>
         <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
-      </RoutineSettingsComponent>
+      </UnknownPluginComponent>
       <PolygonComponent name="dot" plugin="None">
         <Param val="center" valType="str" updates="constant" name="anchor"/>
         <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
@@ -129,13 +133,13 @@
       <CodeComponent name="code" plugin="None">
         <Param val="" valType="extendedCode" updates="constant" name="Before Experiment"/>
         <Param val="" valType="extendedCode" updates="constant" name="Before JS Experiment"/>
-        <Param val="# Begin Experiment&amp;#10;grid_size = 4  # 4x4 grid&amp;#10;dot_size = 0.05  # Size of the grey dot&amp;#10;t_dot = 5 # seconds of showing the dot per position&amp;#10;positions = [(0, 0.66), (0, -0.66), (0.66, 0), (-0.66, 0)]  # Define cross positions (up, down, right, left)&amp;#10;ioServer.getDevice('tracker').sendMessage(&quot;ET: Start experiment 'dots'&quot;)" valType="extendedCode" updates="constant" name="Begin Experiment"/>
-        <Param val="grid_size = 4;&amp;#10;dot_size = 0.05;&amp;#10;t_dot = 5;&amp;#10;positions = [[0, 0.66], [0, (- 0.66)], [0.66, 0], [(- 0.66), 0]];&amp;#10;ioServer.getDevice(&quot;tracker&quot;).sendMessage(&quot;ET: Start experiment 'dots'&quot;);&amp;#10;" valType="extendedCode" updates="constant" name="Begin JS Experiment"/>
-        <Param val="util.shuffle(positions);&amp;#10;current_position_index = 0;&amp;#10;total_positions = positions.length;&amp;#10;dot.pos = positions[current_position_index];&amp;#10;time_of_last_change = 0;&amp;#10;continueRoutine = true;&amp;#10;ioServer.getDevice(&quot;tracker&quot;).sendMessage(&quot;ET: Start routine 'dots'&quot;);&amp;#10;" valType="extendedCode" updates="constant" name="Begin JS Routine"/>
-        <Param val="# Begin Routine&amp;#10;shuffle(positions)  # Shuffle the positions&amp;#10;current_position_index = 0  # Start with the first position&amp;#10;total_positions = len(positions)  # Track the total number of positions&amp;#10;dot.pos = positions[current_position_index]  # Set initial dot position&amp;#10;time_of_last_change = 0  # Variable to store the time of the last position change&amp;#10;continueRoutine = True  # Ensure the routine continues&amp;#10;ioServer.getDevice('tracker').sendMessage(&quot;ET: Start routine 'dots'&quot;)" valType="extendedCode" updates="constant" name="Begin Routine"/>
+        <Param val="# Begin Experiment&amp;#10;grid_size = 4  # 4x4 grid&amp;#10;dot_size = 0.05  # Size of the grey dot&amp;#10;t_dot = 5  # Seconds of showing the dot per position&amp;#10;positions = {&amp;#10;    (0, 0.66): &quot;up&quot;, &amp;#10;    (0, -0.66): &quot;down&quot;, &amp;#10;    (0.66, 0): &quot;right&quot;, &amp;#10;    (-0.66, 0): &quot;left&quot;&amp;#10;}  # Define cross positions with labels&amp;#10;ioServer.getDevice('tracker').sendMessage(&quot;ET: Start experiment 'dots'&quot;)" valType="extendedCode" updates="constant" name="Begin Experiment"/>
+        <Param val="grid_size = 4;&amp;#10;dot_size = 0.05;&amp;#10;t_dot = 5;&amp;#10;positions = {[[0, 0.66]]: &quot;up&quot;, [[0, (- 0.66)]]: &quot;down&quot;, [[0.66, 0]]: &quot;right&quot;, [[(- 0.66), 0]]: &quot;left&quot;};&amp;#10;ioServer.getDevice(&quot;tracker&quot;).sendMessage(&quot;ET: Start experiment 'dots'&quot;);&amp;#10;" valType="extendedCode" updates="constant" name="Begin JS Experiment"/>
+        <Param val="&amp;#10;        // add-on: list(s: string): string[]&amp;#10;        function list(s) {&amp;#10;            // if s is a string, we return a list of its characters&amp;#10;            if (typeof s === 'string')&amp;#10;                return s.split('');&amp;#10;            else&amp;#10;                // otherwise we return s:&amp;#10;                return s;&amp;#10;        }&amp;#10;&amp;#10;        shuffled_positions = list(positions.items());&amp;#10;util.shuffle(shuffled_positions);&amp;#10;current_position_index = 0;&amp;#10;total_positions = shuffled_positions.length;&amp;#10;[dot.pos, direction] = shuffled_positions[current_position_index];&amp;#10;time_of_last_change = 0;&amp;#10;continueRoutine = true;&amp;#10;ioServer.getDevice(&quot;tracker&quot;).sendMessage(&quot;ET: Start routine 'dots'&quot;);&amp;#10;" valType="extendedCode" updates="constant" name="Begin JS Routine"/>
+        <Param val="# Begin Routine&amp;#10;shuffled_positions = list(positions.items())  # Convert dictionary to a list of tuples&amp;#10;shuffle(shuffled_positions)  # Shuffle the positions&amp;#10;current_position_index = 0  # Start with the first position&amp;#10;total_positions = len(shuffled_positions)  # Track the total number of positions&amp;#10;dot.pos, direction = shuffled_positions[current_position_index]  # Set initial dot position and direction&amp;#10;time_of_last_change = 0  # Variable to store the time of the last position change&amp;#10;continueRoutine = True  # Ensure the routine continues&amp;#10;ioServer.getDevice('tracker').sendMessage(&quot;ET: Start routine 'dots'&quot;)" valType="extendedCode" updates="constant" name="Begin Routine"/>
         <Param val="Auto-&gt;JS" valType="str" updates="None" name="Code Type"/>
-        <Param val="# Each Frame&amp;#10;t = routineTimer.getTime()  # Get the current time in the routine&amp;#10;&amp;#10;# Check if enough time has passed since the last position change&amp;#10;if t - time_of_last_change &gt;= t_dot:&amp;#10;    current_position_index += 1  # Move to the next position&amp;#10;    if current_position_index &lt; total_positions:  # Ensure the index is within bounds&amp;#10;        dot.pos = positions[current_position_index]  # Update the dot position&amp;#10;        ioServer.getDevice('tracker').sendMessage(&quot;ET: dot moved!&quot;)&amp;#10;        time_of_last_change = t  # Reset the time of the last position change&amp;#10;    else:&amp;#10;        continueRoutine = False  # End the routine when all positions are visited" valType="extendedCode" updates="constant" name="Each Frame"/>
-        <Param val="t = routineTimer.getTime();&amp;#10;if (((t - time_of_last_change) &gt;= t_dot)) {&amp;#10;    current_position_index += 1;&amp;#10;    if ((current_position_index &lt; total_positions)) {&amp;#10;        dot.pos = positions[current_position_index];&amp;#10;        ioServer.getDevice(&quot;tracker&quot;).sendMessage(&quot;ET: dot moved!&quot;);&amp;#10;        time_of_last_change = t;&amp;#10;    } else {&amp;#10;        continueRoutine = false;&amp;#10;    }&amp;#10;}&amp;#10;" valType="extendedCode" updates="constant" name="Each JS Frame"/>
+        <Param val="# Each Frame&amp;#10;t = routineTimer.getTime()  # Get the current time in the routine&amp;#10;&amp;#10;# Check if enough time has passed since the last position change&amp;#10;if t - time_of_last_change &gt;= t_dot:&amp;#10;    current_position_index += 1  # Move to the next position&amp;#10;    if current_position_index &lt; total_positions:  # Ensure the index is within bounds&amp;#10;        dot.pos, direction = shuffled_positions[current_position_index]  # Update the dot position and direction&amp;#10;        ioServer.getDevice('tracker').sendMessage(f&quot;ET: dot moved {direction}!&quot;)  # Log the direction of movement&amp;#10;        time_of_last_change = t  # Reset the time of the last position change&amp;#10;    else:&amp;#10;        continueRoutine = False  # End the routine when all positions are visited" valType="extendedCode" updates="constant" name="Each Frame"/>
+        <Param val="t = routineTimer.getTime();&amp;#10;if (((t - time_of_last_change) &gt;= t_dot)) {&amp;#10;    current_position_index += 1;&amp;#10;    if ((current_position_index &lt; total_positions)) {&amp;#10;        [dot.pos, direction] = shuffled_positions[current_position_index];&amp;#10;        ioServer.getDevice(&quot;tracker&quot;).sendMessage(`ET: dot moved ${direction}!`);&amp;#10;        time_of_last_change = t;&amp;#10;    } else {&amp;#10;        continueRoutine = false;&amp;#10;    }&amp;#10;}&amp;#10;" valType="extendedCode" updates="constant" name="Each JS Frame"/>
         <Param val="" valType="extendedCode" updates="constant" name="End Experiment"/>
         <Param val="" valType="extendedCode" updates="constant" name="End JS Experiment"/>
         <Param val="" valType="extendedCode" updates="constant" name="End JS Routine"/>
@@ -145,7 +149,7 @@
       </CodeComponent>
     </Routine>
     <Routine name="start_ET">
-      <RoutineSettingsComponent name="start_ET" plugin="None">
+      <UnknownPluginComponent name="start_ET_2" plugin="None">
         <Param val="none" valType="str" updates="None" name="backgroundFit"/>
         <Param val="" valType="str" updates="None" name="backgroundImg"/>
         <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
@@ -154,13 +158,17 @@
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="" valType="code" updates="None" name="durationEstim"/>
         <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
-        <Param val="start_ET" valType="code" updates="None" name="name"/>
+        <Param val="start_ET_2" valType="code" updates="None" name="name"/>
         <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
         <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="" valType="code" updates="None" name="startVal"/>
         <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
         <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="syncScreenRefresh"/>
         <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
-      </RoutineSettingsComponent>
+      </UnknownPluginComponent>
       <EyetrackerRecordComponent name="etRecord" plugin="None">
         <Param val="Start Only" valType="str" updates="None" name="actionType"/>
         <Param val="False" valType="bool" updates="None" name="disabled"/>
@@ -194,7 +202,7 @@
       </CodeComponent>
     </Routine>
     <Routine name="end">
-      <RoutineSettingsComponent name="end" plugin="None">
+      <UnknownPluginComponent name="end_2" plugin="None">
         <Param val="none" valType="str" updates="None" name="backgroundFit"/>
         <Param val="" valType="str" updates="None" name="backgroundImg"/>
         <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
@@ -203,13 +211,17 @@
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="" valType="code" updates="None" name="durationEstim"/>
         <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
-        <Param val="end" valType="code" updates="None" name="name"/>
+        <Param val="end_2" valType="code" updates="None" name="name"/>
         <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
         <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="" valType="code" updates="None" name="startVal"/>
         <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
         <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="syncScreenRefresh"/>
         <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
-      </RoutineSettingsComponent>
+      </UnknownPluginComponent>
       <TextComponent name="text" plugin="None">
         <Param val="white" valType="color" updates="constant" name="color"/>
         <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
@@ -290,7 +302,7 @@
       </CodeComponent>
     </Routine>
     <Routine name="trail">
-      <RoutineSettingsComponent name="trail" plugin="None">
+      <UnknownPluginComponent name="trail_2" plugin="None">
         <Param val="none" valType="str" updates="None" name="backgroundFit"/>
         <Param val="" valType="str" updates="None" name="backgroundImg"/>
         <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
@@ -299,13 +311,17 @@
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="" valType="code" updates="None" name="durationEstim"/>
         <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
-        <Param val="trail" valType="code" updates="None" name="name"/>
+        <Param val="trail_2" valType="code" updates="None" name="name"/>
         <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
         <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="" valType="code" updates="None" name="startVal"/>
         <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
         <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="syncScreenRefresh"/>
         <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
-      </RoutineSettingsComponent>
+      </UnknownPluginComponent>
       <TextComponent name="waiting_trigger" plugin="None">
         <Param val="white" valType="color" updates="constant" name="color"/>
         <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
@@ -382,7 +398,7 @@
       </TextComponent>
     </Routine>
     <Routine name="centered_dot">
-      <RoutineSettingsComponent name="centered_dot" plugin="None">
+      <UnknownPluginComponent name="centered_dot_2" plugin="None">
         <Param val="none" valType="str" updates="None" name="backgroundFit"/>
         <Param val="" valType="str" updates="None" name="backgroundImg"/>
         <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
@@ -391,13 +407,17 @@
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="" valType="code" updates="None" name="durationEstim"/>
         <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
-        <Param val="centered_dot" valType="code" updates="None" name="name"/>
+        <Param val="centered_dot_2" valType="code" updates="None" name="name"/>
         <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
         <Param val="" valType="code" updates="constant" name="skipIf"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="" valType="code" updates="None" name="startVal"/>
         <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
         <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="syncScreenRefresh"/>
         <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
-      </RoutineSettingsComponent>
+      </UnknownPluginComponent>
       <PolygonComponent name="dot_centered" plugin="None">
         <Param val="center" valType="str" updates="constant" name="anchor"/>
         <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
