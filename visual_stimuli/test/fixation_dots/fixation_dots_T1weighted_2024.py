@@ -137,7 +137,7 @@ waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
     depth=0.0);
 key_resp = keyboard.Keyboard()
 fix_desc = visual.TextStim(win=win, name='fix_desc',
-    text='In this task you will see a grating patterns on the screen. \nPlease keep your eyes on the fixation circle like the one below.',
+    text='In this task you will see a central dot on the screen. \nPlease keep your eyes on the fixation circle like the one below.',
     font='Open Sans',
     pos=(0, 0.25), height=0.12, wrapWidth=1.0, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
@@ -350,6 +350,7 @@ while continueRoutine:
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        ioServer.getDevice('tracker').sendMessage("key board escape")
         core.quit()
     
     # check if all components have finished
@@ -421,8 +422,8 @@ while continueRoutine:
         etRecord.status = STARTED
         # Run 'Begin Routine' code from code_channel2
         # send_message((signals.RUN | signals.ET_START_AND_STOP).to_bytes())
-        ioServer.getDevice('tracker').sendMessage("Hello tracker")
-        # ioServer.getDevice('tracker').sendMessage("start visual stimuli")
+        ioServer.getDevice('tracker').sendMessage("Hello tracker record")
+    
     
     # if etRecord is stopping this frame...
     if etRecord.status == STARTED:
@@ -436,7 +437,6 @@ while continueRoutine:
             # update status
             etRecord.status = FINISHED
             ioServer.getDevice('tracker').sendMessage("Bye tracker record")
-            # ioServer.getDevice('tracker').sendMessage("stop visual stimuli")
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -476,12 +476,19 @@ thisExp.addLoop(T1w_LIBRE)  # add the loop to the experiment
 thisT1w_LIBRE = T1w_LIBRE.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisT1w_LIBRE.rgb)
 if thisT1w_LIBRE != None:
-    ioServer.getDevice('tracker').sendMessage("T1w_LIBRE stimuli start")
     for paramName in thisT1w_LIBRE:
         exec('{} = thisT1w_LIBRE[paramName]'.format(paramName))
 
 for thisT1w_LIBRE in T1w_LIBRE:
     currentLoop = T1w_LIBRE
+    current_rep_index = T1w_LIBRE.thisRepN
+    if current_rep_index == 0:
+        # now it is the first repetition
+        ioServer.getDevice('tracker').sendMessage("T1w_LIBRE stimuli start")
+    if T1w_LIBRE.thisRepN % 10 == 0:
+        info = f"Stimuli after {T1w_LIBRE.thisRepN} seconds..."
+        ioServer.getDevice('tracker').sendMessage(info)
+        
     # abbreviate parameter names if possible (e.g. rgb = thisT1w_LIBRE.rgb)
     if thisT1w_LIBRE != None:
         for paramName in thisT1w_LIBRE:
@@ -844,6 +851,7 @@ for thisT1w_LIBRE in T1w_LIBRE:
                 # update status
                 dot_10.status = FINISHED
                 dot_10.setAutoDraw(False)
+                
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -972,6 +980,7 @@ while continueRoutine:
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        ioServer.getDevice('tracker').sendMessage("key board escape")
         core.quit()
     
     # check if all components have finished
