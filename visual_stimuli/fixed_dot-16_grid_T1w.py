@@ -430,115 +430,101 @@ for thisComponent in start_ETComponents:
 # the Routine "start_ET" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
 
-# --- Prepare to start Routine "centered_dot" ---
-continueRoutine = True
-# update component parameters for each repeat
-# keep track of which components have finished
-centered_dotComponents = [dot_centered]
-for thisComponent in centered_dotComponents:
-    thisComponent.tStart = None
-    thisComponent.tStop = None
-    thisComponent.tStartRefresh = None
-    thisComponent.tStopRefresh = None
-    if hasattr(thisComponent, 'status'):
-        thisComponent.status = NOT_STARTED
-# reset timers
-t = 0
-_timeToFirstFrame = win.getFutureFlipTime(clock="now")
-frameN = -1
-
-# --- Run Routine "centered_dot" ---
-routineForceEnded = not continueRoutine
-while continueRoutine and routineTimer.getTime() < 5.0:
-    # get current time
-    t = routineTimer.getTime()
-    tThisFlip = win.getFutureFlipTime(clock=routineTimer)
-    tThisFlipGlobal = win.getFutureFlipTime(clock=None)
-    frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
-    # update/draw components on each frame
-    
-    # *dot_centered* updates
-    
-    # if dot_centered is starting this frame...
-    if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
-        # keep track of start time/frame for later
-        dot_centered.frameNStart = frameN  # exact frame index
-        dot_centered.tStart = t  # local t and not account for scr refresh
-        dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
-        win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
-        # add timestamp to datafile
-        thisExp.timestampOnFlip(win, 'dot_centered.started')
-        # update status
-        dot_centered.status = STARTED
-        dot_centered.setAutoDraw(True)
-    
-    # if dot_centered is active this frame...
-    if dot_centered.status == STARTED:
-        # update params
-        pass
-    
-    # if dot_centered is stopping this frame...
-    if dot_centered.status == STARTED:
-        # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
-            # keep track of stop time/frame for later
-            dot_centered.tStop = t  # not accounting for scr refresh
-            dot_centered.frameNStop = frameN  # exact frame index
-            # add timestamp to datafile
-            thisExp.timestampOnFlip(win, 'dot_centered.stopped')
-            # update status
-            dot_centered.status = FINISHED
-            dot_centered.setAutoDraw(False)
-    
-    # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        ioServer.getDevice('tracker').sendMessage("key board escape")
-        core.quit()
-    
-    # check if all components have finished
-    if not continueRoutine:  # a component has requested a forced-end of Routine
-        routineForceEnded = True
-        break
-    continueRoutine = False  # will revert to True if at least one component still running
+# Repeat the centered_dot routine 6 times
+for _ in range(6):
+    # --- Prepare to start Routine "centered_dot" ---
+    continueRoutine = True
+    # update component parameters for each repeat
+    # keep track of which components have finished
+    centered_dotComponents = [dot_centered]
     for thisComponent in centered_dotComponents:
-        if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
-            continueRoutine = True
-            break  # at least one component has not yet finished
-    
-    # refresh the screen
-    if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
-        win.flip()
+        thisComponent.tStart = None
+        thisComponent.tStop = None
+        thisComponent.tStartRefresh = None
+        thisComponent.tStopRefresh = None
+        if hasattr(thisComponent, 'status'):
+            thisComponent.status = NOT_STARTED
+    # reset timers
+    t = 0
+    _timeToFirstFrame = win.getFutureFlipTime(clock="now")
+    frameN = -1
 
-# --- Ending Routine "centered_dot" ---
-for thisComponent in centered_dotComponents:
-    if hasattr(thisComponent, "setAutoDraw"):
-        thisComponent.setAutoDraw(False)
-# using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
-if routineForceEnded:
-    routineTimer.reset()
-else:
-    routineTimer.addTime(-5.000000)
-thisExp.nextEntry()
+    # --- Run Routine "centered_dot" ---
+    routineForceEnded = not continueRoutine
+    while continueRoutine and routineTimer.getTime() < 5.0:
+        # get current time
+        t = routineTimer.getTime()
+        tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+        tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+        frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+        # update/draw components on each frame
+        
+        # *dot_centered* updates
+        
+        # if dot_centered is starting this frame...
+        if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+            # keep track of start time/frame for later
+            dot_centered.frameNStart = frameN  # exact frame index
+            dot_centered.tStart = t  # local t and not account for scr refresh
+            dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
+            # add timestamp to datafile
+            thisExp.timestampOnFlip(win, 'dot_centered.started')
+            # update status
+            dot_centered.status = STARTED
+            dot_centered.setAutoDraw(True)
+            ioServer.getDevice('tracker').sendMessage("ET: Start routine 'centered_dot'")
+        
+        # if dot_centered is active this frame...
+        if dot_centered.status == STARTED:
+            # update params
+            pass
+        
+        # if dot_centered is stopping this frame...
+        if dot_centered.status == STARTED:
+            # is it time to stop? (based on global clock, using actual start)
+            if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
+                # keep track of stop time/frame for later
+                dot_centered.tStop = t  # not accounting for scr refresh
+                dot_centered.frameNStop = frameN  # exact frame index
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_centered.stopped')
+                # update status
+                dot_centered.status = FINISHED
+                dot_centered.setAutoDraw(False)
+        
+        # check for quit (typically the Esc key)
+        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+            ioServer.getDevice('tracker').sendMessage("key board escape")
+            core.quit()
+        
+        # check if all components have finished
+        if not continueRoutine:  # a component has requested a forced-end of Routine
+            routineForceEnded = True
+            break
+        continueRoutine = False  # will revert to True if at least one component still running
+        for thisComponent in centered_dotComponents:
+            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                continueRoutine = True
+                break  # at least one component has not yet finished
+        
+        # refresh the screen
+        if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+            win.flip()
 
-# set up handler to look after randomisation of conditions etc
-trials = data.TrialHandler(nReps=6.0, method='random', 
-    extraInfo=expInfo, originPath=-1,
-    trialList=[None],
-    seed=None, name='trials')
-thisExp.addLoop(trials)  # add the loop to the experiment
-thisTrial = trials.trialList[0]  # so we can initialise stimuli with some values
-# abbreviate parameter names if possible (e.g. rgb = thisTrial.rgb)
-if thisTrial != None:
-    for paramName in thisTrial:
-        exec('{} = thisTrial[paramName]'.format(paramName))
+    # --- Ending Routine "centered_dot" ---
+    for thisComponent in centered_dotComponents:
+        if hasattr(thisComponent, "setAutoDraw"):
+            thisComponent.setAutoDraw(False)
+    # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
+    if routineForceEnded:
+        routineTimer.reset()
+    else:
+        routineTimer.addTime(-5.000000)
+    thisExp.nextEntry()
 
-for thisTrial in trials:
-    currentLoop = trials
-    # abbreviate parameter names if possible (e.g. rgb = thisTrial.rgb)
-    if thisTrial != None:
-        for paramName in thisTrial:
-            exec('{} = thisTrial[paramName]'.format(paramName))
-    
+# Repeat the dots routine 30 times
+for _ in range(30):
     # --- Prepare to start Routine "dots" ---
     continueRoutine = True
     # Begin Routine
@@ -634,9 +620,99 @@ for thisTrial in trials:
     # the Routine "dots" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset()
     thisExp.nextEntry()
-    
-# completed 6.0 repeats of 'trials'
 
+# Repeat the centered_dot routine 5 times
+for _ in range(5):
+    # --- Prepare to start Routine "centered_dot" ---
+    continueRoutine = True
+    # update component parameters for each repeat
+    # keep track of which components have finished
+    centered_dotComponents = [dot_centered]
+    for thisComponent in centered_dotComponents:
+        thisComponent.tStart = None
+        thisComponent.tStop = None
+        thisComponent.tStartRefresh = None
+        thisComponent.tStopRefresh = None
+        if hasattr(thisComponent, 'status'):
+            thisComponent.status = NOT_STARTED
+    # reset timers
+    t = 0
+    _timeToFirstFrame = win.getFutureFlipTime(clock="now")
+    frameN = -1
+
+    # --- Run Routine "centered_dot" ---
+    routineForceEnded = not continueRoutine
+    while continueRoutine and routineTimer.getTime() < 5.0:
+        # get current time
+        t = routineTimer.getTime()
+        tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+        tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+        frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+        # update/draw components on each frame
+        
+        # *dot_centered* updates
+        
+        # if dot_centered is starting this frame...
+        if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+            # keep track of start time/frame for later
+            dot_centered.frameNStart = frameN  # exact frame index
+            dot_centered.tStart = t  # local t and not account for scr refresh
+            dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
+            # add timestamp to datafile
+            thisExp.timestampOnFlip(win, 'dot_centered.started')
+            # update status
+            dot_centered.status = STARTED
+            dot_centered.setAutoDraw(True)
+            ioServer.getDevice('tracker').sendMessage("ET: Start routine 'centered_dot'")
+        
+        # if dot_centered is active this frame...
+        if dot_centered.status == STARTED:
+            # update params
+            pass
+        
+        # if dot_centered is stopping this frame...
+        if dot_centered.status == STARTED:
+            # is it time to stop? (based on global clock, using actual start)
+            if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
+                # keep track of stop time/frame for later
+                dot_centered.tStop = t  # not accounting for scr refresh
+                dot_centered.frameNStop = frameN  # exact frame index
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_centered.stopped')
+                # update status
+                dot_centered.status = FINISHED
+                dot_centered.setAutoDraw(False)
+        
+        # check for quit (typically the Esc key)
+        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+            ioServer.getDevice('tracker').sendMessage("key board escape")
+            core.quit()
+        
+        # check if all components have finished
+        if not continueRoutine:  # a component has requested a forced-end of Routine
+            routineForceEnded = True
+            break
+        continueRoutine = False  # will revert to True if at least one component still running
+        for thisComponent in centered_dotComponents:
+            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                continueRoutine = True
+                break  # at least one component has not yet finished
+        
+        # refresh the screen
+        if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+            win.flip()
+
+    # --- Ending Routine "centered_dot" ---
+    for thisComponent in centered_dotComponents:
+        if hasattr(thisComponent, "setAutoDraw"):
+            thisComponent.setAutoDraw(False)
+    # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
+    if routineForceEnded:
+        routineTimer.reset()
+    else:
+        routineTimer.addTime(-5.000000)
+    thisExp.nextEntry()
 
 # --- Prepare to start Routine "end" ---
 continueRoutine = True
