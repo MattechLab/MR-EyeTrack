@@ -78,7 +78,7 @@ win = visual.Window(
     monitor='testMonitor', color=[-1,-1,-1], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
-    units='norm')
+    units='pix')
 win.mouseVisible = False
 # store frame rate of monitor if we can measure it
 expInfo['frameRate'] = win.getActualFrameRate()
@@ -171,11 +171,14 @@ dot = visual.ShapeStim(
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
 t_dot = 5  # Seconds of showing the dot per position
+screen_width, screen_height = win.size
+x_offset = screen_width // 3   # 800 / 3 = 266 (integer division)
+y_offset = screen_height // 3  # 600 / 3 = 200
 positions = {
-    (0, 0.66): "up", 
-    (0, -0.66): "down", 
-    (0.66, 0): "right", 
-    (-0.66, 0): "left"
+    (0, y_offset): "up",
+    (0, -y_offset): "down",
+    (-x_offset, 0): "left",
+    (x_offset, 0): "right"
 }  # Define cross positions with labels
 ioServer.getDevice('tracker').sendMessage("ET: Start experiment 'dots'")
 
