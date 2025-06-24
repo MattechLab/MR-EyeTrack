@@ -442,7 +442,7 @@ for thisComponent in start_ETComponents:
 routineTimer.reset()
 
 # Repeat the centered_dot routine 6 times
-for _ in range(1):  # Change to 6 if you want to repeat it 6 times
+for _ in range(6):  # Change to 6 if you want to repeat it 6 times
     # --- Prepare to start Routine "centered_dot" ---
     continueRoutine = True
     # update component parameters for each repeat
