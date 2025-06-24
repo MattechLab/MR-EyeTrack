@@ -78,7 +78,7 @@ win = visual.Window(
     monitor='testMonitor', color=[-1,-1,-1], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
-    units='pix')
+    units='norm')
 win.mouseVisible = False
 # store frame rate of monitor if we can measure it
 expInfo['frameRate'] = win.getActualFrameRate()
@@ -170,16 +170,24 @@ dot = visual.ShapeStim(
 # Begin Experiment
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
-t_dot = 5  # Seconds of showing the dot per position
+t_dot = 3  # Seconds of showing the dot per position
+
+# Get the screen dimensions
+# In norm units, screen goes from -1 to +1 vertically, and aspect-ratio-scaled horizontally.
+# So on an 800×600 display, full x-range is from -800/600 = -1.333 to +1.333
+# We normalize the pixel offsets to norm coordinates.
 screen_width, screen_height = win.size
-x_offset = screen_width // 3   # 800 / 3 = 266 (integer division)
-y_offset = screen_height // 3  # 600 / 3 = 200
+x_offset_norm = 1.33*2/3  # of 1.33
+y_offset_norm = 1/2  # of 1.00
+
+# Define the positions in 'norm' units
 positions = {
-    (0, y_offset): "up",
-    (0, -y_offset): "down",
-    (-x_offset, 0): "left",
-    (x_offset, 0): "right"
-}  # Define cross positions with labels
+    (0, y_offset_norm): "up",
+    (0, -y_offset_norm): "down",
+    (-x_offset_norm, 0): "left",
+    (x_offset_norm, 0): "right"
+}
+
 ioServer.getDevice('tracker').sendMessage("ET: Start experiment 'dots'")
 
 # --- Initialize components for Routine "end" ---
@@ -434,7 +442,7 @@ for thisComponent in start_ETComponents:
 routineTimer.reset()
 
 # Repeat the centered_dot routine 6 times
-for _ in range(6):
+for _ in range(1):  # Change to 6 if you want to repeat it 6 times
     # --- Prepare to start Routine "centered_dot" ---
     continueRoutine = True
     # update component parameters for each repeat
