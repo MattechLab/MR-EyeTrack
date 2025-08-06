@@ -166,3 +166,5 @@ visual_stimuli/test/fixation_dots/data/
 visual_stimuli/test/HCPh-fMRI-tasks/results/
 visual_stimuli/data/
 .DS_Store
+/data
+/other
