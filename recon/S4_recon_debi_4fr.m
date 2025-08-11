@@ -136,5 +136,23 @@ save(xPath, 'x');
 disp('x has been saved here:')
 disp(xPath)
 
+%% .mat to .nii.gz
+image = load(xPath);
 
+% Define NIfTI metadata (optional but recommended for completeness)
+% You can adjust these properties according to your needs.
+nii_hdr = struct;  % Create default NIfTI header
+nii_hdr.ImageSize = size(image.x);
+nii_hdr.PixelDimensions = [0.5 0.5 0.5];  % Adjust these values if needed
 
+% Write the NIfTI file
+% niftiwrite(volume_data, nifti_file, nii_hdr);
+nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f', region_idx, nIter, delta));
+niftiwrite(image.x, nifti_file);
+disp(['Data has been saved as a NIfTI file: ', nifti_file]);
+
+%% Compress to .nii.gz
+gzip([nifti_file '.nii']);
+
+% (Optional) remove the uncompressed file
+delete([nifti_file '.nii']);
