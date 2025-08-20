@@ -2,22 +2,34 @@ clear; clc;
 %%
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
-subject_num = 1;
+subject_num = 2;
 
-datasetDir = '/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-01/rawdata/';
+Matrix_size = 240;
+reconFov = 240;
+
+datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata/'];
 reconDir = '/home/debi/jaime/tmp/250613_JB/';
 
-mask_note_list={'woBin','maskNote_for_sub2', 'maskNote_for_sub3'};
+mask_note_list={'woBin', 'woBin', 'woBin'};
 
 mask_note = mask_note_list{subject_num};
-x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/mask_', mask_note, '/'];
+x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/output/mask_', mask_note, '/'];
 
-% common for all subjects
-bodyCoilFile     = [datasetDir, '/meas_MID00614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
-arrayCoilFile    = [datasetDir, '/meas_MID00615_FID182869_BEAT_LIBREon_eye_HC_BC.dat'];
-measureFile = [datasetDir, '/meas_MID00605_FID182859_BEAT_LIBREon_eye_(23_09_24).dat'];
+if subject_num == 1
+    bodyCoilFile    = [datasetDir, '/meas_MID2400614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
+    arrayCoilFile   = [datasetDir, '/meas_MID00615_FID182869_BEAT_LIBREon_eye_HC_BC.dat'];
+    measureFile     = [datasetDir, '/meas_MID00605_FID182859_BEAT_LIBREon_eye_(23_09_24).dat'];
+elseif subject_num == 2
+    bodyCoilFile    = [datasetDir, '/meas_MID00589_FID182843_BEAT_LIBREon_eye_BC_BC.dat'];
+    arrayCoilFile   = [datasetDir, '/meas_MID00590_FID182844_BEAT_LIBREon_eye_HC_BC.dat'];
+    measureFile     = [datasetDir, '/meas_MID00580_FID182834_BEAT_LIBREon_eye_(23_09_24).dat'];
+elseif subject_num == 3
+    bodyCoilFile    = [datasetDir, '/meas_MID00563_FID182817_BEAT_LIBREon_eye_BC_BC.dat'];
+    arrayCoilFile   = [datasetDir, '/meas_MID00564_FID182818_BEAT_LIBREon_eye_HC_BC.dat'];
+    measureFile     = [datasetDir, '/meas_MID00554_FID182808_BEAT_LIBREon_eye_(23_09_24).dat'];
+end
 
-otherDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/other/')];
+otherDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/other/')];
 
 % Check if the directory exists
 if ~isfolder(otherDir)
@@ -28,7 +40,7 @@ else
     disp(['Directory already exists: ', otherDir]);
 end
 
-saveCDirList = {strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/')...
+saveCDirList = {strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/'),
     strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')};
 
 %% Step 1: Load the Raw Data

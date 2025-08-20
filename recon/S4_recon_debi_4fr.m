@@ -5,7 +5,7 @@ addpath(genpath('/home/debi/yiwei/forclone/Recon_scripts'));
 
 %%
 subject_num = 2;
-region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
+region_idx = 1; % 0:up 1:down 2:left 3:right 4:center mask
 
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata'];
 reconDir = '/home/debi/jaime/tmp/250613_JB/';
@@ -147,12 +147,12 @@ nii_hdr.PixelDimensions = [0.5 0.5 0.5];  % Adjust these values if needed
 
 % Write the NIfTI file
 % niftiwrite(volume_data, nifti_file, nii_hdr);
-nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f', region_idx, nIter, delta));
+nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f.nii', region_idx, nIter, delta));
 niftiwrite(image.x, nifti_file);
 disp(['Data has been saved as a NIfTI file: ', nifti_file]);
 
 %% Compress to .nii.gz
-gzip([nifti_file '.nii']);
+gzip(nifti_file);
 
 % (Optional) remove the uncompressed file
-delete([nifti_file '.nii']);
+% delete(nifti_file);
