@@ -4,7 +4,11 @@ clearvars; clc;
 %%
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
-subject_num = 1;
+% 0:up 1:down 2:left 3:right 4:center mask
+% change woBinning/Binning, change th75->th0, change eyeMask name!
+
+%%
+subject_num = 2;
 
 Matrix_size = 240;
 reconFov = 240;
@@ -12,10 +16,10 @@ reconFov = 240;
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata/'];
 reconDir = '/home/debi/jaime/tmp/250613_JB/';
 
-mask_note_list={'woBin', 'woBin', 'woBin'};
+mask_note_list={'bin', 'bin', 'bin'};
 
 mask_note = mask_note_list{subject_num};
-x0Dir = [reconDir, 'Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/mask_', mask_note, '/'];
+x0Dir = [reconDir, 'Sub00', num2str(subject_num), '/T1_LIBRE_Binning/output/mask_', mask_note, '/'];
 
 if subject_num == 1
     bodyCoilFile    = [datasetDir, '/meas_MID2400614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
@@ -31,7 +35,7 @@ elseif subject_num == 3
     measureFile     = [datasetDir, '/meas_MID00554_FID182808_BEAT_LIBREon_eye_(23_09_24).dat'];
 end
 
-otherDir = [reconDir, strcat('Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/other/')];
+otherDir = [reconDir, strcat('Sub00',num2str(subject_num),'/T1_LIBRE_Binning/other/')];
 
 % Check if the directory exists
 if ~isfolder(otherDir)
@@ -42,7 +46,7 @@ else
     disp(['Directory already exists: ', otherDir]);
 end
 
-saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')];
+saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/')];
 
 %% Step 1: Load the Raw Data
 
@@ -63,6 +67,7 @@ t_tot = bmTraj(reader.acquisitionParams);                 % Compute trajectory
 ve_tot = bmVolumeElement(t_tot, 'voronoi_full_radial3');  % Volume elements
 
 %% Step 2: Load Coil Sensitivity Maps
+
 % Load the coil sensitivity previously measured
 CfileName = 'C.mat';
 CfilePath = fullfile(saveCDir, CfileName);
@@ -90,6 +95,7 @@ C = bmImResize(C, [48, 48, 48], N_u);
 % C = flip(flip(flip(C, 1), 2), 3);
 
 %% tmp: check HC
+
 x0 = bmMathilda(y_tot, t_tot, ve_tot, C, N_u, N_u, dK_u);
 bmImage(x0)
 
@@ -133,9 +139,9 @@ else
     normalization = true;
 end
 if normalization
-    x_tot_comp = bmMathilda(y_tot_comp, t_tot, ve_tot, [], N_u, N_u, dK_u); 
-    x_perm = permute(x_tot_comp, [2,3,1]);
-    x0=x_tot_comp;
+    x_tot = bmMathilda(y_tot, t_tot, ve_tot, C, N_u, N_u, dK_u); 
+    x_perm = permute(x_tot, [2,3,1]);
+    x0=x_tot;
     %
     bmImage(x_perm)
     %
@@ -148,16 +154,16 @@ if normalization
     % The value of one complex point is like: -0.0396 - 0.1162i
     disp('normalize_val')
     disp(normalize_val)
-    y_tot_comp(1,1,123)
+    y_tot(1,1,123)
 end
 % only once !!!!
-if real(y_tot_comp)<1
+if real(y_tot)<1
     if normalization
-        y_tot_comp = y_tot_comp/normalize_val; 
-        y_tot_comp(1,1,123)
+        y_tot = y_tot/normalize_val; 
+        y_tot(1,1,123)
     else
-        y_tot_comp = y_tot_comp/(2.5e-10); 
-        y_tot_comp(1,1,123)
+        y_tot = y_tot/(2.5e-10); 
+        y_tot(1,1,123)
     end
 end
 
@@ -178,41 +184,59 @@ disp(x0Path)
 
 %% Set the folder for mitosius saving
 
-mDir = [reconDir, strcat('/Sub00', num2str(subject_num)),'/T1_LIBRE_woBinning/mitosius_comp/mask_', mask_note, '/'];
+mDir = [reconDir, strcat('/Sub00', num2str(subject_num)),'/T1_LIBRE_Binning/mitosius/mask_', mask_note, '/'];
 
-%% Prepare eye mask
+%% Before running this cell, make sure the Mask is well-prepared.
+% Load the masked coil sensitivity 
 
-eMaskFilePath = [otherDir,'eMask_woBin'];
+% if woBinning
+% MaskFilePath = [otherDir, 'eMask_woBin.mat'];
+% if withBinning
 
-eyeMask = load(eMaskFilePath); 
-fields = fieldnames(eyeMask);  % Get the field names
-firstField = fields{1};  % Get the first field name
-eyeMask = eyeMask.(firstField);  % Access the first field's value
-disp(eMaskFilePath)
-disp('is loaded!')
-% Eliminate the first segment of all the spokes for accuracies
+for region_idx = 0:3
 
-%
-size_Mask = size(eyeMask);
-nbins = size_Mask(1);
-eyeMask = reshape(eyeMask, [nbins, reader.acquisitionParams.nSeg, reader.acquisitionParams.nShot]); 
-eyeMask(:, 1, :) = []; 
+    if subject_num == 1
+        mDir = [reconDir, '/Sub001/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx)];
+    elseif subject_num == 2
+        mDir = [reconDir, '/Sub002/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx)];
+    elseif subject_num == 3
+        mDir = [reconDir, '/Sub003/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx)];
+    else
+        mDir = [reconDir, '/Sub004/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx)];
+    end
 
-eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = []; 
-eyeMask = bmPointReshape(eyeMask); 
+    th_ratio = 3/4;
+    eMaskFilePath = [otherDir, sprintf('eMask_th%.2f_region%i_clean.mat', th_ratio, region_idx)];
+    
+    eyeMask = load(eMaskFilePath); 
+    fields = fieldnames(eyeMask);  % Get the field names
+    firstField = fields{1};  % Get the first field name
+    eyeMask = eyeMask.(firstField);  % Access the first field's value
+    disp(eMaskFilePath)
+    disp('is loaded!')
+    % Eliminate the first segment of all the spokes for accuracies
+    
+    %
+    size_Mask = size(eyeMask);
+    nbins = size_Mask(1);
+    eyeMask = reshape(eyeMask, [nbins, reader.acquisitionParams.nSeg, reader.acquisitionParams.nShot]); 
+    eyeMask(:, 1, :) = []; 
+    
+    eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = []; 
+    eyeMask = bmPointReshape(eyeMask); 
+    
+    % Run the mitosis function and compute volume elements
+    
+    [y, t] = bmMitosis(y_tot, t_tot, eyeMask); 
+    y = bmPermuteToCol(y); 
+    ve  = bmVolumeElement(t, 'voronoi_full_radial3' ); 
 
-%% Run the mitosis function and compute volume elements
-
-[y, t] = bmMitosis(y_tot, t_tot, eyeMask); 
-y = bmPermuteToCol(y); 
-ve  = bmVolumeElement(t, 'voronoi_full_radial3' ); 
-
-% Save all the resulting datastructures on the disk. You are now ready
-% to run your reconstruction
-
-bmMitosius_create(mDir, y, t, ve); 
-disp('Mitosius files are saved!')
-disp(mDir)
+    % Save all the resulting datastructures on the disk. You are now ready
+    % to run your reconstruction
+    
+    bmMitosius_create(mDir, y, t, ve); 
+    disp('Mitosius files are saved!')
+    disp(mDir)
 
 
 

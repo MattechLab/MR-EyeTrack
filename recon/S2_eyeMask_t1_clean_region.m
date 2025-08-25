@@ -8,11 +8,11 @@
 % sampling rate of readouts: TR=8ms
 % =====================================================
 clear; clc;
-addpath(genpath('/home/debi/yiwei/forclone/Recon_scripts'));
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 
 
 %%
-subject_num = 2;
+subject_num = 1;
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/'];
 reconDir = '/home/debi/jaime/tmp/250613_JB/';
 otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/other/'];
@@ -58,7 +58,7 @@ eMask = eyeGenerateBinningWin(datasetDir, nShotOff, nSeg, th_ratio, ETDir, winLe
 
 % Saving data and Convert to Monalisa format
 %--------------------------------------------------------------------------
-region_idx_list = 0:3;
+region_idx_list = 0:0;
 
 for region_idx = region_idx_list
     % Extract the row corresponding to this region
