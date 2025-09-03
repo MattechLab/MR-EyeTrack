@@ -36,8 +36,7 @@ else
     disp(['Directory already exists: ', otherDir]);
 end
 
-saveCDirList = {strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/'),
-    strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')};
+saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')];
 
 %% Step 1: Load the Raw Data
 
@@ -47,9 +46,8 @@ reader.acquisitionParams.nShot_off = 14;
 reader.acquisitionParams.traj_type = 'full_radial3_phylotaxis';
 %
 % Load the raw data and compute trajectory and volume elements
-y_tot = reader.readRawData(true, true);  % Filter nshotoff and SI
+y_tot = reader.readRawData(true, true);  % Filter nShotOff and SI
 
-%%
 t_tot = bmTraj(reader.acquisitionParams);                 % Compute trajectory
 
 ve_tot = bmVolumeElement(t_tot, 'voronoi_full_radial3');  % Volume elements
@@ -57,7 +55,6 @@ ve_tot = bmVolumeElement(t_tot, 'voronoi_full_radial3');  % Volume elements
 %% Step 2: Load Coil Sensitivity Maps
 
 % Load the coil sensitivity previously measured
-saveCDir = [reconDir,saveCDirList{2}];
 CfileName = 'C.mat';
 CfilePath = fullfile(saveCDir, CfileName);
 load(CfilePath, 'C');  % Load sensitivity maps
@@ -81,38 +78,6 @@ dK_u = [1, 1, 1]./FoV;
 %%
 C = bmImResize(C, [48, 48, 48], N_u);
 % C = flip(flip(flip(C, 1), 2), 3);
-
-%% tmp: check HC
-
-x0 = bmMathilda(y_tot, t_tot, ve_tot, C, N_u, N_u, dK_u);
-bmImage(x0)
-
-%% Coil compression (can be here or after normalization)
-coilCompression = 1;
-nChCompressed = 4;
-nCh = size(y_tot, 1);
-nx = size(y_tot, 2);
-ntviews = size(y_tot, 3);
-if coilCompression == 1
-    D = reshape(y_tot, nx * ntviews, nCh);
-    [U, S, V] = svd(D, 'econ');
-    singular_values = diag(S);
-    total_variance = sum(singular_values .^ 2);
-    explained_variance = singular_values(1:nChCompressed) .^ 2;
-    percentage_explained = (explained_variance / total_variance) * 100;
-    y_tot = reshape(D * V(:, 1:nChCompressed), nChCompressed, nx, ntviews);
-    % Plot the explained variance
-    f=figure;
-    f.Position = [100 100 500 800];
-    plot(percentage_explained,'.-','LineWidth',2,'Color','r','MarkerSize',20)
-    xlabel('Virtual Coil nr.')
-    ylabel('Explained [%]')
-    title(sprintf('Coil Compression, Explanation for nChCompressed = %d is %.2f%%', nChCompressed, sum(percentage_explained(1:nChCompressed))))
-else
-    % coil combination to save memory (for now just coil selection) EP test
-    selected_coils = [1,2,4,5,6:2:size(kdata_raw,3)];
-    kdata_raw=kdata_raw(:,:,selected_coils);
-end
 
 %% Step 3: Normalize the Raw Data
 
@@ -194,7 +159,7 @@ eyeMask = bmPointReshape(eyeMask);
 
 [y, t] = bmMitosis(y_tot, t_tot, eyeMask); 
 y = bmPermuteToCol(y); 
-ve  = bmVolumeElement(t, 'voronoi_full_radial3' ); 
+ve  = bmVolumeElement(t, 'voronoi_full_radial3'); 
 
 % Save all the resulting datastructures on the disk. You are now ready
 % to run your reconstruction

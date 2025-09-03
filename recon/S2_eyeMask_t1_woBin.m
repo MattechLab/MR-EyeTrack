@@ -7,13 +7,10 @@
 % nShotOff * nSeg
 % =====================================================
 clear; clc;
-addpath(genpath('/home/debi/yiwei/forclone/Recon_scripts'));
-
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 
 %%
-
-
-subject_num = 1;
+subject_num = 2;
 
 datasetDir = '/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-01/rawdata/';
 reconDir = '/home/debi/jaime/tmp/250613_JB/';
@@ -37,6 +34,7 @@ if ~isfolder(otherDir)
 else
     disp(['Directory already exists: ', otherDir]);
 end
+
 %%
 autoRead = 1;
 % 1:if you don't know the nSeg and nShot of the raw data, set 1, the reader

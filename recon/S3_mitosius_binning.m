@@ -1,24 +1,23 @@
 clc; clearvars;
 debug = false;
 
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
-% 0:up 1:down 2:left 3:right 4:center mask
+%% Config
 
-% change woBinning/Binning, change th75->th0, change eyeMask name!
-
-%%
+% Variables
 subject_num = 2;
+mask_type = 'clean_0.25';  % <-- use char instead of string
 
 Matrix_size = 240;
 reconFov = 240;
 
-datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata/'];
-reconDir = '/home/debi/jaime/tmp/250613_JB/';
-
-mask_note_list={'bin', 'bin', 'bin'};
-
-mask_note = mask_note_list{subject_num};
-x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/output/mask_', mask_note, '/'];
+% Paths
+datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata'];
+reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
+otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/other/', mask_type, '/'];
+saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/')];
 
 if subject_num == 1
     bodyCoilFile    = [datasetDir, '/meas_MID2400614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
@@ -34,8 +33,6 @@ elseif subject_num == 3
     measureFile     = [datasetDir, '/meas_MID00554_FID182808_BEAT_LIBREon_eye_(23_09_24).dat'];
 end
 
-otherDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/other/')];
-
 % Check if the directory exists
 if ~isfolder(otherDir)
     % If it doesn't exist, create it
@@ -44,9 +41,6 @@ if ~isfolder(otherDir)
 else
     disp(['Directory already exists: ', otherDir]);
 end
-
-saveCDirList = {strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/'),
-    strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')};
 
 %% Step 1: Load the Raw Data
 
@@ -60,13 +54,11 @@ y_tot = reader.readRawData(true, true);  % Filter nshotoff and SI
 
 %%
 t_tot = bmTraj(reader.acquisitionParams);                 % Compute trajectory
-
 ve_tot = bmVolumeElement(t_tot, 'voronoi_full_radial3');  % Volume elements
 
 %% Step 2: Load Coil Sensitivity Maps
 
 % Load the coil sensitivity previously measured
-saveCDir = [reconDir,saveCDirList{1}];
 CfileName = 'C.mat';
 CfilePath = fullfile(saveCDir, CfileName);
 load(CfilePath, 'C');  % Load sensitivity maps
@@ -127,23 +119,23 @@ if real(y_tot)<1
     end
 end
 
-%%
-if ~isfolder(x0Dir)
-    % If it doesn't exist, create it
-    mkdir(x0Dir);
-    disp(['Directory created: ', x0Dir]);
-else
-    disp(['Directory already exists: ', x0Dir]);
-end
-x0Path = fullfile(x0Dir, 'x0.mat');
-% Save the x0 to the .mat file
-save(x0Path, 'x0', '-v7.3');
-disp('x0 has been saved here:')
-disp(x0Path)
+%% [OPTIONAL] Save x0 recon 
 
-%% Set the folder for mitosius saving
+% x0Dir = fullfile(reconDir, ['Sub00', num2str(subject_num)], 'T1_LIBRE_Binning/output/');
 
-mDir = [reconDir, strcat('/Sub00', num2str(subject_num)),'/T1_LIBRE_Binning/mitosius/mask_', mask_note, '/'];
+% if ~isfolder(x0Dir)
+%     % If it doesn't exist, create it
+%     mkdir(x0Dir);
+%     disp(['Directory created: ', x0Dir]);
+% else
+%     disp(['Directory already exists: ', x0Dir]);
+% end
+% x0Path = fullfile(x0Dir, 'x0.mat');
+
+% % Save the x0 to the .mat file
+% save(x0Path, 'x0', '-v7.3');
+% disp('x0 has been saved here:')
+% disp(x0Path)
 
 %% Before running this cell, make sure the Mask is well-prepared.
 % Load the masked coil sensitivity 
@@ -154,28 +146,19 @@ mDir = [reconDir, strcat('/Sub00', num2str(subject_num)),'/T1_LIBRE_Binning/mito
 
 for region_idx = 0:3
 
-    if subject_num == 1
-        mDir = [reconDir, '/Sub001/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx)];
-    elseif subject_num == 2
-        mDir = [reconDir, '/Sub002/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx)];
-    elseif subject_num == 3
-        mDir = [reconDir, '/Sub003/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx)];
-    else
-        mDir = [reconDir, '/Sub004/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx)];
-    end
+    mDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/mitosius/', mask_type, '/mask_', num2str(region_idx), '/'];
 
     th_ratio = 3/4;
-    eMaskFilePath = [otherDir,sprintf('eMask_th%.2f_region%i_clean.mat', th_ratio, region_idx)];
-    %
-    eyeMask = load(eMaskFilePath); 
+    eMaskFilePath = [otherDir, sprintf('eMask_th%.2f_region%i.mat', th_ratio, region_idx)];
+
+    eyeMask = load(eMaskFilePath);
     fields = fieldnames(eyeMask);  % Get the field names
     firstField = fields{1};  % Get the first field name
     eyeMask = eyeMask.(firstField);  % Access the first field's value
     disp(eMaskFilePath)
     disp('is loaded!')
-    % Eleminate the first segment of all the spokes for accuracies
     
-    %
+    % Eliminate the first segment of all the spokes for accuracies
     size_Mask = size(eyeMask);
     nbins = size_Mask(1);
     eyeMask = reshape(eyeMask, [nbins, reader.acquisitionParams.nSeg, reader.acquisitionParams.nShot]); 
@@ -183,17 +166,14 @@ for region_idx = 0:3
     
     eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = []; 
     eyeMask = bmPointReshape(eyeMask); 
-    
-    
+        
     % Run the mitosis function and compute volume elements
-    
     [y, t] = bmMitosis(y_tot, t_tot, eyeMask); 
     y = bmPermuteToCol(y); 
     ve  = bmVolumeElement(t, 'voronoi_full_radial3' ); 
 
     % Save all the resulting datastructures on the disk. You are now ready
     % to run your reconstruction
-    
     bmMitosius_create(mDir, y, t, ve); 
     disp('Mitosius files are saved!')
     disp(mDir)

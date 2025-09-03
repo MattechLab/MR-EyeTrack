@@ -2,15 +2,18 @@
 
 clc; clearvars;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
+%% Config
 
-%%
-subject_num = 1;
-region_idx = 2; % 0:up 1:down 2:left 3:right 4:center mask
+% Variables
+subject_num = 2;
+region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
+mask_type = 'clean_0.25';
 
+% Paths
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata'];
-reconDir = '/home/debi/jaime/tmp/250613_JB/';
-otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/other/'];
-mDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/mitosius/mask_', num2str(region_idx), '/'];
+reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
+mDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/mitosius/', mask_type, '/mask_', num2str(region_idx), '/'];
 saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/')];
 
 if subject_num == 1
@@ -76,7 +79,7 @@ x0 = cell(nFr, 1);
 
 %% save x0
 
-x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/output/mask_', num2str(region_idx)];
+x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/output/', mask_type, '/x0/'];
 
 if ~isfolder(x0Dir)
     % If it doesn't exist, create it
@@ -85,7 +88,7 @@ if ~isfolder(x0Dir)
 else
     disp(['Directory already exists: ', x0Dir]);
 end
-x0Path = fullfile(x0Dir, 'x0.mat');
+x0Path = fullfile(x0Dir, ['x0_regionidx' num2str(region_idx) '.mat']);
 % Save the x0 to the .mat file
 save(x0Path, 'x0', '-v7.3');
 disp('x0 has been saved here:')
@@ -115,7 +118,7 @@ x = bmSteva(  x0{1}, [], [], y{1}, ve{1}, C, Gu{1}, Gut{1}, n_u, ...
 bmImage(x)
 
 if isunix
-    xDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/output/th8/'];
+    xDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/output/', mask_type, '/th8/'];
 else
     xDir = [reconDir, '\Sub00', num2str(subject_num), '\240821_recon\240']; 
 end
@@ -134,23 +137,21 @@ save(xPath, 'x');
 disp('x has been saved here:')
 disp(xPath)
 
-%% .mat to .nii.gz
-image = load(xPath);
+% %% .mat to .nii.gz
+% image = load(xPath);
 
-% Define NIfTI metadata (optional but recommended for completeness)
-% You can adjust these properties according to your needs.
-nii_hdr = struct;  % Create default NIfTI header
-nii_hdr.ImageSize = size(image.x);
-nii_hdr.PixelDimensions = [0.5 0.5 0.5];  % Adjust these values if needed
-
-% Write the NIfTI file
-% niftiwrite(volume_data, nifti_file, nii_hdr);
-nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f.nii', region_idx, nIter, delta));
-niftiwrite(image.x, nifti_file);
-disp(['Data has been saved as a NIfTI file: ', nifti_file]);
-
-%% Compress to .nii.gz
-gzip(nifti_file);
-
-% (Optional) remove the uncompressed file
-% delete(nifti_file);
+% % Define NIfTI metadata (optional but recommended for completeness) You can
+% % adjust these properties according to your needs.
+% nii_hdr = struct;  % Create default NIfTI header
+% nii_hdr.ImageSize = size(image.x);
+% nii_hdr.PixelDimensions = [0.5 0.5 0.5];  % Adjust these values if needed
+% 
+% % Write the NIfTI file niftiwrite(volume_data, nifti_file, nii_hdr);
+% nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f.nii', region_idx, nIter, delta));
+% niftiwrite(image.x, nifti_file);
+% disp(['Data has been saved as a NIfTI file: ', nifti_file]);
+% 
+% %% Compress to .nii.gz
+% gzip(nifti_file);
+% 
+% % (Optional) remove the uncompressed file delete(nifti_file);

@@ -1,4 +1,5 @@
 {
     "iis.configDir": "",
-    "MATLAB.installPath": ""
+    "MATLAB.installPath": "",
+    "MATLAB.matlabConnectionTiming": "onStart"
 }

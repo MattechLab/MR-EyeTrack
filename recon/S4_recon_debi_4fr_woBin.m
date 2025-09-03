@@ -66,17 +66,15 @@ C = bmImResize(C, [48, 48, 48], N_u);
 
 %%
 x0 = cell(nFr, 1);
-    for i = 1:nFr
-        x0{i} = bmMathilda(y{i}, t{i}, ve{i}, C, N_u, n_u, dK_u, [], [], [], []);
-    end
-    % isequal(x0_p, x0)
-    %
-    bmImage(x0);
+for i = 1:nFr
+    x0{i} = bmMathilda(y{i}, t{i}, ve{i}, C, N_u, n_u, dK_u, [], [], [], []);
+end
+bmImage(x0);
 
 
 %% save x0
 
-x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/output/mask'];
+x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/output/mask_woBin'];
 
 if ~isfolder(x0Dir)
     % If it doesn't exist, create it
@@ -86,13 +84,14 @@ else
     disp(['Directory already exists: ', x0Dir]);
 end
 x0Path = fullfile(x0Dir, 'x0.mat');
+
 % Save the x0 to the .mat file
 save(x0Path, 'x0', '-v7.3');
 disp('x0 has been saved here:')
 disp(x0Path)
 
 %%
-[Gu, Gut] = bmTraj2SparseMat(t, ve, N_u, dK_u);
+[Gu, Gut] = bmTraj2SparseMat(t{1}, ve{1}, N_u, dK_u);
 
 %% bmSteva
 deltaArray = 1;

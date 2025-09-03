@@ -169,4 +169,5 @@ visual_stimuli/data/
 .vscode/
 /data
 /other
+/results
 *.asv

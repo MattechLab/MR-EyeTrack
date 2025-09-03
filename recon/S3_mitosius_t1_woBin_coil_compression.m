@@ -82,7 +82,7 @@ voxel_size = round(FoV/240);
 % ===============================================
 matrix_size = 240;  % Max nominal spatial resolution
 N_u = [matrix_size, matrix_size, matrix_size];
-n_u     = [matrix_size, matrix_size, matrix_size];
+n_u = [matrix_size, matrix_size, matrix_size];
 dK_u = [1, 1, 1]./FoV;
 
 %%
