@@ -8,10 +8,10 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 % Variables
 subject_num = 2;
 region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
-mask_type = 'clean_0.25';
+mask_type = 'clean_0.95';
 
 % Paths
-datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata'];
+datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
 reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
 mDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/mitosius/', mask_type, '/mask_', num2str(region_idx), '/'];
 saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/')];
@@ -130,7 +130,7 @@ else
     disp(['Directory already exists: ', xDir]);
 end
 
-xPath = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f.mat', region_idx, nIter, delta));
+xPath = fullfile(xDir, sprintf('x_steva_regionidx_%i_nIter_%d_delta_%.3f.mat', region_idx, nIter, delta));
 
 % Save the x0 to the .mat file
 save(xPath, 'x');

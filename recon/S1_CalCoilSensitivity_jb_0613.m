@@ -10,22 +10,23 @@
 % =====================================================
 clc, clearvars;
 % addpath(genpath("/media/sinf/1,0 TB Disk/Backup/Recon_fork"));
-addpath(genpath('/home/debi/yiwei/forclone/Recon_scripts/'));
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Initialize the directories and acquire the Coil
 subject_num=2;
 
 datasetDir = '/home/debi/jaime/repos/MR-EyeTrack/data/pilot';
-reconDir = '/home/debi/jaime/tmp/250613_JB';
+reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
 
 if subject_num == 1
-    datasetDir = [datasetDir, '/sub-01/rawdata'];
+    datasetDir = [datasetDir, '/sub-001/rawdata'];
     ETDir      = [datasetDir, '/masks_1206/Sub001'];
 elseif subject_num == 2
-    datasetDir = [datasetDir, '/sub-02/rawdata'];
+    datasetDir = [datasetDir, '/sub-002/rawdata'];
     ETDir      = [datasetDir, '/masks_1206/Sub002'];
 elseif subject_num == 3
-    datasetDir = [datasetDir, '/sub-03/rawdata'];
+    datasetDir = [datasetDir, '/sub-003/rawdata'];
     ETDir      = [datasetDir, '/masks_1206/Sub003'];
 else
     datasetDir = [datasetDir, ' '];
@@ -46,16 +47,15 @@ elseif subject_num == 3
     measureFile     = [datasetDir, '/meas_MID00554_FID182808_BEAT_LIBREon_eye_(23_09_24).dat'];
 end
 
-
 %% Load and Configure Data
 % Read data using the library's `createRawDataReader` function
 % This readers makes the usage of Siemens and ISMRMRD files equivalent for
 % the library
-bodyCoilreader = createRawDataReader(bodyCoilFile, false);
+bodyCoilreader = createRawDataReader(bodyCoilFile, true);
 bodyCoilreader.acquisitionParams.nShot_off = 14;
 bodyCoilreader.acquisitionParams.traj_type = 'full_radial3_phylotaxis';
 %
-arrayCoilReader = createRawDataReader(arrayCoilFile, false);
+arrayCoilReader = createRawDataReader(arrayCoilFile, true);
 arrayCoilReader.acquisitionParams.nShot_off = 14;
 arrayCoilReader.acquisitionParams.traj_type = 'full_radial3_phylotaxis';
 
@@ -68,7 +68,7 @@ quickCalC = 1;
 %0: explore the details of C calculation in monalisa, with comments
 
 if quickCalC
-    autoFlag=false;
+    autoFlag=true;
     nIter = 5;
     C = mlComputeCoilSensitivity(bodyCoilreader, arrayCoilReader, [48,48,48], autoFlag, nIter);
 else
@@ -106,7 +106,7 @@ end
 %
 
 %% Save C into the folder
-bmImage(C)
+% bmImage(C)
 saveCDirList = {strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/'),
     strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')};
 

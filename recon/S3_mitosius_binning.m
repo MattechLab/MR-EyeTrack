@@ -8,13 +8,13 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 % Variables
 subject_num = 2;
-mask_type = 'clean_0.25';  % <-- use char instead of string
+mask_type = 'clean_0.95';  % <-- use char instead of string
 
 Matrix_size = 240;
 reconFov = 240;
 
 % Paths
-datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata'];
+datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
 reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
 otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/other/', mask_type, '/'];
 saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/')];

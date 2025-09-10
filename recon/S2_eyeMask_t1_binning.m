@@ -18,7 +18,7 @@ subject_num = 2;
 mask_type = "clean";
 
 % Paths
-datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/'];
+datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/'];
 reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
 otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/other/', mask_type, '/'];
 ETDir = '/home/debi/jaime/repos/MR-EyeTrack/data/pilot/masks_1206/';

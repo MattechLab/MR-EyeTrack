@@ -1,17 +1,14 @@
-%% The script is not changed yet... it cannot run on debi
-
+%% Init
 clc; clearvars;
-addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
-addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
-%%
+%% config
 subject_num = 2;
 
-datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
-reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
-otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_woBinning/other/'];
-mDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_woBinning/mitosius/mask_woBin'];
-saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')];
+datasetDir = ['/usr/src/app/dataset/sub-00', num2str(subject_num), '/rawdata'];
+reconDir = '/usr/src/app/recon_f';
+mDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/mitosius/mask_woBin'];
+saveCDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/C/'];
+resultsDir = '/usr/src/app/results';
 
 if subject_num == 1
     bodyCoilFile    = [datasetDir, '/meas_MID2400614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
@@ -61,20 +58,18 @@ N_u = [matrix_size, matrix_size, matrix_size]; % Matrix size: Size of the Virtua
 n_u = N_u; % Image size (output)
 dK_u = [1, 1, 1]./FoV; % Spacing of the virtual cartesian grid
 
-%%
+%% resize C
 C = bmImResize(C, [48, 48, 48], N_u);
 
-%%
+%% compute Mathilda
 x0 = cell(nFr, 1);
 for i = 1:nFr
     x0{i} = bmMathilda(y{i}, t{i}, ve{i}, C, N_u, n_u, dK_u, [], [], [], []);
 end
-bmImage(x0);
-
+% bmImage(x0);
 
 %% save x0
-
-x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/output/mask_woBin'];
+x0Dir = [resultsDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/mask_woBin'];
 
 if ~isfolder(x0Dir)
     % If it doesn't exist, create it
@@ -111,12 +106,12 @@ x = bmSteva(  x0{1}, [], [], y{1}, ve{1}, C, Gu, Gut, n_u, ...
                                         nIter, ...
                                         bmWitnessInfo('steva_d0p1_r1_nCGD4', witness_ind));
 
-bmImage(x)
+% bmImage(x)
 
 if isunix
-    xDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/th8/'];
+    xDir = [resultsDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/th8/'];
 else
-    xDir = [reconDir, '\Sub00', num2str(subject_num), '\240821_recon\240']; 
+    xDir = [resultsDir, '\Sub00', num2str(subject_num), '\240821_recon\240']; 
 end
 if ~isfolder(xDir)
     % If it doesn't exist, create it
@@ -126,30 +121,30 @@ else
     disp(['Directory already exists: ', xDir]);
 end
 
-xPath = fullfile(xDir, sprintf('x_steva%i_nIter%d_delta_%.3f.mat', nIter, delta));
+xPath = fullfile(xDir, sprintf('x_steva_nIter_%i_delta_%.3f.mat', nIter, delta));
 
 % Save the x0 to the .mat file
 save(xPath, 'x');
 disp('x has been saved here:')
 disp(xPath)
 
-%% .mat to .nii.gz
-image = load(xPath);
+% %% .mat to .nii.gz
+% image = load(xPath);
 
-% Define NIfTI metadata (optional but recommended for completeness)
-% You can adjust these properties according to your needs.
-nii_hdr = struct;  % Create default NIfTI header
-nii_hdr.ImageSize = size(image.x);
-nii_hdr.PixelDimensions = [0.5 0.5 0.5];  % Adjust these values if needed
+% % Define NIfTI metadata (optional but recommended for completeness)
+% % You can adjust these properties according to your needs.
+% nii_hdr = struct;  % Create default NIfTI header
+% nii_hdr.ImageSize = size(image.x);
+% nii_hdr.PixelDimensions = [0.5 0.5 0.5];  % Adjust these values if needed
 
-% Write the NIfTI file
-% niftiwrite(volume_data, nifti_file, nii_hdr);
-nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f.nii', region_idx, nIter, delta));
-niftiwrite(image.x, nifti_file);
-disp(['Data has been saved as a NIfTI file: ', nifti_file]);
+% % Write the NIfTI file
+% % niftiwrite(volume_data, nifti_file, nii_hdr);
+% nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f.nii', region_idx, nIter, delta));
+% niftiwrite(image.x, nifti_file);
+% disp(['Data has been saved as a NIfTI file: ', nifti_file]);
 
-%% Compress to .nii.gz
-gzip(nifti_file);
+% %% Compress to .nii.gz
+% gzip(nifti_file);
 
-% (Optional) remove the uncompressed file
-% delete(nifti_file);
+% % (Optional) remove the uncompressed file
+% % delete(nifti_file);

@@ -13,7 +13,7 @@ addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 % Variables
 subject_num = 2;
 mask_type = 'clean';
-undersampling_factor = 0.25; % keep % of the original readouts
+undersampling_factor = 0.95; % remove % of the original readouts
 
 reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
 otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/other/', mask_type, '/'];
@@ -50,30 +50,4 @@ for region_idx = region_idx_list
     savePath = [outputDir, 'eMask_th0.75_region', num2str(region_idx), '.mat'];
     save(savePath, 'eMask');
     disp(['Undersampled mask saved to: ', savePath]);
-end
-
-%% Undersample per segment
-
-region_idx_list = 0:3;  % 0:up 1:down 2:left 3:right 4:center mask
-
-for region_idx = region_idx_list
-    % Load the mask
-    eMaskFilePath = [otherDir, 'eMask_th0.75_region', num2str(region_idx), '.mat'];
-    tmp = load(eMaskFilePath);
-    eMask = tmp.eMask;   % adjust variable name if needed
-
-    % Reshape into [segments × shots]
-    eMask2D = reshape(eMask, [3723, 22])';   % 22 x 3723
-
-    % Undersample each segment independently
-    for seg = 1:22
-        oneIdx = find(eMask2D(seg,:) == 1);
-        numToZero = floor(numel(oneIdx) * undersampling_factor);
-        idxToZero = randsample(oneIdx, numToZero);
-        eMask2D(seg, idxToZero) = 0;
-    end
-
-    % Flatten back to vector
-    eMask = reshape(eMask2D', [], 1);
-
 end

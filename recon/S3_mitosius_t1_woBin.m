@@ -1,31 +1,33 @@
-clear; clc; close all;
+clearvars; clc; close all;
 
-% =====================================================
-% Author: Yiwei Jia
-% Date: April 17
-% ------------------------------------------------
-% Coil sensitivity -> binning mask eMask -> [Mitosius]
-% Update: the eyeGenerateBinning is replaced with eyeGenerateBinningWin
-% Add a new txt file saved along side with the mask to log the details
-% =====================================================
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
-%%
-subject_num = 1;
+%% Config
+subject_num = 2;
 
-datasetDir = '/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-01/rawdata/';
-reconDir = '/home/debi/jaime/tmp/250613_JB/';
+% Paths
+datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
+reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
+otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_woBinning/other/'];
+saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')];
 
-mask_note_list={'woBin','maskNote_for_sub2', 'maskNote_for_sub3'};
-
-mask_note = mask_note_list{subject_num};
+mask_note = 'woBin';
 x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/mask_', mask_note, '/'];
 
-% common for all subjects
-bodyCoilFile     = [datasetDir, '/meas_MID00614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
-arrayCoilFile    = [datasetDir, '/meas_MID00615_FID182869_BEAT_LIBREon_eye_HC_BC.dat'];
-measureFile = [datasetDir, '/meas_MID00605_FID182859_BEAT_LIBREon_eye_(23_09_24).dat'];
-
-otherDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/other/')];
+if subject_num == 1
+    bodyCoilFile    = [datasetDir, '/meas_MID2400614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
+    arrayCoilFile   = [datasetDir, '/meas_MID00615_FID182869_BEAT_LIBREon_eye_HC_BC.dat'];
+    measureFile     = [datasetDir, '/meas_MID00605_FID182859_BEAT_LIBREon_eye_(23_09_24).dat'];
+elseif subject_num == 2
+    bodyCoilFile    = [datasetDir, '/meas_MID00589_FID182843_BEAT_LIBREon_eye_BC_BC.dat'];
+    arrayCoilFile   = [datasetDir, '/meas_MID00590_FID182844_BEAT_LIBREon_eye_HC_BC.dat'];
+    measureFile     = [datasetDir, '/meas_MID00580_FID182834_BEAT_LIBREon_eye_(23_09_24).dat'];
+elseif subject_num == 3
+    bodyCoilFile    = [datasetDir, '/meas_MID00563_FID182817_BEAT_LIBREon_eye_BC_BC.dat'];
+    arrayCoilFile   = [datasetDir, '/meas_MID00564_FID182818_BEAT_LIBREon_eye_HC_BC.dat'];
+    measureFile     = [datasetDir, '/meas_MID00554_FID182808_BEAT_LIBREon_eye_(23_09_24).dat'];
+end
 
 % Check if the directory exists
 if ~isfolder(otherDir)
@@ -36,20 +38,16 @@ else
     disp(['Directory already exists: ', otherDir]);
 end
 
-saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')];
-
 %% Step 1: Load the Raw Data
 
 autoFlag = true;  % Disable validation UI
 reader = createRawDataReader(measureFile, autoFlag);
 reader.acquisitionParams.nShot_off = 14;
 reader.acquisitionParams.traj_type = 'full_radial3_phylotaxis';
-%
+
 % Load the raw data and compute trajectory and volume elements
-y_tot = reader.readRawData(true, true);  % Filter nShotOff and SI
-
+y_tot = reader.readRawData(true, true);                   % Filter nShotOff and SI
 t_tot = bmTraj(reader.acquisitionParams);                 % Compute trajectory
-
 ve_tot = bmVolumeElement(t_tot, 'voronoi_full_radial3');  % Volume elements
 
 %% Step 2: Load Coil Sensitivity Maps
@@ -135,7 +133,7 @@ mDir = [reconDir, strcat('/Sub00', num2str(subject_num)),'/T1_LIBRE_woBinning/mi
 
 %% Prepare eye mask
 
-eMaskFilePath = [otherDir,'eMask_woBin'];
+eMaskFilePath = [otherDir, 'eMask_woBin'];
 
 eyeMask = load(eMaskFilePath); 
 fields = fieldnames(eyeMask);  % Get the field names
@@ -167,27 +165,3 @@ ve  = bmVolumeElement(t, 'voronoi_full_radial3');
 bmMitosius_create(mDir, y, t, ve); 
 disp('Mitosius files are saved!')
 disp(mDir)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
