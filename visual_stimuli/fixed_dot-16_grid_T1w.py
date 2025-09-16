@@ -170,7 +170,7 @@ dot = visual.ShapeStim(
 # Begin Experiment
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
-t_dot = 3  # Seconds of showing the dot per position
+t_dot = 5  # Seconds of showing the dot per position
 
 # Get the screen dimensions
 # In norm units, screen goes from -1 to +1 vertically, and aspect-ratio-scaled horizontally.
