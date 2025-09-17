@@ -1,29 +1,48 @@
 %% Visual comparison with subplots
 clc; clearvars;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/results'));
-addpath(genpath('/home/debi/MatTechLab/monalisa'));  % for bmImage
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Config
 
 % Variables
-subject_num = 2;
+subject_num = 1;
 region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
-mask_type = {'clean', 'clean_0.95'};
+mask_type = {'clean', 'filtered'};
 
 % Paths
 resultsDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
-x_all_path = [resultsDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/th8/x_steva_nIter_20_delta_1.000.mat'];
-x_clean_path = [resultsDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/output/', mask_type{1}, '/th8/x_steva_regionidx_', num2str(region_idx), '_nIter_20_delta_1.000.mat'];
-x_clean_095_path = [resultsDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/output/', mask_type{2}, '/th8/x_steva_regionidx_', num2str(region_idx), '_nIter_20_delta_1.000.mat'];
-disp(['x_all_path: ', x_all_path]);
-disp(['x_clean_path: ', x_clean_path]);
-disp(['x_clean_095_path: ', x_clean_095_path]);
+mask_1_path = [resultsDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/other/', mask_type{1}, '/eMask_th0.75_region', num2str(region_idx), '.mat'];
+mask_2_path = [resultsDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/other/', mask_type{2}, '/eMask_th0.75_region', num2str(region_idx), '.mat'];
+
+disp(['mask_1_path: ', mask_1_path]);
+disp(['mask_2_path: ', mask_2_path]);
 
 % Load images
-x_all = load(x_all_path, 'x');
-x_clean = load(x_clean_path, 'x');
-x_clean_095 = load(x_clean_095_path, 'x');
+m1 = load(mask_1_path, 'eMaskN');
+m2 = load(mask_2_path, 'eMaskN');
 
-%% Subplots
-bmImage(cat(2, [x_all.x, x_clean.x, x_clean_095.x]), 'slice', 128, ... % Adjust slice index as needed
-    'titles', {'Reconstruction without Mask', ['Reconstruction with Mask: ', mask_type{1}], ['Reconstruction with Mask: ', mask_type{2}]});
+%% Plot
+figure;
+plot(m1.eMaskN, '.-');
+title('eMaskN 1D Plot - Clean');
+xlabel('Index');
+ylabel('Mask Value');
+
+% figure;
+% plot(m2.eMaskN, '.-');
+% title('eMaskN 1D Plot - Filtered');
+% xlabel('Index');
+% ylabel('Mask Value');
+
+%%
+n = ceil(sqrt(length(m1.eMaskN)));       % closest square dimension
+maskImg = zeros(1, n^2);
+maskImg(1:length(m1.eMaskN)) = m1.eMaskN;   % pad to square
+maskImg = reshape(maskImg, n, n);
+
+figure;
+imagesc(maskImg);
+colormap(gray);
+axis image off;
+title('Binary Mask (reshaped view)');
