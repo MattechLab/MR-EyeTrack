@@ -6,9 +6,9 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 %% Config
 
 % Variables
-subject_num = 2;
-region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
-mask_type = 'clean_0.95';
+subject_num = 1;
+region_idx = 3; % 0:up 1:down 2:left 3:right 4:center mask
+mask_type = 'filtered';
 
 % Paths
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
@@ -17,7 +17,7 @@ mDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_Binning/mitosius/', 
 saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_Binning/C/')];
 
 if subject_num == 1
-    bodyCoilFile    = [datasetDir, '/meas_MID2400614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
+    bodyCoilFile    = [datasetDir, '/meas_MID00614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
     arrayCoilFile   = [datasetDir, '/meas_MID00615_FID182869_BEAT_LIBREon_eye_HC_BC.dat'];
     measureFile     = [datasetDir, '/meas_MID00605_FID182859_BEAT_LIBREon_eye_(23_09_24).dat'];
 elseif subject_num == 2

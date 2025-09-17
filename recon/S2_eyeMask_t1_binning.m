@@ -14,8 +14,8 @@ addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 %% Config
 
 % Variables
-subject_num = 2;
-mask_type = "clean";
+subject_num = 1;
+mask_type = 'location';
 
 % Paths
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/'];
@@ -61,7 +61,7 @@ eMask = eyeGenerateBinningWin(datasetDir, nShotOff, nSeg, th_ratio, ETDir, winLe
 
 % Saving data and Convert to Monalisa format
 %--------------------------------------------------------------------------
-region_idx_list = 0:3;  % 0:up 1:down 2:left 3:right 4:center mask
+region_idx_list = 0:4;  % 0:up 1:down 2:left 3:right 4:center mask
 
 for region_idx = region_idx_list
     % Extract the row corresponding to this region

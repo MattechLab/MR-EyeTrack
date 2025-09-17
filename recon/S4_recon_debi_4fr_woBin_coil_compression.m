@@ -1,17 +1,16 @@
-%% The script is not changed yet... it cannot run on debi
-
+%% Init
 clc; clearvars;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
-%%
+%% Config
 subject_num = 1;
 
-datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-0', num2str(subject_num), '/rawdata'];
-reconDir = '/home/debi/jaime/tmp/250613_JB/';
+datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
+reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
 otherDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_woBinning/other/'];
-mDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_woBinning/mitosius_comp/mask_woBin'];
-saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')];
+mDir = [reconDir, '/Sub00', num2str(subject_num),'/T1_LIBRE_woBinning/mitosius_sel/mask_woBin'];
+saveCDir = [reconDir, strcat('/Sub00', num2str(subject_num),'/T1_LIBRE_woBinning/C_sel/')];
 
 if subject_num == 1
     bodyCoilFile    = [datasetDir, '/meas_MID2400614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
@@ -27,7 +26,7 @@ elseif subject_num == 3
     measureFile     = [datasetDir, '/meas_MID00554_FID182808_BEAT_LIBREon_eye_(23_09_24).dat'];
 end
 
-%% reader
+%% Reader
 autoFlag = true;  % Disable validation UI
 reader = createRawDataReader(arrayCoilFile, autoFlag);
 
@@ -41,11 +40,12 @@ disp('Mitosius has been loaded!')
 %% Load Coil Sensitivity Maps
 CfileName = 'C.mat';
 CfilePath = fullfile(saveCDir, CfileName);
-load(CfilePath, 'C');  % Load sensitivity maps
+load(CfilePath, 'C_comp');  % Load sensitivity maps
+C = C_comp;
+clear C_comp;
 disp(['C is loaded from:', CfilePath]);
 
-%% compileScript()
-nFr     = 1; 
+%% compileScript() 
 % best achivable resolution is 1/ N_u*dK_u If you have enough coverage
 FoV = reader.acquisitionParams.FoV;  % Field of View
 
@@ -63,20 +63,20 @@ dK_u = [1, 1, 1]./FoV; % Spacing of the virtual cartesian grid
 
 %%
 C = bmImResize(C, [48, 48, 48], N_u);
+disp('C has been resized!')
 
 %%
+nFr = 1;
 x0 = cell(nFr, 1);
-    for i = 1:nFr
-        x0{i} = bmMathilda(y{i}, t{i}, ve{i}, [], N_u, n_u, dK_u, [], [], [], []);
-    end
-    % isequal(x0_p, x0)
-    %
-    bmImage(x0);
+for i = 1:nFr
+    x0{i} = bmMathilda(y{i}, t{i}, ve{i}, C, N_u, n_u, dK_u);
+end
+% isequal(x0_p, x0)
 
+bmImage(x0);
 
-%% save x0
-
-x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/output/mask'];
+%% Save x0
+x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/output/mask_woBin/'];
 
 if ~isfolder(x0Dir)
     % If it doesn't exist, create it
@@ -85,13 +85,14 @@ if ~isfolder(x0Dir)
 else
     disp(['Directory already exists: ', x0Dir]);
 end
-x0Path = fullfile(x0Dir, 'x0.mat');
+x0Path = fullfile(x0Dir, 'x0_comp.mat');
+
 % Save the x0 to the .mat file
 save(x0Path, 'x0', '-v7.3');
 disp('x0 has been saved here:')
 disp(x0Path)
 
-%%
+%% Compute sparse matrices
 [Gu, Gut] = bmTraj2SparseMat(t, ve, N_u, dK_u);
 
 %% bmSteva
@@ -105,7 +106,6 @@ delta = deltaArray(1);
 rho       = 10*delta;
 nCGD      = 4;
 ve_max    = 10*prod(dK_u(:));
-
 
 x = bmSteva(  x0{1}, [], [], y{1}, ve{1}, C, Gu{1}, Gut{1}, n_u, ...
                                         delta, rho, nCGD, ve_max, ...
@@ -135,22 +135,22 @@ disp('x has been saved here:')
 disp(xPath)
 
 %% .mat to .nii.gz
-image = load(xPath);
+% image = load(xPath);
 
-% Define NIfTI metadata (optional but recommended for completeness)
-% You can adjust these properties according to your needs.
-nii_hdr = struct;  % Create default NIfTI header
-nii_hdr.ImageSize = size(image.x);
-nii_hdr.PixelDimensions = [0.5 0.5 0.5];  % Adjust these values if needed
+% % Define NIfTI metadata (optional but recommended for completeness)
+% % You can adjust these properties according to your needs.
+% nii_hdr = struct;  % Create default NIfTI header
+% nii_hdr.ImageSize = size(image.x);
+% nii_hdr.PixelDimensions = [0.5 0.5 0.5];  % Adjust these values if needed
 
-% Write the NIfTI file
-% niftiwrite(volume_data, nifti_file, nii_hdr);
-nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f.nii', region_idx, nIter, delta));
-niftiwrite(image.x, nifti_file);
-disp(['Data has been saved as a NIfTI file: ', nifti_file]);
+% % Write the NIfTI file
+% % niftiwrite(volume_data, nifti_file, nii_hdr);
+% nifti_file = fullfile(xDir, sprintf('x_steva_regionidx%i_nIter%d_delta_%.3f.nii', region_idx, nIter, delta));
+% niftiwrite(image.x, nifti_file);
+% disp(['Data has been saved as a NIfTI file: ', nifti_file]);
 
-%% Compress to .nii.gz
-gzip(nifti_file);
+% %% Compress to .nii.gz
+% gzip(nifti_file);
 
 % (Optional) remove the uncompressed file
 % delete(nifti_file);

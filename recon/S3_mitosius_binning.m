@@ -7,8 +7,8 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 %% Config
 
 % Variables
-subject_num = 2;
-mask_type = 'clean_0.95';  % <-- use char instead of string
+subject_num = 1;
+mask_type = 'filtered';  % <-- use char instead of string
 
 Matrix_size = 240;
 reconFov = 240;
@@ -162,9 +162,8 @@ for region_idx = 0:3
     size_Mask = size(eyeMask);
     nbins = size_Mask(1);
     eyeMask = reshape(eyeMask, [nbins, reader.acquisitionParams.nSeg, reader.acquisitionParams.nShot]); 
-    eyeMask(:, 1, :) = []; 
-    
-    eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = []; 
+    eyeMask(:, 1, :) = [];  % SI
+    eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = [];  % SS
     eyeMask = bmPointReshape(eyeMask); 
         
     % Run the mitosis function and compute volume elements

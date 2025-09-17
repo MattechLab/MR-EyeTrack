@@ -38,11 +38,12 @@ disp('Mitosius has been loaded!')
 %% Load Coil Sensitivity Maps
 CfileName = 'C.mat';
 CfilePath = fullfile(saveCDir, CfileName);
-load(CfilePath, 'C');  % Load sensitivity maps
+load(CfilePath, 'C_comp');  % Load sensitivity maps
+C = C_comp;
+clear C_comp;
 disp(['C is loaded from:', CfilePath]);
 
 %% compileScript()
-nFr     = 1; 
 % best achivable resolution is 1/ N_u*dK_u If you have enough coverage
 FoV = reader.acquisitionParams.FoV;  % Field of View
 
@@ -62,6 +63,7 @@ dK_u = [1, 1, 1]./FoV; % Spacing of the virtual cartesian grid
 C = bmImResize(C, [48, 48, 48], N_u);
 
 %% compute Mathilda
+nFr     = 1; 
 x0 = cell(nFr, 1);
 for i = 1:nFr
     x0{i} = bmMathilda(y{i}, t{i}, ve{i}, C, N_u, n_u, dK_u, [], [], [], []);
