@@ -13,7 +13,7 @@ reconFov = 240;
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata/'];
 reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
 
-mask_note = 'woBin';  % woBin_woFilt
+mask_note = '_woFilt';  % '' or '_woFilt'
 x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/x0_', mask_note, '/'];
 
 if subject_num == 1
@@ -48,11 +48,11 @@ saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/
 autoFlag = true;  % Disable validation UI
 reader = createRawDataReader(measureFile, autoFlag);
 reader.acquisitionParams.traj_type = 'full_radial3_phylotaxis';
-reader.acquisitionParams.nShot_off = 14;
-reader.acquisitionParams.selfNav_flag = 1;
+reader.acquisitionParams.nShot_off = 0;
+reader.acquisitionParams.selfNav_flag = 0;
 
 % Load the raw data
-y_tot = reader.readRawData(true, true);  % Filter nShot_off (nShot_off*nSeg) and SI (1st nShot)
+y_tot = reader.readRawData(false, false);  % Filter nShot_off (nShot_off*nSeg) and SI (1st nShot)
 
 %% Twix
 myTwix = bmTwix(measureFile);
@@ -98,7 +98,7 @@ disp('x0_Filt has been saved here:')
 disp(x0_Path)
 
 %% Coil compression
-coilCompression = 0;
+coilCompression = 0;  % 1: SVD-based compression; 0: coil selection based on energy
 nChCompressed = 20;
 nCh = size(y_tot, 1);
 nx = size(y_tot, 2);
@@ -191,7 +191,7 @@ else
     C_comp     = C(:,:,:, idxKeep);
 
     % Save the compressed k-space data
-    y_outputDir = [reconDir, strcat('/Sub00',num2str(subject_num), '/T1_LIBRE_woBinning/y_tot_sel')];
+    y_outputDir = [reconDir, strcat('/Sub00',num2str(subject_num), '/T1_LIBRE_woBinning/y_tot_sel', mask_note)];
     y_tot_comp_path = fullfile(y_outputDir, 'y_tot_comp.mat');
     if ~isfolder(y_outputDir)
         % If it doesn't exist, create it
@@ -212,12 +212,12 @@ else
     else
         disp(['Directory already exists: ', C_outputDir]);
     end
-    C_comp_path = fullfile(C_outputDir, 'C.mat');
+    C_comp_path = fullfile(C_outputDir, 'C_woFilt.mat');
     save(C_comp_path, 'C_comp', '-v7.3');
     disp(['C_comp has been saved here: ', C_comp_path]);
 
     % Set the folder for mitosius saving
-    mDir = [reconDir, strcat('/Sub00', num2str(subject_num)),'/T1_LIBRE_woBinning/mitosius_sel/mask_', mask_note, '/'];
+    mDir = [reconDir, strcat('/Sub00', num2str(subject_num)),'/T1_LIBRE_woBinning/mitosius_sel/mask', mask_note, '/'];
     
     % Set the x0Dir for saving x0
     x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/x0_sel/'];
@@ -280,7 +280,7 @@ if ~isfolder(x0Dir)
 else
     disp(['Directory already exists: ', x0Dir]);
 end
-x0Path = fullfile(x0Dir, 'x0_comp.mat');
+x0Path = fullfile(x0Dir, 'x0_comp_woFilt.mat');
 % Save the x0 to the .mat file
 save(x0Path, 'x0_comp', '-v7.3');
 disp('x0 has been saved here:')
@@ -301,8 +301,8 @@ disp('is loaded!')
 size_Mask = size(eyeMask);
 nbins = size_Mask(1);
 eyeMask = reshape(eyeMask, [nbins, reader.acquisitionParams.nSeg, reader.acquisitionParams.nShot]); 
-eyeMask(:, 1, :) = [];  % SI
-eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = [];  % SS
+% eyeMask(:, 1, :) = [];  % SI
+% eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = [];  % SS
 eyeMask = bmPointReshape(eyeMask);
 
 %% Run the mitosis function and compute volume elements
