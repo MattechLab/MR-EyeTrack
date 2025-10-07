@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+﻿b#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2024.2.1),
@@ -170,7 +170,7 @@ dot = visual.ShapeStim(
 # Begin Experiment
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
-t_dot = 5  # Seconds of showing the dot per position
+t_dot = 5*6.2/8.01  # Seconds of showing the dot per position. TR is decreased from 8.1 to 6.2ms
 
 # Get the screen dimensions
 # In norm units, screen goes from -1 to +1 vertically, and aspect-ratio-scaled horizontally.
