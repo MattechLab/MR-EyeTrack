@@ -14,7 +14,7 @@ addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Initialize the directories and acquire the Coil
-subject_num=2;
+subject_num=3;
 
 datasetDir = '/home/debi/jaime/repos/MR-EyeTrack/data/pilot';
 reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';

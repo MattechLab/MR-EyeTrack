@@ -4,7 +4,7 @@ addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Config
-subject_num = 2;
+subject_num = 3;
 
 % Paths
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
@@ -105,11 +105,11 @@ end
 % only once !!!!
 if real(y_tot)<1
     if normalization
-        y_tot = y_tot/normalize_val; 
-        y_tot(1,1,123)
+        y_tot_norm = y_tot/normalize_val; 
+        y_tot_norm(1,1,123)
     else
-        y_tot = y_tot/(2.5e-10); 
-        y_tot(1,1,123)
+        y_tot_norm = y_tot/(2.5e-10); 
+        y_tot_norm(1,1,123)
     end
 end
 
@@ -155,7 +155,7 @@ eyeMask = bmPointReshape(eyeMask);
 
 %% Run the mitosis function and compute volume elements
 
-[y, t] = bmMitosis(y_tot, t_tot, eyeMask); 
+[y, t] = bmMitosis(y_tot_norm, t_tot, eyeMask); 
 y = bmPermuteToCol(y); 
 ve  = bmVolumeElement(t, 'voronoi_full_radial3'); 
 

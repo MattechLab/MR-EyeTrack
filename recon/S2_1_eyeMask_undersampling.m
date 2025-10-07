@@ -11,7 +11,7 @@ addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 %% Config
 
 % Variables
-subject_num = 2;
+subject_num = 3;
 mask_type = 'clean';
 undersampling_factor = 0.95; % remove % of the original readouts
 

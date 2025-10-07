@@ -1,5 +1,5 @@
 %% Visual comparison with subplots
-clc; clearvars;
+clc; clearvars; close all;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/results'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
@@ -8,7 +8,7 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 % Variables
 subject_num = 1;
 region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
-mask_type = {'clean', 'filtered'};
+mask_type = {'clean', 'clean_0.5'};  % for the undersampled masks, the object is eMask, for the full masks, the object is eMaskN inside the struct
 
 % Paths
 resultsDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
@@ -20,7 +20,7 @@ disp(['mask_2_path: ', mask_2_path]);
 
 % Load images
 m1 = load(mask_1_path, 'eMaskN');
-m2 = load(mask_2_path, 'eMaskN');
+m2 = load(mask_2_path, 'eMask');
 
 %% Plot
 figure;

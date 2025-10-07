@@ -1,14 +1,14 @@
 %% The script is not changed yet... it cannot run on debi
 
-clc; clearvars;
+clc; clearvars, close all;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 %% Config
 
 % Variables
-subject_num = 1;
+subject_num = 3;
 region_idx = 3; % 0:up 1:down 2:left 3:right 4:center mask
-mask_type = 'filtered';
+mask_type = 'clean_0.75';
 
 % Paths
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
@@ -66,6 +66,7 @@ dK_u = [1, 1, 1]./FoV; % Spacing of the virtual cartesian grid
 
 %%
 C = bmImResize(C, [48, 48, 48], N_u);
+disp('C resized!')
 
 %%
 x0 = cell(nFr, 1);

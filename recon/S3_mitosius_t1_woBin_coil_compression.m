@@ -5,7 +5,10 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Config
 
-subject_num = 1;
+subject_num = 3;
+mask_note = '_woFilt';  % '' or '_woFilt'
+coilCompression = 0;  % 1: SVD-based compression; 0: coil selection based on energy
+nChCompressed = 20;  % Number of virtual coils after compression
 
 Matrix_size = 240;
 reconFov = 240;
@@ -13,8 +16,7 @@ reconFov = 240;
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata/'];
 reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
 
-mask_note = '_woFilt';  % '' or '_woFilt'
-x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/x0_', mask_note, '/'];
+x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/x0', mask_note, '/'];
 
 if subject_num == 1
     bodyCoilFile    = [datasetDir, '/meas_MID2400614_FID182868_BEAT_LIBREon_eye_BC_BC.dat'];
@@ -41,6 +43,14 @@ else
     disp(['Directory already exists: ', otherDir]);
 end
 
+if ~isfolder(x0Dir)
+    % If it doesn't exist, create it
+    mkdir(x0Dir);
+    disp(['Directory created: ', x0Dir]);
+else
+    disp(['Directory already exists: ', x0Dir]);
+end
+
 saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/C/')];
 
 %% Step 1: Load the Raw Data
@@ -48,11 +58,15 @@ saveCDir = [reconDir, strcat('/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/
 autoFlag = true;  % Disable validation UI
 reader = createRawDataReader(measureFile, autoFlag);
 reader.acquisitionParams.traj_type = 'full_radial3_phylotaxis';
-reader.acquisitionParams.nShot_off = 0;
-reader.acquisitionParams.selfNav_flag = 0;
-
-% Load the raw data
-y_tot = reader.readRawData(false, false);  % Filter nShot_off (nShot_off*nSeg) and SI (1st nShot)
+if strcmp(mask_note, '_woFilt')
+    reader.acquisitionParams.nShot_off = 0;  % 0 for woFilt
+    reader.acquisitionParams.selfNav_flag = 0;
+    y_tot = reader.readRawData(false, false);  % Filter nShot_off (nShot_off*nSeg) and SI (1st nShot)
+elseif strcmp(mask_note, '')
+    reader.acquisitionParams.nShot_off = 14;  % 14 for with filtering
+    reader.acquisitionParams.selfNav_flag = 1;
+    y_tot = reader.readRawData(true, true);  % Filter nShot_off (nShot_off*nSeg) and SI (1st nShot)
+end
 
 %% Twix
 myTwix = bmTwix(measureFile);
@@ -98,8 +112,6 @@ disp('x0_Filt has been saved here:')
 disp(x0_Path)
 
 %% Coil compression
-coilCompression = 0;  % 1: SVD-based compression; 0: coil selection based on energy
-nChCompressed = 20;
 nCh = size(y_tot, 1);
 nx = size(y_tot, 2);
 ntviews = size(y_tot, 3);
@@ -174,7 +186,7 @@ if coilCompression == 1
     % Set the x0Dir for saving x0
     x0Dir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/output/x0_comp/'];
 
-else
+elseif coilCompression == 0
     % Coil selection based on energy
     % --- Compute coil energy ---
     % Energy per coil = sum over all samples of |signal|^2
@@ -225,8 +237,8 @@ else
 end
 
 %% [Optional] Read the new compressed raw data and coil sensitivity
-load(fullfile(y_outputDir, 'y_tot_comp.mat')); % y_tot_comp
-load(fullfile(C_outputDir, 'C.mat')); % C_comp
+% load(fullfile(y_outputDir, 'y_tot_comp.mat')); % y_tot_comp
+% load(fullfile(C_outputDir, 'C.mat')); % C_comp
 
 %%
 C_comp_resized = bmImResize(C_comp, [48, 48, 48], N_u);
@@ -246,9 +258,7 @@ end
 if normalization
     x0_comp = bmMathilda(y_tot_comp, t_tot, ve_tot, C_comp_resized, N_u, N_u, dK_u); 
     x_perm = permute(x0_comp, [2,3,1]);
-    %
     bmImage(x_perm)
-    %
     temp_im = getimage(gca);  
     bmImage(temp_im); 
     temp_roi = roipoly; 
@@ -280,7 +290,7 @@ if ~isfolder(x0Dir)
 else
     disp(['Directory already exists: ', x0Dir]);
 end
-x0Path = fullfile(x0Dir, 'x0_comp_woFilt.mat');
+x0Path = fullfile(x0Dir, ['x0_comp', mask_note, '.mat']);
 % Save the x0 to the .mat file
 save(x0Path, 'x0_comp', '-v7.3');
 disp('x0 has been saved here:')

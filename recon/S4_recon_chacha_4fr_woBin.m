@@ -1,8 +1,8 @@
 %% Init
-clc; clearvars;
+clc; clearvars; close all;
 
 %% config
-subject_num = 1;
+subject_num = 3;
 
 datasetDir = ['/usr/src/app/dataset/sub-00', num2str(subject_num), '/rawdata'];
 reconDir = '/usr/src/app/recon_f';

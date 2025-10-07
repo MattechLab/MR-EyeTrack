@@ -1,5 +1,5 @@
 %% Init
-clc; clearvars;
+clc; clearvars; close all;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/results'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));  % for bmImage
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
@@ -7,9 +7,9 @@ addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 %% Config
 
 % Variables
-subject_num = 2;
+subject_num = 3;
 region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
-mask_type = {'clean', 'clean_0.75'};
+mask_type = {'clean', 'clean_0.5'};
 
 % Paths
 resultsDir = '/home/debi/jaime/repos/MR-EyeTrack/results';

@@ -5,7 +5,7 @@ addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %%
-subject_num = 2;
+subject_num = 1;
 
 datasetDir = ['/home/debi/jaime/repos/MR-EyeTrack/data/pilot/sub-00', num2str(subject_num), '/rawdata'];
 reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';

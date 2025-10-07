@@ -1,4 +1,4 @@
-clc; clearvars;
+clc; clearvars; close all;
 debug = false;
 
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
@@ -7,7 +7,7 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 %% Config
 
 % Variables
-subject_num = 1;
+subject_num = 3;
 mask_type = 'filtered';  % <-- use char instead of string
 
 Matrix_size = 240;
@@ -111,11 +111,11 @@ end
 % only once !!!!
 if real(y_tot)<1
     if normalization
-        y_tot = y_tot/normalize_val; 
-        y_tot(1,1,123)
+        y_tot_norm = y_tot/normalize_val; 
+        y_tot_norm(1,1,123)
     else
-        y_tot = y_tot/(2.5e-10); 
-        y_tot(1,1,123)
+        y_tot_norm = y_tot/(2.5e-10); 
+        y_tot_norm(1,1,123)
     end
 end
 
@@ -148,7 +148,7 @@ for region_idx = 0:3
 
     mDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_Binning/mitosius/', mask_type, '/mask_', num2str(region_idx), '/'];
 
-    th_ratio = 3/4;
+    th_ratio = 0.75;
     eMaskFilePath = [otherDir, sprintf('eMask_th%.2f_region%i.mat', th_ratio, region_idx)];
 
     eyeMask = load(eMaskFilePath);
@@ -167,7 +167,7 @@ for region_idx = 0:3
     eyeMask = bmPointReshape(eyeMask); 
         
     % Run the mitosis function and compute volume elements
-    [y, t] = bmMitosis(y_tot, t_tot, eyeMask); 
+    [y, t] = bmMitosis(y_tot_norm, t_tot, eyeMask); 
     y = bmPermuteToCol(y); 
     ve  = bmVolumeElement(t, 'voronoi_full_radial3' ); 
 
