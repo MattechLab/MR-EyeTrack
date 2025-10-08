@@ -76,7 +76,7 @@ end
 bmImage(x0);
 
 %% Save x0
-x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/output/mask_woBin/'];
+x0Dir = [reconDir, '/Sub00',num2str(subject_num),'/T1_LIBRE_woBinning/output/x0/'];
 
 if ~isfolder(x0Dir)
     % If it doesn't exist, create it
