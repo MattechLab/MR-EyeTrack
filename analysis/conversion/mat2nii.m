@@ -1,9 +1,23 @@
 %% Clear environment
 clc; clearvars; close all;
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/analysis'));
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/results'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));  % for bmImage
 
 %% Paths
-baseDir = '/home/debi/jaime/repos/MR-EyeTrack/results/Sub001/T1_LIBRE_Binning/output/clean/th8'; % directory with .mat files
-% imgName = 'x_steva_nIter_20_delta_1.000.mat'; % reconstructed image
+% Define variables
+subject_num = '1';  % subject number
+bin = '';  % binning type (can be '' or 'wo')
+mask = 'clean';  % mask type
+recon = 'x0';  % reconstruction type (can be 'th8' for Steva or 'x0' for Mathilda)
+% TODO: check with Mathilda recons
+
+% Construct base directory path
+if strcmp(bin, 'wo')
+    baseDir = sprintf('/home/debi/jaime/repos/MR-EyeTrack/results/Sub00%s/T1_LIBRE_%sBinning/output/%s', subject_num, bin, recon);
+else
+    baseDir = sprintf('/home/debi/jaime/repos/MR-EyeTrack/results/Sub00%s/T1_LIBRE_%sBinning/output/%s/%s', subject_num, bin, mask, recon);
+end
 ref_nii_path = '/home/debi/Desktop/tmp/webplatform/input/2022160100001.nii.gz'; % reference image
 
 %% Find all .mat files in the directory
@@ -33,16 +47,26 @@ for fileIdx = 1:length(matFiles)
     imgFilepath = fullfile(imgDir, imgName);
     
     data = load(imgFilepath);
-    im_cs = data.x;   % assuming your data is stored in variable "x"
+    % Load data based on reconstruction type
+    if strcmp(recon, 'th8')
+        im_cs = data.x;
+    elseif strcmp(recon, 'x0')
+        if iscell(data.x0)
+            im_cs = data.x0{1};
+        else
+            im_cs = data.x0;
+        end
+    else
+        error('Unknown reconstruction type: %s', recon);
+    end
 
-    %% Compute sum of squares (if needed)
-    im_sos = sumOfSquares(im_cs,5);
-    Functional_Recon_all_lines = abs(sumOfSquares(im_sos,4));
-    Functional_Recon_all_lines_flipped = flip(Functional_Recon_all_lines,3);
+    %% Compute absolute value (images are already reconstructed and in 3D, no need for SoS)
+    Functional_Recon_all_lines = abs(im_cs);
 
     %% Adjust orientation before writing
-    Functional_Recon_all_lines_flipped = permute(Functional_Recon_all_lines_flipped, [2 1 3]); % swap x/y
-    Functional_Recon_all_lines_flipped = flip(Functional_Recon_all_lines_flipped, 1);          % flip L-R
+    Functional_Recon_all_lines_flipped = permute(Functional_Recon_all_lines, [2 1 3]); % swap x/y
+    Functional_Recon_all_lines_flipped = flip(Functional_Recon_all_lines_flipped, 1);   % flip L-R
+    Functional_Recon_all_lines_flipped = flip(Functional_Recon_all_lines_flipped, 3);   % flip in 3rd dimension
 
     %% Load reference header
     ref_info = niftiinfo(ref_nii_path);
