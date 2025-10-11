@@ -1,0 +1,20 @@
+{
+    "Name": "MR-EyeTrack Reconstructed MRI Dataset",
+    "BIDSVersion": "1.9.0",
+    "DatasetType": "derivative",
+    "GeneratedBy": [
+        {
+            "Name": "STEVA",
+            "Version": "1.0",
+            "Description": "L2-norm regularized reconstruction algorithm"
+        },
+        {
+            "Name": "MATHILDA",
+            "Version": "1.0",
+            "Description": "Non-regularized reconstruction algorithm"
+        }
+    ],
+    "Acknowledgements": "Generated as part of the MR-EyeTrack project.",
+    "HowToAcknowledge": "Please cite the MR-EyeTrack project when using this data.",
+    "Date": "2025-10-10"
+}

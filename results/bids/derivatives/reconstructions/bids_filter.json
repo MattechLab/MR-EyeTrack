@@ -1,0 +1,11 @@
+{
+    "T1w": {
+        "reconstruction": [
+            "stevafull",
+            "stevaFull",
+            "steva50p",
+            "steva75p",
+            "steva95p"
+        ]
+    }
+}

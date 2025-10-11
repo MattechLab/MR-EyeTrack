@@ -169,6 +169,23 @@ visual_stimuli/data/
 .vscode/
 /data
 /other
-/results
+
+# results
+/results/*
+/results/mriqc/
+/results/Sub-*/
+/results/bids/derivatives/reconstructions/*
+
+# Keep only these 3 JSON files under reconstructions
+!/results/bids/derivatives/reconstructions/dataset_description.json
+!/results/bids/derivatives/reconstructions/ants_settings.json
+!/results/bids/derivatives/reconstructions/bids_filter.json
+
+# keep these folders to keep the json files
+!/results/bids/
+!/results/bids/derivatives/
+!/results/bids/derivatives/reconstructions/
+
+# MATLAB
 *.asv
 *.mat
