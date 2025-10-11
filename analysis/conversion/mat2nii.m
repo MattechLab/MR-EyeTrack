@@ -10,7 +10,6 @@ subject_num = '1';  % subject number
 bin = '';  % binning type (can be '' or 'wo')
 mask = 'clean';  % mask type
 recon = 'x0';  % reconstruction type (can be 'th8' for Steva or 'x0' for Mathilda)
-% TODO: check with Mathilda recons
 
 % Construct base directory path
 if strcmp(bin, 'wo')
