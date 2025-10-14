@@ -1,5 +1,6 @@
 {
     "iis.configDir": "",
     "MATLAB.installPath": "/usr/local/MATLAB/R2024b",
-    "MATLAB.matlabConnectionTiming": "onStart"
+    "MATLAB.matlabConnectionTiming": "onStart",
+    "python-envs.pythonProjects": []
 }

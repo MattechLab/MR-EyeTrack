@@ -178,23 +178,3 @@ for region_idx = 0:3
     disp(mDir)
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
