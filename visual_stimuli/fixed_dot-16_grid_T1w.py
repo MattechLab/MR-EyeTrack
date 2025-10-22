@@ -25,6 +25,7 @@ from numpy import (sin, cos, tan, log, log10, pi, average, sqrt, std, deg2rad, r
 from numpy.random import random, randint, normal, shuffle, choice as randchoice
 import os  # handy system and path functions
 import sys  # to get file system encoding
+from psychopy.monitors import Monitor
 
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
@@ -71,14 +72,22 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # Start Code - component code to be run after the window creation
 
+# Monitor setup
+WIN_SIZE = [800, 600]
+monitor = Monitor("expMonitor")
+monitor.setWidth(369.54e-3)  # screen width in meters
+monitor.setDistance(1020e-3)  # viewing distance in meters
+monitor.setSizePix(WIN_SIZE)  # screen resolution
+monitor.saveMon()
+
 # --- Setup the Window ---
 win = visual.Window(
-    size=[800, 600], fullscr=True, screen=0, 
+    size=WIN_SIZE, fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
-    monitor='testMonitor', color=[-1,-1,-1], colorSpace='rgb',
+    monitor='expMonitor', color=(0, 0, 0), colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
-    units='norm')
+    units='deg')
 win.mouseVisible = False
 # store frame rate of monitor if we can measure it
 expInfo['frameRate'] = win.getActualFrameRate()
@@ -152,40 +161,57 @@ def send_message(message, addr="localhost", port=2023):
     client_socket.sendall(message)
     client_socket.close()
 
-# --- Initialize components for Routine "centered_dot" ---
-dot_centered = visual.ShapeStim(
-    win=win, name='dot_centered',
-    size=(0.1, 0.1), vertices='circle',
-    ori=0.0, pos=(0, 0), anchor='center',
-    lineWidth=1.0, colorSpace='rgb', lineColor=[0.5000, 0.5000, 0.5000], fillColor=[0.5000, 0.5000, 0.5000],
-    opacity=1.0, depth=0.0, interpolate=True)
+FIXATION_COLORS: tuple[str, ...] = ("red", "green", "blue")
 
-# --- Initialize components for Routine "dots" ---
-dot = visual.ShapeStim(
-    win=win, name='dot',
-    size=(0.1, 0.1), vertices='circle',
-    ori=0.0, pos=(0, 0), anchor='center',
-    lineWidth=1.0,     colorSpace='rgb',  lineColor=[0.5, 0.5, 0.5], fillColor=[0.5, 0.5, 0.5],
-    opacity=1.0, depth=0.0, interpolate=True)
+dot = []
+
+dot.extend([
+    visual.Circle(
+        win=win,
+        units="deg",
+        edges=64,
+        radius=0.4/2,
+        lineWidth=0.0,
+        fillColor=[0.5, 0.5, 0.5],
+        interpolate=True,
+    ),
+    visual.ShapeStim(
+        win=win,
+        units="deg",
+        vertices="cross",
+        size=0.8/2,
+        lineWidth=0.0,
+        fillColor=[0.5, 0.5, 0.5],
+    ),
+    visual.Circle(
+        win=win,
+        units="deg",
+        edges=64,
+        radius=0.1/2,  # 0.01,
+        lineWidth=0.0,
+        fillColor=[0.5, 0.5, 0.5],
+        interpolate=True,
+    )
+])
+
 # Begin Experiment
-grid_size = 4  # 4x4 grid
-dot_size = 0.05  # Size of the grey dot
 t_dot = 5*6.2/8.01  # Seconds of showing the dot per position. TR is decreased from 8.1 to 6.2ms
 
-# Get the screen dimensions
-# In norm units, screen goes from -1 to +1 vertically, and aspect-ratio-scaled horizontally.
-# So on an 800×600 display, full x-range is from -800/600 = -1.333 to +1.333
-# We normalize the pixel offsets to norm coordinates.
-screen_width, screen_height = win.size
-x_offset_norm = 1.33*2/3  # of 1.33
-y_offset_norm = 1/2  # of 1.00
+# Get screen dimensions in degrees
+screen_width_deg = monitor.getWidth() / monitor.getDistance() * (180 / np.pi)
+screen_height_deg = screen_width_deg * (win.size[1] / win.size[0])
 
-# Define the positions in 'norm' units
+# Define offsets (in degrees of visual angle)
+# Example: stimuli appear at ±5° horizontally and vertically
+x_offset_deg = 5
+y_offset_deg = 5
+
+# Define positions in 'deg' units
 positions = {
-    (0, y_offset_norm): "up",
-    (0, -y_offset_norm): "down",
-    (-x_offset_norm, 0): "left",
-    (x_offset_norm, 0): "right"
+    (0, y_offset_deg): "up",
+    (0, -y_offset_deg): "down",
+    (-x_offset_deg, 0): "left",
+    (x_offset_deg, 0): "right"
 }
 
 ioServer.getDevice('tracker').sendMessage("ET: Start experiment 'dots'")
