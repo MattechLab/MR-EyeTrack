@@ -72,8 +72,11 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # Start Code - component code to be run after the window creation
 
+# ET?
+DUMMY_MODE = True  # Set to False when running with the real eyetracker
+
 # Monitor setup
-WIN_SIZE = [800, 600]
+WIN_SIZE = (800, 600)
 monitor = Monitor("expMonitor")
 monitor.setWidth(369.54e-3)  # screen width in meters
 monitor.setDistance(1020e-3)  # viewing distance in meters
@@ -98,11 +101,25 @@ else:
 # --- Setup input devices ---
 ioConfig = {}
 
+# Compute a dynamic text height based on the monitor/window size when units are 'deg'.
+# We compute an estimate of degrees-per-pixel from the monitor physical size and viewing
+# distance, then set a text height that scales with the vertical visual degrees.
+# Clamp to a reasonable range so text stays readable across displays.
+try:
+    # screen size in degrees (approx): width / distance in radians -> degrees
+    screen_width_deg = monitor.getWidth() / monitor.getDistance() * (180.0 / np.pi)
+    screen_height_deg = screen_width_deg * (win.size[1] / win.size[0])
+    # choose text height as a fraction of vertical visual degrees
+    _text_height = max(0.02, min(0.18, screen_height_deg * 0.06))
+except Exception:
+    # Fallback to previous hard-coded value (in deg units used by Window)
+    _text_height = 0.12
+
 # Setup eyetracking
 ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
     'name': 'tracker',
     'model_name': 'EYELINK 1000 DESKTOP',
-    'simulation_mode': False,
+    'simulation_mode': DUMMY_MODE,
     'network_settings': '100.1.1.1',
     'default_native_data_file_name': 'EXPFILE',
     'runtime_settings': {
@@ -136,7 +153,7 @@ defaultKeyboard = keyboard.Keyboard(backend='iohub')
 waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
     text="The program is ready for the scanner trigger. Press 's' to proceed manually.",
     font='Open Sans',
-    pos=(0, -0.4), height=0.12, wrapWidth=1.7, ori=0.0, 
+    pos=(0, -0.4), height=_text_height, wrapWidth=1.7, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
     languageStyle='LTR',
     depth=0.0);
@@ -144,7 +161,7 @@ key_resp = keyboard.Keyboard()
 fix_desc = visual.TextStim(win=win, name='fix_desc',
     text='In this task you will see a dot moving randomly within different positions on the screen. You have to follow the dot :)',
     font='Open Sans',
-    pos=(0, 0.25), height=0.12, wrapWidth=1.0, ori=0.0, 
+    pos=(0, 0.25), height=_text_height, wrapWidth=1.0, ori=0.0, 
     color='white', colorSpace='rgb', opacity=1.0, 
     languageStyle='LTR',
     depth=-2.0);
@@ -197,10 +214,6 @@ dot.extend([
 # Begin Experiment
 t_dot = 5*6.2/8.01  # Seconds of showing the dot per position. TR is decreased from 8.1 to 6.2ms
 
-# Get screen dimensions in degrees
-screen_width_deg = monitor.getWidth() / monitor.getDistance() * (180 / np.pi)
-screen_height_deg = screen_width_deg * (win.size[1] / win.size[0])
-
 # Define offsets (in degrees of visual angle)
 # Example: stimuli appear at ±5° horizontally and vertically
 x_offset_deg = 5
@@ -220,7 +233,7 @@ ioServer.getDevice('tracker').sendMessage("ET: Start experiment 'dots'")
 text = visual.TextStim(win=win, name='text',
     text="End press 't'",
     font='Open Sans',
-    pos=(0, 0), height=0.12, wrapWidth=None, ori=0.0, 
+    pos=(0, 0), height=_text_height, wrapWidth=None, ori=0.0, 
     color='white', colorSpace='rgb', opacity=None, 
     languageStyle='LTR',
     depth=0.0);
@@ -473,7 +486,7 @@ for _ in range(6):  # Change to 6 if you want to repeat it 6 times
     continueRoutine = True
     # update component parameters for each repeat
     # keep track of which components have finished
-    centered_dotComponents = [dot_centered]
+    centered_dotComponents = [dot]
     for thisComponent in centered_dotComponents:
         thisComponent.tStart = None
         thisComponent.tStop = None
@@ -496,39 +509,39 @@ for _ in range(6):  # Change to 6 if you want to repeat it 6 times
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
         
-        # *dot_centered* updates
+        # *dot* updates
         
-        # if dot_centered is starting this frame...
-        if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        # if dot is starting this frame...
+        if dot.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
             # keep track of start time/frame for later
-            dot_centered.frameNStart = frameN  # exact frame index
-            dot_centered.tStart = t  # local t and not account for scr refresh
-            dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
-            win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
+            dot.frameNStart = frameN  # exact frame index
+            dot.tStart = t  # local t and not account for scr refresh
+            dot.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(dot, 'tStartRefresh')  # time at next scr refresh
             # add timestamp to datafile
-            thisExp.timestampOnFlip(win, 'dot_centered.started')
+            thisExp.timestampOnFlip(win, 'dot.started')
             # update status
-            dot_centered.status = STARTED
-            dot_centered.setAutoDraw(True)
+            dot.status = STARTED
+            dot.setAutoDraw(True)
             ioServer.getDevice('tracker').sendMessage("ET: Start routine 'centered_dot'")
         
-        # if dot_centered is active this frame...
-        if dot_centered.status == STARTED:
+        # if dot is active this frame...
+        if dot.status == STARTED:
             # update params
             pass
         
-        # if dot_centered is stopping this frame...
-        if dot_centered.status == STARTED:
+        # if dot is stopping this frame...
+        if dot.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
+            if tThisFlipGlobal > dot.tStartRefresh + 5.0-frameTolerance:
                 # keep track of stop time/frame for later
-                dot_centered.tStop = t  # not accounting for scr refresh
-                dot_centered.frameNStop = frameN  # exact frame index
+                dot.tStop = t  # not accounting for scr refresh
+                dot.frameNStop = frameN  # exact frame index
                 # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'dot_centered.stopped')
+                thisExp.timestampOnFlip(win, 'dot.stopped')
                 # update status
-                dot_centered.status = FINISHED
-                dot_centered.setAutoDraw(False)
+                dot.status = FINISHED
+                dot.setAutoDraw(False)
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -664,7 +677,7 @@ for _ in range(5):
     continueRoutine = True
     # update component parameters for each repeat
     # keep track of which components have finished
-    centered_dotComponents = [dot_centered]
+    centered_dotComponents = [dot]
     for thisComponent in centered_dotComponents:
         thisComponent.tStart = None
         thisComponent.tStop = None
@@ -687,39 +700,39 @@ for _ in range(5):
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
         
-        # *dot_centered* updates
+        # *dot* updates
         
-        # if dot_centered is starting this frame...
-        if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        # if dot is starting this frame...
+        if dot.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
             # keep track of start time/frame for later
-            dot_centered.frameNStart = frameN  # exact frame index
-            dot_centered.tStart = t  # local t and not account for scr refresh
-            dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
-            win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
+            dot.frameNStart = frameN  # exact frame index
+            dot.tStart = t  # local t and not account for scr refresh
+            dot.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(dot, 'tStartRefresh')  # time at next scr refresh
             # add timestamp to datafile
-            thisExp.timestampOnFlip(win, 'dot_centered.started')
+            thisExp.timestampOnFlip(win, 'dot.started')
             # update status
-            dot_centered.status = STARTED
-            dot_centered.setAutoDraw(True)
+            dot.status = STARTED
+            dot.setAutoDraw(True)
             ioServer.getDevice('tracker').sendMessage("ET: Start routine 'centered_dot'")
         
-        # if dot_centered is active this frame...
-        if dot_centered.status == STARTED:
+        # if dot is active this frame...
+        if dot.status == STARTED:
             # update params
             pass
         
-        # if dot_centered is stopping this frame...
-        if dot_centered.status == STARTED:
+        # if dot is stopping this frame...
+        if dot.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
+            if tThisFlipGlobal > dot.tStartRefresh + 5.0-frameTolerance:
                 # keep track of stop time/frame for later
-                dot_centered.tStop = t  # not accounting for scr refresh
-                dot_centered.frameNStop = frameN  # exact frame index
+                dot.tStop = t  # not accounting for scr refresh
+                dot.frameNStop = frameN  # exact frame index
                 # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'dot_centered.stopped')
+                thisExp.timestampOnFlip(win, 'dot.stopped')
                 # update status
-                dot_centered.status = FINISHED
-                dot_centered.setAutoDraw(False)
+                dot.status = FINISHED
+                dot.setAutoDraw(False)
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
