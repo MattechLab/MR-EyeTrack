@@ -43,7 +43,7 @@ os.chdir(_thisDir)
 psychopyVersion = '2024.2.1'
 expName = 'fixed_dot-16_grid_T1w'  # from the Builder filename that created this script
 expInfo = {
-    'participant': f"{randint(0, 999999):06.0f}",
+    'participant': f"{randint(0, 999):03.0f}",
     'session': '001',
 }
 # --- Show participant info dialog --
@@ -85,11 +85,18 @@ monitor.saveMon()
 
 # --- Setup the Window ---
 win = visual.Window(
-    size=WIN_SIZE, fullscr=True, screen=0, 
-    winType='pyglet', allowStencil=False,
-    monitor='expMonitor', color=(0, 0, 0), colorSpace='rgb',
-    backgroundImage='', backgroundFit='none',
-    blendMode='avg', useFBO=True, 
+    size=WIN_SIZE,
+    fullscr=True,
+    screen=0, 
+    winType='pyglet',
+    allowStencil=False,
+    monitor='expMonitor',
+    color=(0, 0, 0),
+    colorSpace='rgb',
+    backgroundImage='',
+    backgroundFit='none',
+    blendMode='avg',
+    useFBO=True, 
     units='deg')
 win.mouseVisible = False
 # store frame rate of monitor if we can measure it
