@@ -12,7 +12,7 @@ eMask_paths = {
     '/home/debi/jaime/repos/MR-EyeTrack/results/Sub001/T1_LIBRE_Binning/other/clean_0.75/eMask_th0.75_region0.mat' % clean 75%
     '/home/debi/jaime/repos/MR-EyeTrack/results/Sub001/T1_LIBRE_Binning/other/clean_0.95/eMask_th0.75_region0.mat' % clean 95%
 };
-eMask_path = eMask_paths{5}; % Select desired eMask path
+eMask_path = eMask_paths{2}; % Select desired eMask path
 fprintf('eMask: %s\n', eMask_path);
 nx  = 480;          % Number of sampled points along each spoke
 nPC = 1;            % Number of phase cycles
