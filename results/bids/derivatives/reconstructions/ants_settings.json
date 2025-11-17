@@ -1,0 +1,4 @@
+{
+    "use-histogram-matching": 1,
+    "metric": "MI"
+}

@@ -166,4 +166,28 @@ visual_stimuli/test/fixation_dots/data/
 visual_stimuli/test/HCPh-fMRI-tasks/results/
 visual_stimuli/data/
 visual_stimuli/data_archive/
+visual_stimuli/data_archive/
 .DS_Store
+.vscode/
+/data
+/other
+
+# results
+/results/*
+/results/mriqc/
+/results/Sub-*/
+/results/bids/derivatives/reconstructions/*
+
+# Keep only these 3 JSON files under reconstructions
+!/results/bids/derivatives/reconstructions/dataset_description.json
+!/results/bids/derivatives/reconstructions/ants_settings.json
+!/results/bids/derivatives/reconstructions/bids_filter.json
+
+# keep these folders to keep the json files
+!/results/bids/
+!/results/bids/derivatives/
+!/results/bids/derivatives/reconstructions/
+
+# MATLAB
+*.asv
+*.mat

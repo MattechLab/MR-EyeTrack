@@ -13,3 +13,7 @@ throughout the acquisition and synchronized with the MRI machine. Readouts acqui
 discarded, whereas the others are grouped with respect to the shown visual stimulus. By applying the
 reconstruction on each of these groups of readouts, 16 different 3D motion-free T1-weighted images are
 obtained, each with eyes oriented in a specific direction (panel C). Adapted from Franceschiello et al.
+
+![alt text](18-e-calibration.png)
+
+Project experiment on Pyschopy.

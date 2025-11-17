@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2024.2.1),
-    on November 09, 2025, at 13:51
+    on January 27, 2025, at 11:49
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -22,7 +22,8 @@ from psychopy import sound, gui, visual, core, data, event, logging, clock, colo
 from psychopy.tools import environmenttools
 from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED,
                                 STOPPED, FINISHED, PRESSED, RELEASED, FOREVER, priority)
-
+import socket
+# from hcphsignals import signals
 import numpy as np  # whole numpy lib is available, prepend 'np.'
 from numpy import (sin, cos, tan, log, log10, pi, average,
                    sqrt, std, deg2rad, rad2deg, linspace, asarray)
@@ -33,6 +34,12 @@ import sys  # to get file system encoding
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
 
+def send_message(message, addr="localhost", port=2023):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((addr, port))
+    client_socket.sendall(message)
+    client_socket.close()
+    
 # --- Setup global variables (available in all functions) ---
 # create a device manager to handle hardware (keyboards, mice, mirophones, speakers, etc.)
 deviceManager = hardware.DeviceManager()
@@ -40,7 +47,7 @@ deviceManager = hardware.DeviceManager()
 _thisDir = os.path.dirname(os.path.abspath(__file__))
 # store info about the experiment session
 psychopyVersion = '2024.2.1'
-expName = 'fixed_dot-16_grid_T1w'  # from the Builder filename that created this script
+expName = 'fixation_dots_T1weighted'  # from the Builder filename that created this script
 # information about this experiment
 expInfo = {
     'participant': f"{randint(0, 999999):06.0f}",
@@ -59,8 +66,8 @@ or run the experiment with `--pilot` as an argument. To change what pilot
 # work out from system args whether we are running in pilot mode
 PILOTING = core.setPilotModeFromArgs()
 # start off with values from experiment settings
-_fullScr = True
-_winSize = [1280, 720]
+_fullScr = False
+_winSize = [800, 600]
 # if in pilot mode, apply overrides according to preferences
 if PILOTING:
     # force windowed mode
@@ -126,7 +133,7 @@ def setupData(expInfo, dataDir=None):
     thisExp = data.ExperimentHandler(
         name=expName, version='',
         extraInfo=expInfo, runtimeInfo=None,
-        originPath='C:\\Users\\jaime.barranco\\Desktop\\repos\\mattechlab\\MR-EyeTrack\\visual_stimuli\\fixed_dot-16_grid_T1w_lastrun.py',
+        originPath='C:\\yiwei\\1_Pilot_MREye_Data\\1_anatomical-Protocol\\MREye_psychopy\\MREye_psychopy\\fixation_dots_T1weighted.py',
         savePickle=True, saveWideText=True,
         dataFileName=dataDir + os.sep + filename, sortColumns='time'
     )
@@ -187,15 +194,12 @@ def setupWindow(expInfo=None, win=None):
     psychopy.visual.Window
         Window in which to run this experiment.
     """
-    if PILOTING:
-        logging.debug('Fullscreen settings ignored as running in pilot mode.')
-    
     if win is None:
         # if not given a window to setup, make one
         win = visual.Window(
-            size=_winSize, fullscr=_fullScr, screen=0,
+            size=[800, 600], fullscr=False, screen=0,
             winType='pyglet', allowStencil=False,
-            monitor='testMonitor', color=[-1.0000, -1.0000, -1.0000], colorSpace='rgb',
+            monitor='testMonitor', color=[0,0,0], colorSpace='rgb',
             backgroundImage='', backgroundFit='none',
             blendMode='avg', useFBO=True,
             units='norm', 
@@ -203,7 +207,7 @@ def setupWindow(expInfo=None, win=None):
         )
     else:
         # if we have a window, just set the attributes which are safe to set
-        win.color = [-1.0000, -1.0000, -1.0000]
+        win.color = [0,0,0]
         win.colorSpace = 'rgb'
         win.backgroundImage = ''
         win.backgroundFit = 'none'
@@ -213,7 +217,7 @@ def setupWindow(expInfo=None, win=None):
         if win._monitorFrameRate is None:
             win._monitorFrameRate = win.getActualFrameRate(infoMsg='Attempting to measure frame rate of screen, please wait...')
         expInfo['frameRate'] = win._monitorFrameRate
-    win.mouseVisible = False
+    win.mouseVisible = True
     win.hideMessage()
     # show a visual indicator if we're in piloting mode
     if PILOTING and prefs.piloting['showPilotingIndicator']:
@@ -299,7 +303,7 @@ def setupDevices(expInfo, thisExp, win):
     # return True if completed successfully
     return True
 
-def pauseExperiment(thisExp, win=None, timers=[], playbackComponents=[]):
+def pauseExperiment(thisExp, win=None, timers=[], playbackComponents=[], ioServer=None):
     """
     Pause this experiment, preventing the flow from advancing to the next routine until resumed.
     
@@ -336,6 +340,7 @@ def pauseExperiment(thisExp, win=None, timers=[], playbackComponents=[]):
     while thisExp.status == PAUSED:
         # check for quit (typically the Esc key)
         if defaultKeyboard.getKeys(keyList=['escape']):
+            ioServer.getDevice('tracker').sendMessage("key board escape")
             endExperiment(thisExp, win=win)
         # sleep 1ms so other threads can execute
         clock.time.sleep(0.001)
@@ -394,102 +399,140 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         frameDur = 1.0 / 60.0  # could not measure, so guess
     
     # Start Code - component code to be run after the window creation
-    
+    # --- Setup input devices ---
+    ioConfig = {}
+    # Setup eyetracking
+    ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
+        'name': 'tracker',
+        'model_name': 'EYELINK 1000 DESKTOP',
+        'simulation_mode': False,
+        'network_settings': '100.1.1.1',
+        'default_native_data_file_name': 'JB1',
+        'runtime_settings': {
+            'sampling_rate': 1000.0,
+            'track_eyes': 'RIGHT_EYE',
+            'sample_filtering': {
+                'sample_filtering': 'FILTER_LEVEL_2',
+                'elLiveFiltering': 'FILTER_LEVEL_OFF',
+            },
+            'vog_settings': {
+                'pupil_measure_types': 'PUPIL_AREA',
+                'tracking_mode': 'PUPIL_CR_TRACKING',
+                'pupil_center_algorithm': 'ELLIPSE_FIT',
+            }
+        }
+    }
+    # Setup iohub keyboard
+    ioConfig['Keyboard'] = dict(use_keymap='psychopy')
+
+    ioSession = '1'
+    if 'session' in expInfo:
+        ioSession = str(expInfo['session'])
+    ioServer = io.launchHubServer(window=win, **ioConfig)
+    eyetracker = ioServer.getDevice('tracker')
     # --- Initialize components for Routine "trail" ---
-    
-    # Unknown component ignored: trail_2
-    
     waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
         text="The program is ready for the scanner trigger. Press 's' to proceed manually.",
         font='Open Sans',
         pos=(0, -0.4), draggable=False, height=0.12, wrapWidth=1.7, ori=0.0, 
         color='white', colorSpace='rgb', opacity=1.0, 
         languageStyle='LTR',
-        depth=-1.0);
+        depth=0.0);
     key_resp = keyboard.Keyboard(deviceName='key_resp')
     fix_desc = visual.TextStim(win=win, name='fix_desc',
-        text='In this task you will see a dot moving randomly within different positions on the screen. You have to follow the dot :)',
+        text='In this task you will see a central dot with changing colors on the screen. \nPlease keep your eyes on the fixation circle like the one below.',
         font='Open Sans',
         pos=(0, 0.25), draggable=False, height=0.12, wrapWidth=1.0, ori=0.0, 
         color='white', colorSpace='rgb', opacity=1.0, 
         languageStyle='LTR',
-        depth=-3.0);
+        depth=-2.0);
     
     # --- Initialize components for Routine "start_ET" ---
-    
-    # Unknown component ignored: start_ET_2
-    
     etRecord = hardware.eyetracker.EyetrackerControl(
         tracker=eyetracker,
         actionType='Start Only'
     )
-    # Run 'Begin Experiment' code from code_2
-    # Send logs to the ET
-    def send_message(message, addr="localhost", port=2023):
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((addr, port))
-        client_socket.sendall(message)
-        client_socket.close()
-    
-    # --- Initialize components for Routine "centered_dot" ---
-    
-    # Unknown component ignored: centered_dot_2
-    
-    dot_centered = visual.ShapeStim(
-        win=win, name='dot_centered',
-        size=(0.1, 0.1), vertices='circle',
-        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
-        lineWidth=1.0,
-        colorSpace='rgb', lineColor=[0.5000, 0.5000, 0.5000], fillColor=[0.5000, 0.5000, 0.5000],
-        opacity=1.0, depth=-1.0, interpolate=True)
     
     # --- Initialize components for Routine "dots" ---
-    
-    # Unknown component ignored: dots_2
-    
-    dot = visual.ShapeStim(
-        win=win, name='dot',
-        size=(0.1, 0.1), vertices='circle',
+    dot_1 = visual.ShapeStim(
+        win=win, name='dot_1',
+        size=(0.04, 0.04), vertices='circle',
         ori=0.0, pos=(0, 0), draggable=False, anchor='center',
         lineWidth=1.0,
-        colorSpace='rgb', lineColor=[0.5, 0.5, 0.5], fillColor=[0.5, 0.5, 0.5],
-        opacity=1.0, depth=-1.0, interpolate=True)
-    # Run 'Begin Experiment' code from code
-    # Begin Experiment
-    grid_size = 4  # 4x4 grid
-    dot_size = 0.05  # Size of the grey dot
-    t_dot = 5  # Seconds of showing the dot per position
-    positions = {
-        (0, 0.66): "up", 
-        (0, -0.66): "down", 
-        (0.66, 0): "right", 
-        (-0.66, 0): "left"
-    }  # Define cross positions with labels
-    ioServer.getDevice('tracker').sendMessage("ET: Start experiment 'dots'")
-    
-    # --- Initialize components for Routine "centered_dot" ---
-    
-    # Unknown component ignored: centered_dot_2
-    
-    dot_centered = visual.ShapeStim(
-        win=win, name='dot_centered',
-        size=(0.1, 0.1), vertices='circle',
+        colorSpace='rgb', lineColor=[1.0000, -1.0000, -1.0000], fillColor=[1.0000, -1.0000, -1.0000],
+        opacity=None, depth=0.0, interpolate=True)
+    dot_2 = visual.ShapeStim(
+        win=win, name='dot_2',
+        size=(0.04, 0.04), vertices='circle',
         ori=0.0, pos=(0, 0), draggable=False, anchor='center',
         lineWidth=1.0,
-        colorSpace='rgb', lineColor=[0.5000, 0.5000, 0.5000], fillColor=[0.5000, 0.5000, 0.5000],
-        opacity=1.0, depth=-1.0, interpolate=True)
+        colorSpace='rgb', lineColor='white', fillColor=[-1.0000, -1.0000, 0.0902],
+        opacity=None, depth=-1.0, interpolate=True)
+    dot_3 = visual.ShapeStim(
+        win=win, name='dot_3',
+        size=(0.04, 0.04), vertices='circle',
+        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor=[1.0000, 0.0745, -0.4667], fillColor=[1.0000, 0.0745, -0.4667],
+        opacity=None, depth=-2.0, interpolate=True)
+    dot_4 = visual.ShapeStim(
+        win=win, name='dot_4',
+        size=(0.04, 0.04), vertices='circle',
+        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor=[-1,1,1], fillColor=[-1,1,1],
+        opacity=None, depth=-3.0, interpolate=True)
+    dot_5 = visual.ShapeStim(
+        win=win, name='dot_5',
+        size=(0.04, 0.04), vertices='circle',
+        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor=[0.4510, 0.4275, 0.4353], fillColor=[0.4510, 0.4275, 0.4353],
+        opacity=None, depth=-4.0, interpolate=True)
+    dot_6 = visual.ShapeStim(
+        win=win, name='dot_6',
+        size=(0.04, 0.04), vertices='circle',
+        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor=[1.0000, 0.7647, -0.6235], fillColor=[1.0000, 0.7647, -0.6235],
+        opacity=None, depth=-5.0, interpolate=True)
+    dot_7 = visual.ShapeStim(
+        win=win, name='dot_7',
+        size=(0.04, 0.04), vertices='circle',
+        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor=[-0.15, -0.1, 1], fillColor=[0.2235, -1.0000, 1.0000],
+        opacity=None, depth=-6.0, interpolate=True)
+    dot_8 = visual.ShapeStim(
+        win=win, name='dot_8',
+        size=(0.04, 0.04), vertices='circle',
+        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor=[0.3412, -0.1294, -0.5059], fillColor=[0.3412, -0.1294, -0.5059],
+        opacity=None, depth=-7.0, interpolate=True)
+    dot_9 = visual.ShapeStim(
+        win=win, name='dot_9',
+        size=(0.04, 0.04), vertices='circle',
+        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor=[0.6078, -0.2784, -0.2784], fillColor=[0.6078, -0.2784, -0.2784],
+        opacity=None, depth=-8.0, interpolate=True)
+    dot_10 = visual.ShapeStim(
+        win=win, name='dot_10',
+        size=(0.04, 0.04), vertices='circle',
+        ori=0.0, pos=(0, 0), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor=[-0.0039, 1.0000, 0.6627], fillColor=[-0.0039, 1.0000, 0.6627],
+        opacity=None, depth=-9.0, interpolate=True)
     
     # --- Initialize components for Routine "end" ---
-    
-    # Unknown component ignored: end_2
-    
     text = visual.TextStim(win=win, name='text',
         text="End press 't'",
         font='Open Sans',
         pos=(0, 0), draggable=False, height=0.12, wrapWidth=None, ori=0.0, 
         color='white', colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=-1.0);
+        depth=0.0);
     ET_stop = hardware.eyetracker.EyetrackerControl(
         tracker=eyetracker,
         actionType='Stop Only'
@@ -526,8 +569,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # define target for calibration_2
     calibration_2Target = visual.TargetStim(win, 
         name='calibration_2Target',
-        radius=0.15, fillColor=[0.5, 0.5, 0.5], borderColor=[0.5, 0.5, 0.5], lineWidth=2.0,
-        innerRadius=0.07, innerFillColor=[0.5, 0.5, 0.5], innerBorderColor=[0.5, 0.5, 0.5], innerLineWidth=2.0,
+        radius=0.15, fillColor=[-1, -1, -1], borderColor='black', lineWidth=2.0,
+        innerRadius=0.07, innerFillColor='green', innerBorderColor='black', innerLineWidth=2.0,
         colorSpace='rgb', units=None
     )
     # define parameters for calibration_2
@@ -550,7 +593,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # create an object to store info about Routine trail
     trail = data.Routine(
         name='trail',
-        components=[trail_2, waiting_trigger, key_resp, fix_desc],
+        components=[waiting_trigger, key_resp, fix_desc],
     )
     trail.status = NOT_STARTED
     continueRoutine = True
@@ -629,12 +672,14 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             win.callOnFlip(key_resp.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if key_resp.status == STARTED and not waitOnFlip:
             theseKeys = key_resp.getKeys(keyList=['s'], ignoreKeys=["escape"], waitRelease=False)
+            ioServer.getDevice('tracker').sendMessage("-----Key s detected----------")
             _key_resp_allKeys.extend(theseKeys)
             if len(_key_resp_allKeys):
                 key_resp.keys = _key_resp_allKeys[-1].name  # just the last key pressed
                 key_resp.rt = _key_resp_allKeys[-1].rt
                 key_resp.duration = _key_resp_allKeys[-1].duration
                 # a response ends the routine
+                
                 continueRoutine = False
         
         # *fix_desc* updates
@@ -669,7 +714,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                 thisExp=thisExp, 
                 win=win, 
                 timers=[routineTimer], 
-                playbackComponents=[]
+                playbackComponents=[],
+                ioServer=ioServer
             )
             # skip the frame we paused on
             continue
@@ -700,9 +746,12 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     if key_resp.keys in ['', [], None]:  # No response was made
         key_resp.keys = None
     thisExp.addData('key_resp.keys',key_resp.keys)
+    
     if key_resp.keys != None:  # we had a response
         thisExp.addData('key_resp.rt', key_resp.rt)
         thisExp.addData('key_resp.duration', key_resp.duration)
+        if key_resp.keys in ['s']:  # s response was made
+            ioServer.getDevice('tracker').sendMessage("Key s trigger response")
     thisExp.nextEntry()
     # the Routine "trail" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset()
@@ -711,13 +760,11 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # create an object to store info about Routine start_ET
     start_ET = data.Routine(
         name='start_ET',
-        components=[start_ET_2, etRecord],
+        components=[etRecord],
     )
     start_ET.status = NOT_STARTED
     continueRoutine = True
     # update component parameters for each repeat
-    # Run 'Begin Routine' code from code_2
-    ioServer.getDevice('tracker').sendMessage("ET: recording started")
     # store start times for start_ET
     start_ET.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
     start_ET.tStart = globalClock.getTime(format='float')
@@ -761,16 +808,19 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             thisExp.timestampOnFlip(win, 'etRecord.started')
             # update status
             etRecord.status = STARTED
+            ioServer.getDevice('tracker').sendMessage("Hello tracker record")
             etRecord.start()
         if etRecord.status == STARTED:
             etRecord.tStop = t  # not accounting for scr refresh
             etRecord.tStopRefresh = tThisFlipGlobal  # on global time
             etRecord.frameNStop = frameN  # exact frame index
             etRecord.status = FINISHED
+            ioServer.getDevice('tracker').sendMessage("Bye tracker record")
         
         # check for quit (typically the Esc key)
         if defaultKeyboard.getKeys(keyList=["escape"]):
             thisExp.status = FINISHED
+            ioServer.getDevice('tracker').sendMessage("key board escape")
         if thisExp.status == FINISHED or endExpNow:
             endExperiment(thisExp, win=win)
             return
@@ -780,7 +830,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                 thisExp=thisExp, 
                 win=win, 
                 timers=[routineTimer], 
-                playbackComponents=[]
+                playbackComponents=[],
+                ioServer=ioServer
             )
             # skip the frame we paused on
             continue
@@ -812,167 +863,9 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     routineTimer.reset()
     
     # set up handler to look after randomisation of conditions etc
-    trials = data.TrialHandler2(
-        name='trials',
-        nReps=6.0, 
-        method='random', 
-        extraInfo=expInfo, 
-        originPath=-1, 
-        trialList=[None], 
-        seed=None, 
-    )
-    thisExp.addLoop(trials)  # add the loop to the experiment
-    thisTrial = trials.trialList[0]  # so we can initialise stimuli with some values
-    # abbreviate parameter names if possible (e.g. rgb = thisTrial.rgb)
-    if thisTrial != None:
-        for paramName in thisTrial:
-            globals()[paramName] = thisTrial[paramName]
-    if thisSession is not None:
-        # if running in a Session with a Liaison client, send data up to now
-        thisSession.sendExperimentData()
-    
-    for thisTrial in trials:
-        currentLoop = trials
-        thisExp.timestampOnFlip(win, 'thisRow.t', format=globalClock.format)
-        if thisSession is not None:
-            # if running in a Session with a Liaison client, send data up to now
-            thisSession.sendExperimentData()
-        # abbreviate parameter names if possible (e.g. rgb = thisTrial.rgb)
-        if thisTrial != None:
-            for paramName in thisTrial:
-                globals()[paramName] = thisTrial[paramName]
-        
-        # --- Prepare to start Routine "centered_dot" ---
-        # create an object to store info about Routine centered_dot
-        centered_dot = data.Routine(
-            name='centered_dot',
-            components=[centered_dot_2, dot_centered],
-        )
-        centered_dot.status = NOT_STARTED
-        continueRoutine = True
-        # update component parameters for each repeat
-        # Run 'Begin Routine' code from code_4
-        ioServer.getDevice('tracker').sendMessage("ET: Start routine 'centered_dot'")
-        # store start times for centered_dot
-        centered_dot.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
-        centered_dot.tStart = globalClock.getTime(format='float')
-        centered_dot.status = STARTED
-        thisExp.addData('centered_dot.started', centered_dot.tStart)
-        centered_dot.maxDuration = None
-        # keep track of which components have finished
-        centered_dotComponents = centered_dot.components
-        for thisComponent in centered_dot.components:
-            thisComponent.tStart = None
-            thisComponent.tStop = None
-            thisComponent.tStartRefresh = None
-            thisComponent.tStopRefresh = None
-            if hasattr(thisComponent, 'status'):
-                thisComponent.status = NOT_STARTED
-        # reset timers
-        t = 0
-        _timeToFirstFrame = win.getFutureFlipTime(clock="now")
-        frameN = -1
-        
-        # --- Run Routine "centered_dot" ---
-        # if trial has changed, end Routine now
-        if isinstance(trials, data.TrialHandler2) and thisTrial.thisN != trials.thisTrial.thisN:
-            continueRoutine = False
-        centered_dot.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine:
-            # get current time
-            t = routineTimer.getTime()
-            tThisFlip = win.getFutureFlipTime(clock=routineTimer)
-            tThisFlipGlobal = win.getFutureFlipTime(clock=None)
-            frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
-            # update/draw components on each frame
-            
-            # *dot_centered* updates
-            
-            # if dot_centered is starting this frame...
-            if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                dot_centered.frameNStart = frameN  # exact frame index
-                dot_centered.tStart = t  # local t and not account for scr refresh
-                dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
-                # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'dot_centered.started')
-                # update status
-                dot_centered.status = STARTED
-                dot_centered.setAutoDraw(True)
-            
-            # if dot_centered is active this frame...
-            if dot_centered.status == STARTED:
-                # update params
-                pass
-            
-            # if dot_centered is stopping this frame...
-            if dot_centered.status == STARTED:
-                # is it time to stop? (based on global clock, using actual start)
-                if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
-                    # keep track of stop time/frame for later
-                    dot_centered.tStop = t  # not accounting for scr refresh
-                    dot_centered.tStopRefresh = tThisFlipGlobal  # on global time
-                    dot_centered.frameNStop = frameN  # exact frame index
-                    # add timestamp to datafile
-                    thisExp.timestampOnFlip(win, 'dot_centered.stopped')
-                    # update status
-                    dot_centered.status = FINISHED
-                    dot_centered.setAutoDraw(False)
-            
-            # check for quit (typically the Esc key)
-            if defaultKeyboard.getKeys(keyList=["escape"]):
-                thisExp.status = FINISHED
-            if thisExp.status == FINISHED or endExpNow:
-                endExperiment(thisExp, win=win)
-                return
-            # pause experiment here if requested
-            if thisExp.status == PAUSED:
-                pauseExperiment(
-                    thisExp=thisExp, 
-                    win=win, 
-                    timers=[routineTimer], 
-                    playbackComponents=[]
-                )
-                # skip the frame we paused on
-                continue
-            
-            # check if all components have finished
-            if not continueRoutine:  # a component has requested a forced-end of Routine
-                centered_dot.forceEnded = routineForceEnded = True
-                break
-            continueRoutine = False  # will revert to True if at least one component still running
-            for thisComponent in centered_dot.components:
-                if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
-                    continueRoutine = True
-                    break  # at least one component has not yet finished
-            
-            # refresh the screen
-            if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
-                win.flip()
-        
-        # --- Ending Routine "centered_dot" ---
-        for thisComponent in centered_dot.components:
-            if hasattr(thisComponent, "setAutoDraw"):
-                thisComponent.setAutoDraw(False)
-        # store stop times for centered_dot
-        centered_dot.tStop = globalClock.getTime(format='float')
-        centered_dot.tStopRefresh = tThisFlipGlobal
-        thisExp.addData('centered_dot.stopped', centered_dot.tStop)
-        # the Routine "centered_dot" was not non-slip safe, so reset the non-slip timer
-        routineTimer.reset()
-        thisExp.nextEntry()
-        
-    # completed 6.0 repeats of 'trials'
-    
-    if thisSession is not None:
-        # if running in a Session with a Liaison client, send data up to now
-        thisSession.sendExperimentData()
-    
-    # set up handler to look after randomisation of conditions etc
     T1w_LIBRE = data.TrialHandler2(
         name='T1w_LIBRE',
-        nReps=30.0, 
+        nReps=72.0, 
         method='random', 
         extraInfo=expInfo, 
         originPath=-1, 
@@ -991,6 +884,13 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     
     for thisT1w_LIBRE in T1w_LIBRE:
         currentLoop = T1w_LIBRE
+        current_rep_index = T1w_LIBRE.thisRepN
+        if current_rep_index == 0:
+            # now it is the first repetition
+            ioServer.getDevice('tracker').sendMessage("T1w_LIBRE stimuli start")
+        if T1w_LIBRE.thisRepN % 10 == 0:
+            info = f"Stimuli after {T1w_LIBRE.thisRepN/10} seconds..."
+            ioServer.getDevice('tracker').sendMessage(info)
         thisExp.timestampOnFlip(win, 'thisRow.t', format=globalClock.format)
         if thisSession is not None:
             # if running in a Session with a Liaison client, send data up to now
@@ -1004,21 +904,12 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         # create an object to store info about Routine dots
         dots = data.Routine(
             name='dots',
-            components=[dots_2, dot],
+            components=[dot_1, dot_2, dot_3, dot_4, dot_5, dot_6, dot_7, dot_8, dot_9, dot_10],
         )
         dots.status = NOT_STARTED
         continueRoutine = True
         # update component parameters for each repeat
-        # Run 'Begin Routine' code from code
-        # Begin Routine
-        shuffled_positions = list(positions.items())  # Convert dictionary to a list of tuples
-        shuffle(shuffled_positions)  # Shuffle the positions
-        current_position_index = 0  # Start with the first position
-        total_positions = len(shuffled_positions)  # Track the total number of positions
-        dot.pos, direction = shuffled_positions[current_position_index]  # Set initial dot position and direction
-        time_of_last_change = 0  # Variable to store the time of the last position change
-        continueRoutine = True  # Ensure the routine continues
-        ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
+        dot_2.setLineColor([-1.0000, -1.0000, 0.0902])
         # store start times for dots
         dots.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
         dots.tStart = globalClock.getTime(format='float')
@@ -1044,7 +935,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         if isinstance(T1w_LIBRE, data.TrialHandler2) and thisT1w_LIBRE.thisN != T1w_LIBRE.thisTrial.thisN:
             continueRoutine = False
         dots.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine:
+        while continueRoutine and routineTimer.getTime() < 10.0:
             # get current time
             t = routineTimer.getTime()
             tThisFlip = win.getFutureFlipTime(clock=routineTimer)
@@ -1052,38 +943,345 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
             
-            # *dot* updates
+            # *dot_1* updates
             
-            # if dot is starting this frame...
-            if dot.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+            # if dot_1 is starting this frame...
+            if dot_1.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
                 # keep track of start time/frame for later
-                dot.frameNStart = frameN  # exact frame index
-                dot.tStart = t  # local t and not account for scr refresh
-                dot.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(dot, 'tStartRefresh')  # time at next scr refresh
+                dot_1.frameNStart = frameN  # exact frame index
+                dot_1.tStart = t  # local t and not account for scr refresh
+                dot_1.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_1, 'tStartRefresh')  # time at next scr refresh
                 # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'dot.started')
+                thisExp.timestampOnFlip(win, 'dot_1.started')
                 # update status
-                dot.status = STARTED
-                dot.setAutoDraw(True)
+                dot_1.status = STARTED
+                dot_1.setAutoDraw(True)
             
-            # if dot is active this frame...
-            if dot.status == STARTED:
+            # if dot_1 is active this frame...
+            if dot_1.status == STARTED:
                 # update params
                 pass
-            # Run 'Each Frame' code from code
-            # Each Frame
-            t = routineTimer.getTime()  # Get the current time in the routine
             
-            # Check if enough time has passed since the last position change
-            if t - time_of_last_change >= t_dot:
-                current_position_index += 1  # Move to the next position
-                if current_position_index < total_positions:  # Ensure the index is within bounds
-                    dot.pos, direction = shuffled_positions[current_position_index]  # Update the dot position and direction
-                    ioServer.getDevice('tracker').sendMessage(f"ET: dot moved {direction}!")  # Log the direction of movement
-                    time_of_last_change = t  # Reset the time of the last position change
-                else:
-                    continueRoutine = False  # End the routine when all positions are visited
+            # if dot_1 is stopping this frame...
+            if dot_1.status == STARTED:
+                # is it time to stop? (based on global clock, using actual start)
+                if tThisFlipGlobal > dot_1.tStartRefresh + 1-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_1.tStop = t  # not accounting for scr refresh
+                    dot_1.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_1.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_1.stopped')
+                    # update status
+                    dot_1.status = FINISHED
+                    dot_1.setAutoDraw(False)
+            
+            # *dot_2* updates
+            
+            # if dot_2 is starting this frame...
+            if dot_2.status == NOT_STARTED and tThisFlip >= 1-frameTolerance:
+                # keep track of start time/frame for later
+                dot_2.frameNStart = frameN  # exact frame index
+                dot_2.tStart = t  # local t and not account for scr refresh
+                dot_2.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_2, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_2.started')
+                # update status
+                dot_2.status = STARTED
+                dot_2.setAutoDraw(True)
+            
+            # if dot_2 is active this frame...
+            if dot_2.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_2 is stopping this frame...
+            if dot_2.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 2-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_2.tStop = t  # not accounting for scr refresh
+                    dot_2.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_2.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_2.stopped')
+                    # update status
+                    dot_2.status = FINISHED
+                    dot_2.setAutoDraw(False)
+            
+            # *dot_3* updates
+            
+            # if dot_3 is starting this frame...
+            if dot_3.status == NOT_STARTED and tThisFlip >= 2-frameTolerance:
+                # keep track of start time/frame for later
+                dot_3.frameNStart = frameN  # exact frame index
+                dot_3.tStart = t  # local t and not account for scr refresh
+                dot_3.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_3, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_3.started')
+                # update status
+                dot_3.status = STARTED
+                dot_3.setAutoDraw(True)
+            
+            # if dot_3 is active this frame...
+            if dot_3.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_3 is stopping this frame...
+            if dot_3.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 3-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_3.tStop = t  # not accounting for scr refresh
+                    dot_3.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_3.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_3.stopped')
+                    # update status
+                    dot_3.status = FINISHED
+                    dot_3.setAutoDraw(False)
+            
+            # *dot_4* updates
+            
+            # if dot_4 is starting this frame...
+            if dot_4.status == NOT_STARTED and tThisFlip >= 3-frameTolerance:
+                # keep track of start time/frame for later
+                dot_4.frameNStart = frameN  # exact frame index
+                dot_4.tStart = t  # local t and not account for scr refresh
+                dot_4.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_4, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_4.started')
+                # update status
+                dot_4.status = STARTED
+                dot_4.setAutoDraw(True)
+            
+            # if dot_4 is active this frame...
+            if dot_4.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_4 is stopping this frame...
+            if dot_4.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 4-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_4.tStop = t  # not accounting for scr refresh
+                    dot_4.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_4.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_4.stopped')
+                    # update status
+                    dot_4.status = FINISHED
+                    dot_4.setAutoDraw(False)
+            
+            # *dot_5* updates
+            
+            # if dot_5 is starting this frame...
+            if dot_5.status == NOT_STARTED and tThisFlip >= 4-frameTolerance:
+                # keep track of start time/frame for later
+                dot_5.frameNStart = frameN  # exact frame index
+                dot_5.tStart = t  # local t and not account for scr refresh
+                dot_5.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_5, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_5.started')
+                # update status
+                dot_5.status = STARTED
+                dot_5.setAutoDraw(True)
+            
+            # if dot_5 is active this frame...
+            if dot_5.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_5 is stopping this frame...
+            if dot_5.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 5-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_5.tStop = t  # not accounting for scr refresh
+                    dot_5.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_5.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_5.stopped')
+                    # update status
+                    dot_5.status = FINISHED
+                    dot_5.setAutoDraw(False)
+            
+            # *dot_6* updates
+            
+            # if dot_6 is starting this frame...
+            if dot_6.status == NOT_STARTED and tThisFlip >= 5-frameTolerance:
+                # keep track of start time/frame for later
+                dot_6.frameNStart = frameN  # exact frame index
+                dot_6.tStart = t  # local t and not account for scr refresh
+                dot_6.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_6, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_6.started')
+                # update status
+                dot_6.status = STARTED
+                dot_6.setAutoDraw(True)
+            
+            # if dot_6 is active this frame...
+            if dot_6.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_6 is stopping this frame...
+            if dot_6.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 6-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_6.tStop = t  # not accounting for scr refresh
+                    dot_6.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_6.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_6.stopped')
+                    # update status
+                    dot_6.status = FINISHED
+                    dot_6.setAutoDraw(False)
+            
+            # *dot_7* updates
+            
+            # if dot_7 is starting this frame...
+            if dot_7.status == NOT_STARTED and tThisFlip >= 6-frameTolerance:
+                # keep track of start time/frame for later
+                dot_7.frameNStart = frameN  # exact frame index
+                dot_7.tStart = t  # local t and not account for scr refresh
+                dot_7.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_7, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_7.started')
+                # update status
+                dot_7.status = STARTED
+                dot_7.setAutoDraw(True)
+            
+            # if dot_7 is active this frame...
+            if dot_7.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_7 is stopping this frame...
+            if dot_7.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 7-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_7.tStop = t  # not accounting for scr refresh
+                    dot_7.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_7.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_7.stopped')
+                    # update status
+                    dot_7.status = FINISHED
+                    dot_7.setAutoDraw(False)
+            
+            # *dot_8* updates
+            
+            # if dot_8 is starting this frame...
+            if dot_8.status == NOT_STARTED and tThisFlip >= 7-frameTolerance:
+                # keep track of start time/frame for later
+                dot_8.frameNStart = frameN  # exact frame index
+                dot_8.tStart = t  # local t and not account for scr refresh
+                dot_8.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_8, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_8.started')
+                # update status
+                dot_8.status = STARTED
+                dot_8.setAutoDraw(True)
+            
+            # if dot_8 is active this frame...
+            if dot_8.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_8 is stopping this frame...
+            if dot_8.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 8-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_8.tStop = t  # not accounting for scr refresh
+                    dot_8.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_8.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_8.stopped')
+                    # update status
+                    dot_8.status = FINISHED
+                    dot_8.setAutoDraw(False)
+            
+            # *dot_9* updates
+            
+            # if dot_9 is starting this frame...
+            if dot_9.status == NOT_STARTED and tThisFlip >= 8-frameTolerance:
+                # keep track of start time/frame for later
+                dot_9.frameNStart = frameN  # exact frame index
+                dot_9.tStart = t  # local t and not account for scr refresh
+                dot_9.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_9, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_9.started')
+                # update status
+                dot_9.status = STARTED
+                dot_9.setAutoDraw(True)
+            
+            # if dot_9 is active this frame...
+            if dot_9.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_9 is stopping this frame...
+            if dot_9.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 9-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_9.tStop = t  # not accounting for scr refresh
+                    dot_9.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_9.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_9.stopped')
+                    # update status
+                    dot_9.status = FINISHED
+                    dot_9.setAutoDraw(False)
+            
+            # *dot_10* updates
+            
+            # if dot_10 is starting this frame...
+            if dot_10.status == NOT_STARTED and tThisFlip >= 9-frameTolerance:
+                # keep track of start time/frame for later
+                dot_10.frameNStart = frameN  # exact frame index
+                dot_10.tStart = t  # local t and not account for scr refresh
+                dot_10.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(dot_10, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'dot_10.started')
+                # update status
+                dot_10.status = STARTED
+                dot_10.setAutoDraw(True)
+            
+            # if dot_10 is active this frame...
+            if dot_10.status == STARTED:
+                # update params
+                pass
+            
+            # if dot_10 is stopping this frame...
+            if dot_10.status == STARTED:
+                # is it time to stop? (based on local clock)
+                if tThisFlip > 10-frameTolerance:
+                    # keep track of stop time/frame for later
+                    dot_10.tStop = t  # not accounting for scr refresh
+                    dot_10.tStopRefresh = tThisFlipGlobal  # on global time
+                    dot_10.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'dot_10.stopped')
+                    # update status
+                    dot_10.status = FINISHED
+                    dot_10.setAutoDraw(False)
             
             # check for quit (typically the Esc key)
             if defaultKeyboard.getKeys(keyList=["escape"]):
@@ -1097,7 +1295,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                     thisExp=thisExp, 
                     win=win, 
                     timers=[routineTimer], 
-                    playbackComponents=[]
+                    playbackComponents=[],
+                    ioServer=ioServer
                 )
                 # skip the frame we paused on
                 continue
@@ -1124,169 +1323,16 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         dots.tStop = globalClock.getTime(format='float')
         dots.tStopRefresh = tThisFlipGlobal
         thisExp.addData('dots.stopped', dots.tStop)
-        # the Routine "dots" was not non-slip safe, so reset the non-slip timer
-        routineTimer.reset()
+        # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
+        if dots.maxDurationReached:
+            routineTimer.addTime(-dots.maxDuration)
+        elif dots.forceEnded:
+            routineTimer.reset()
+        else:
+            routineTimer.addTime(-10.000000)
         thisExp.nextEntry()
         
-    # completed 30.0 repeats of 'T1w_LIBRE'
-    
-    if thisSession is not None:
-        # if running in a Session with a Liaison client, send data up to now
-        thisSession.sendExperimentData()
-    
-    # set up handler to look after randomisation of conditions etc
-    trials_2 = data.TrialHandler2(
-        name='trials_2',
-        nReps=5.0, 
-        method='random', 
-        extraInfo=expInfo, 
-        originPath=-1, 
-        trialList=[None], 
-        seed=None, 
-    )
-    thisExp.addLoop(trials_2)  # add the loop to the experiment
-    thisTrial_2 = trials_2.trialList[0]  # so we can initialise stimuli with some values
-    # abbreviate parameter names if possible (e.g. rgb = thisTrial_2.rgb)
-    if thisTrial_2 != None:
-        for paramName in thisTrial_2:
-            globals()[paramName] = thisTrial_2[paramName]
-    if thisSession is not None:
-        # if running in a Session with a Liaison client, send data up to now
-        thisSession.sendExperimentData()
-    
-    for thisTrial_2 in trials_2:
-        currentLoop = trials_2
-        thisExp.timestampOnFlip(win, 'thisRow.t', format=globalClock.format)
-        if thisSession is not None:
-            # if running in a Session with a Liaison client, send data up to now
-            thisSession.sendExperimentData()
-        # abbreviate parameter names if possible (e.g. rgb = thisTrial_2.rgb)
-        if thisTrial_2 != None:
-            for paramName in thisTrial_2:
-                globals()[paramName] = thisTrial_2[paramName]
-        
-        # --- Prepare to start Routine "centered_dot" ---
-        # create an object to store info about Routine centered_dot
-        centered_dot = data.Routine(
-            name='centered_dot',
-            components=[centered_dot_2, dot_centered],
-        )
-        centered_dot.status = NOT_STARTED
-        continueRoutine = True
-        # update component parameters for each repeat
-        # Run 'Begin Routine' code from code_4
-        ioServer.getDevice('tracker').sendMessage("ET: Start routine 'centered_dot'")
-        # store start times for centered_dot
-        centered_dot.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
-        centered_dot.tStart = globalClock.getTime(format='float')
-        centered_dot.status = STARTED
-        thisExp.addData('centered_dot.started', centered_dot.tStart)
-        centered_dot.maxDuration = None
-        # keep track of which components have finished
-        centered_dotComponents = centered_dot.components
-        for thisComponent in centered_dot.components:
-            thisComponent.tStart = None
-            thisComponent.tStop = None
-            thisComponent.tStartRefresh = None
-            thisComponent.tStopRefresh = None
-            if hasattr(thisComponent, 'status'):
-                thisComponent.status = NOT_STARTED
-        # reset timers
-        t = 0
-        _timeToFirstFrame = win.getFutureFlipTime(clock="now")
-        frameN = -1
-        
-        # --- Run Routine "centered_dot" ---
-        # if trial has changed, end Routine now
-        if isinstance(trials_2, data.TrialHandler2) and thisTrial_2.thisN != trials_2.thisTrial.thisN:
-            continueRoutine = False
-        centered_dot.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine:
-            # get current time
-            t = routineTimer.getTime()
-            tThisFlip = win.getFutureFlipTime(clock=routineTimer)
-            tThisFlipGlobal = win.getFutureFlipTime(clock=None)
-            frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
-            # update/draw components on each frame
-            
-            # *dot_centered* updates
-            
-            # if dot_centered is starting this frame...
-            if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                dot_centered.frameNStart = frameN  # exact frame index
-                dot_centered.tStart = t  # local t and not account for scr refresh
-                dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
-                # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'dot_centered.started')
-                # update status
-                dot_centered.status = STARTED
-                dot_centered.setAutoDraw(True)
-            
-            # if dot_centered is active this frame...
-            if dot_centered.status == STARTED:
-                # update params
-                pass
-            
-            # if dot_centered is stopping this frame...
-            if dot_centered.status == STARTED:
-                # is it time to stop? (based on global clock, using actual start)
-                if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
-                    # keep track of stop time/frame for later
-                    dot_centered.tStop = t  # not accounting for scr refresh
-                    dot_centered.tStopRefresh = tThisFlipGlobal  # on global time
-                    dot_centered.frameNStop = frameN  # exact frame index
-                    # add timestamp to datafile
-                    thisExp.timestampOnFlip(win, 'dot_centered.stopped')
-                    # update status
-                    dot_centered.status = FINISHED
-                    dot_centered.setAutoDraw(False)
-            
-            # check for quit (typically the Esc key)
-            if defaultKeyboard.getKeys(keyList=["escape"]):
-                thisExp.status = FINISHED
-            if thisExp.status == FINISHED or endExpNow:
-                endExperiment(thisExp, win=win)
-                return
-            # pause experiment here if requested
-            if thisExp.status == PAUSED:
-                pauseExperiment(
-                    thisExp=thisExp, 
-                    win=win, 
-                    timers=[routineTimer], 
-                    playbackComponents=[]
-                )
-                # skip the frame we paused on
-                continue
-            
-            # check if all components have finished
-            if not continueRoutine:  # a component has requested a forced-end of Routine
-                centered_dot.forceEnded = routineForceEnded = True
-                break
-            continueRoutine = False  # will revert to True if at least one component still running
-            for thisComponent in centered_dot.components:
-                if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
-                    continueRoutine = True
-                    break  # at least one component has not yet finished
-            
-            # refresh the screen
-            if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
-                win.flip()
-        
-        # --- Ending Routine "centered_dot" ---
-        for thisComponent in centered_dot.components:
-            if hasattr(thisComponent, "setAutoDraw"):
-                thisComponent.setAutoDraw(False)
-        # store stop times for centered_dot
-        centered_dot.tStop = globalClock.getTime(format='float')
-        centered_dot.tStopRefresh = tThisFlipGlobal
-        thisExp.addData('centered_dot.stopped', centered_dot.tStop)
-        # the Routine "centered_dot" was not non-slip safe, so reset the non-slip timer
-        routineTimer.reset()
-        thisExp.nextEntry()
-        
-    # completed 5.0 repeats of 'trials_2'
+    # completed 1.0 repeats of 'T1w_LIBRE'
     
     if thisSession is not None:
         # if running in a Session with a Liaison client, send data up to now
@@ -1296,7 +1342,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # create an object to store info about Routine end
     end = data.Routine(
         name='end',
-        components=[end_2, text, ET_stop, key_resp_3],
+        components=[text, ET_stop, key_resp_3],
     )
     end.status = NOT_STARTED
     continueRoutine = True
@@ -1305,8 +1351,6 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     key_resp_3.keys = []
     key_resp_3.rt = []
     _key_resp_3_allKeys = []
-    # Run 'Begin Routine' code from code_3
-    ioServer.getDevice('tracker').sendMessage("ET: eye-tracker stopped")
     # store start times for end
     end.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
     end.tStart = globalClock.getTime(format='float')
@@ -1419,7 +1463,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                 thisExp=thisExp, 
                 win=win, 
                 timers=[routineTimer], 
-                playbackComponents=[]
+                playbackComponents=[],
+                ioServer=ioServer
             )
             # skip the frame we paused on
             continue
@@ -1453,6 +1498,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     if key_resp_3.keys != None:  # we had a response
         thisExp.addData('key_resp_3.rt', key_resp_3.rt)
         thisExp.addData('key_resp_3.duration', key_resp_3.duration)
+        if key_resp_3.keys in ['s', 'S']:
+            ioServer.getDevice('tracker').sendMessage("Key s trigger response")
     thisExp.nextEntry()
     # the Routine "end" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset()
