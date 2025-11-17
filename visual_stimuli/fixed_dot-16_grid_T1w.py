@@ -25,12 +25,9 @@ from numpy import (sin, cos, tan, log, log10, pi, average, sqrt, std, deg2rad, r
 from numpy.random import random, randint, normal, shuffle, choice as randchoice
 import os  # handy system and path functions
 import sys  # to get file system encoding
-import math
 
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
-
-DUMMY_MODE = True  # Set to False when running with the real EyeLink tracker
 
 def send_message(message, addr="localhost", port=2023):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -45,7 +42,7 @@ os.chdir(_thisDir)
 psychopyVersion = '2024.2.1'
 expName = 'fixed_dot-16_grid_T1w'  # from the Builder filename that created this script
 expInfo = {
-    'participant': f"{randint(0, 999):06.0f}",
+    'participant': f"{randint(0, 999999):06.0f}",
     'session': '001',
 }
 # --- Show participant info dialog --
@@ -78,7 +75,7 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 win = visual.Window(
     size=[800, 600], fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
-    monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
+    monitor='testMonitor', color=[-1,-1,-1], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
     blendMode='avg', useFBO=True, 
     units='norm')
@@ -96,7 +93,7 @@ ioConfig = {}
 ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
     'name': 'tracker',
     'model_name': 'EYELINK 1000 DESKTOP',
-    'simulation_mode': DUMMY_MODE,
+    'simulation_mode': False,
     'network_settings': '100.1.1.1',
     'default_native_data_file_name': 'EXPFILE',
     'runtime_settings': {
@@ -155,70 +152,21 @@ def send_message(message, addr="localhost", port=2023):
     client_socket.sendall(message)
     client_socket.close()
 
-# Dot stimuli: composite dot made of components (outer circle, cross as two rectangles, inner circle)
-dot = []
+# --- Initialize components for Routine "centered_dot" ---
+dot_centered = visual.ShapeStim(
+    win=win, name='dot_centered',
+    size=(0.1, 0.1), vertices='circle',
+    ori=0.0, pos=(0, 0), anchor='center',
+    lineWidth=1.0, colorSpace='rgb', lineColor=[0.5000, 0.5000, 0.5000], fillColor=[0.5000, 0.5000, 0.5000],
+    opacity=1.0, depth=0.0, interpolate=True)
 
-# Geometry (units = 'norm') -- use original sizes but compensate for aspect when drawing
-outer_radius = 0.1 / 2       # original outer radius in norm units
-inner_radius = 0.02 / 2       # original inner radius in norm units
-cross_length = outer_radius * 2.1  # a bit bigger than double to cross the entire outer circle
-cross_thickness = inner_radius * 2.1  # a bit bigger than double 
-
-# Aspect and x-axis scale for norm units: x should be scaled by 1/aspect to counter horizontal stretching
-aspect = float(win.size[0]) / float(win.size[1]) if hasattr(win, 'size') else 1.0
-x_scale = 1.0 / aspect
-
-# helper: build polygon vertices approximating a circle, scaled in x by x_scale
-def _circle_vertices(radius, n=64, x_scale=1.0):
-    verts = []
-    for i in range(n):
-        theta = (2.0 * math.pi * i) / n
-        x = math.cos(theta) * radius * x_scale
-        y = math.sin(theta) * radius
-        verts.append((x, y))
-    return verts
-
-# outer circle (as ShapeStim polygon so we can scale x separately)
-outer_verts = _circle_vertices(outer_radius, n=64, x_scale=x_scale)
-# inner circle verts
-inner_verts = _circle_vertices(inner_radius, n=64, x_scale=x_scale)
-
-dot.extend([
-    visual.ShapeStim(
-        win=win,
-        units='norm',
-        vertices=outer_verts,
-        fillColor=(-1, -1, -1),
-        lineColor=(-1, -1, -1),
-        interpolate=True,
-    ),
-    # cross as rects but scale width by x_scale so they match norm coordinate system
-    visual.Rect(
-        win=win,
-        units='norm',
-        width=cross_length * x_scale,
-        height=cross_thickness,
-        fillColor=(0, 0, 0),
-        lineColor=(0, 0, 0),
-    ),
-    visual.Rect(
-        win=win,
-        units='norm',
-        width=cross_thickness * x_scale,
-        height=cross_length,
-        fillColor=(0, 0, 0),
-        lineColor=(0, 0, 0),
-    ),
-    visual.ShapeStim(
-        win=win,
-        units='norm',
-        vertices=inner_verts,
-        fillColor=(-1, -1, -1),
-        lineColor=(-1, -1, -1),
-        interpolate=True,
-    ),
-])
-
+# --- Initialize components for Routine "dots" ---
+dot = visual.ShapeStim(
+    win=win, name='dot',
+    size=(0.1, 0.1), vertices='circle',
+    ori=0.0, pos=(0, 0), anchor='center',
+    lineWidth=1.0,     colorSpace='rgb',  lineColor=[0.5, 0.5, 0.5], fillColor=[0.5, 0.5, 0.5],
+    opacity=1.0, depth=0.0, interpolate=True)
 # Begin Experiment
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the grey dot
@@ -499,7 +447,7 @@ for _ in range(6):  # Change to 6 if you want to repeat it 6 times
     continueRoutine = True
     # update component parameters for each repeat
     # keep track of which components have finished
-    centered_dotComponents = [dot]
+    centered_dotComponents = [dot_centered]
     for thisComponent in centered_dotComponents:
         thisComponent.tStart = None
         thisComponent.tStop = None
@@ -522,39 +470,39 @@ for _ in range(6):  # Change to 6 if you want to repeat it 6 times
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
         
-        # *dot* updates
+        # *dot_centered* updates
         
-        # if dot is starting this frame...
-        if dot.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        # if dot_centered is starting this frame...
+        if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
             # keep track of start time/frame for later
-            dot.frameNStart = frameN  # exact frame index
-            dot.tStart = t  # local t and not account for scr refresh
-            dot.tStartRefresh = tThisFlipGlobal  # on global time
-            win.timeOnFlip(dot, 'tStartRefresh')  # time at next scr refresh
+            dot_centered.frameNStart = frameN  # exact frame index
+            dot_centered.tStart = t  # local t and not account for scr refresh
+            dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
             # add timestamp to datafile
-            thisExp.timestampOnFlip(win, 'dot.started')
+            thisExp.timestampOnFlip(win, 'dot_centered.started')
             # update status
-            dot.status = STARTED
-            dot.setAutoDraw(True)
+            dot_centered.status = STARTED
+            dot_centered.setAutoDraw(True)
             ioServer.getDevice('tracker').sendMessage("ET: Start routine 'centered_dot'")
         
-        # if dot is active this frame...
-        if dot.status == STARTED:
+        # if dot_centered is active this frame...
+        if dot_centered.status == STARTED:
             # update params
             pass
         
-        # if dot is stopping this frame...
-        if dot.status == STARTED:
+        # if dot_centered is stopping this frame...
+        if dot_centered.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > dot.tStartRefresh + 5.0-frameTolerance:
+            if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
                 # keep track of stop time/frame for later
-                dot.tStop = t  # not accounting for scr refresh
-                dot.frameNStop = frameN  # exact frame index
+                dot_centered.tStop = t  # not accounting for scr refresh
+                dot_centered.frameNStop = frameN  # exact frame index
                 # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'dot.stopped')
+                thisExp.timestampOnFlip(win, 'dot_centered.stopped')
                 # update status
-                dot.status = FINISHED
-                dot.setAutoDraw(False)
+                dot_centered.status = FINISHED
+                dot_centered.setAutoDraw(False)
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -690,7 +638,7 @@ for _ in range(5):
     continueRoutine = True
     # update component parameters for each repeat
     # keep track of which components have finished
-    centered_dotComponents = [dot]
+    centered_dotComponents = [dot_centered]
     for thisComponent in centered_dotComponents:
         thisComponent.tStart = None
         thisComponent.tStop = None
@@ -713,39 +661,39 @@ for _ in range(5):
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
         
-        # *dot* updates
+        # *dot_centered* updates
         
-        # if dot is starting this frame...
-        if dot.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        # if dot_centered is starting this frame...
+        if dot_centered.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
             # keep track of start time/frame for later
-            dot.frameNStart = frameN  # exact frame index
-            dot.tStart = t  # local t and not account for scr refresh
-            dot.tStartRefresh = tThisFlipGlobal  # on global time
-            win.timeOnFlip(dot, 'tStartRefresh')  # time at next scr refresh
+            dot_centered.frameNStart = frameN  # exact frame index
+            dot_centered.tStart = t  # local t and not account for scr refresh
+            dot_centered.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(dot_centered, 'tStartRefresh')  # time at next scr refresh
             # add timestamp to datafile
-            thisExp.timestampOnFlip(win, 'dot.started')
+            thisExp.timestampOnFlip(win, 'dot_centered.started')
             # update status
-            dot.status = STARTED
-            dot.setAutoDraw(True)
+            dot_centered.status = STARTED
+            dot_centered.setAutoDraw(True)
             ioServer.getDevice('tracker').sendMessage("ET: Start routine 'centered_dot'")
         
-        # if dot is active this frame...
-        if dot.status == STARTED:
+        # if dot_centered is active this frame...
+        if dot_centered.status == STARTED:
             # update params
             pass
         
-        # if dot is stopping this frame...
-        if dot.status == STARTED:
+        # if dot_centered is stopping this frame...
+        if dot_centered.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > dot.tStartRefresh + 5.0-frameTolerance:
+            if tThisFlipGlobal > dot_centered.tStartRefresh + 5.0-frameTolerance:
                 # keep track of stop time/frame for later
-                dot.tStop = t  # not accounting for scr refresh
-                dot.frameNStop = frameN  # exact frame index
+                dot_centered.tStop = t  # not accounting for scr refresh
+                dot_centered.frameNStop = frameN  # exact frame index
                 # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'dot.stopped')
+                thisExp.timestampOnFlip(win, 'dot_centered.stopped')
                 # update status
-                dot.status = FINISHED
-                dot.setAutoDraw(False)
+                dot_centered.status = FINISHED
+                dot_centered.setAutoDraw(False)
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):

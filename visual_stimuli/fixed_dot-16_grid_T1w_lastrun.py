@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2024.2.1),
-    on October 14, 2024, at 17:49
+    on November 09, 2025, at 13:51
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -60,7 +60,7 @@ or run the experiment with `--pilot` as an argument. To change what pilot
 PILOTING = core.setPilotModeFromArgs()
 # start off with values from experiment settings
 _fullScr = True
-_winSize = [800, 600]
+_winSize = [1280, 720]
 # if in pilot mode, apply overrides according to preferences
 if PILOTING:
     # force windowed mode
@@ -396,23 +396,29 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # Start Code - component code to be run after the window creation
     
     # --- Initialize components for Routine "trail" ---
+    
+    # Unknown component ignored: trail_2
+    
     waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
         text="The program is ready for the scanner trigger. Press 's' to proceed manually.",
         font='Open Sans',
         pos=(0, -0.4), draggable=False, height=0.12, wrapWidth=1.7, ori=0.0, 
         color='white', colorSpace='rgb', opacity=1.0, 
         languageStyle='LTR',
-        depth=0.0);
+        depth=-1.0);
     key_resp = keyboard.Keyboard(deviceName='key_resp')
     fix_desc = visual.TextStim(win=win, name='fix_desc',
-        text='In this task you will see a dot moving randomly within 16 different positions on the screen. You have to follow the dot :)',
+        text='In this task you will see a dot moving randomly within different positions on the screen. You have to follow the dot :)',
         font='Open Sans',
         pos=(0, 0.25), draggable=False, height=0.12, wrapWidth=1.0, ori=0.0, 
         color='white', colorSpace='rgb', opacity=1.0, 
         languageStyle='LTR',
-        depth=-2.0);
+        depth=-3.0);
     
     # --- Initialize components for Routine "start_ET" ---
+    
+    # Unknown component ignored: start_ET_2
+    
     etRecord = hardware.eyetracker.EyetrackerControl(
         tracker=eyetracker,
         actionType='Start Only'
@@ -426,47 +432,64 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         client_socket.close()
     
     # --- Initialize components for Routine "centered_dot" ---
+    
+    # Unknown component ignored: centered_dot_2
+    
     dot_centered = visual.ShapeStim(
         win=win, name='dot_centered',
         size=(0.1, 0.1), vertices='circle',
         ori=0.0, pos=(0, 0), draggable=False, anchor='center',
         lineWidth=1.0,
         colorSpace='rgb', lineColor=[0.5000, 0.5000, 0.5000], fillColor=[0.5000, 0.5000, 0.5000],
-        opacity=1.0, depth=0.0, interpolate=True)
+        opacity=1.0, depth=-1.0, interpolate=True)
     
     # --- Initialize components for Routine "dots" ---
+    
+    # Unknown component ignored: dots_2
+    
     dot = visual.ShapeStim(
         win=win, name='dot',
         size=(0.1, 0.1), vertices='circle',
         ori=0.0, pos=(0, 0), draggable=False, anchor='center',
         lineWidth=1.0,
         colorSpace='rgb', lineColor=[0.5, 0.5, 0.5], fillColor=[0.5, 0.5, 0.5],
-        opacity=1.0, depth=0.0, interpolate=True)
+        opacity=1.0, depth=-1.0, interpolate=True)
     # Run 'Begin Experiment' code from code
     # Begin Experiment
     grid_size = 4  # 4x4 grid
     dot_size = 0.05  # Size of the grey dot
-    t_dot = 5 # seconds of showing the dot per position
-    positions = [(0, 0.66), (0, -0.66), (0.66, 0), (-0.66, 0)]  # Define cross positions (up, down, right, left)
+    t_dot = 5  # Seconds of showing the dot per position
+    positions = {
+        (0, 0.66): "up", 
+        (0, -0.66): "down", 
+        (0.66, 0): "right", 
+        (-0.66, 0): "left"
+    }  # Define cross positions with labels
     ioServer.getDevice('tracker').sendMessage("ET: Start experiment 'dots'")
     
     # --- Initialize components for Routine "centered_dot" ---
+    
+    # Unknown component ignored: centered_dot_2
+    
     dot_centered = visual.ShapeStim(
         win=win, name='dot_centered',
         size=(0.1, 0.1), vertices='circle',
         ori=0.0, pos=(0, 0), draggable=False, anchor='center',
         lineWidth=1.0,
         colorSpace='rgb', lineColor=[0.5000, 0.5000, 0.5000], fillColor=[0.5000, 0.5000, 0.5000],
-        opacity=1.0, depth=0.0, interpolate=True)
+        opacity=1.0, depth=-1.0, interpolate=True)
     
     # --- Initialize components for Routine "end" ---
+    
+    # Unknown component ignored: end_2
+    
     text = visual.TextStim(win=win, name='text',
         text="End press 't'",
         font='Open Sans',
         pos=(0, 0), draggable=False, height=0.12, wrapWidth=None, ori=0.0, 
         color='white', colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=0.0);
+        depth=-1.0);
     ET_stop = hardware.eyetracker.EyetrackerControl(
         tracker=eyetracker,
         actionType='Stop Only'
@@ -527,7 +550,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # create an object to store info about Routine trail
     trail = data.Routine(
         name='trail',
-        components=[waiting_trigger, key_resp, fix_desc],
+        components=[trail_2, waiting_trigger, key_resp, fix_desc],
     )
     trail.status = NOT_STARTED
     continueRoutine = True
@@ -688,7 +711,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # create an object to store info about Routine start_ET
     start_ET = data.Routine(
         name='start_ET',
-        components=[etRecord],
+        components=[start_ET_2, etRecord],
     )
     start_ET.status = NOT_STARTED
     continueRoutine = True
@@ -823,7 +846,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         # create an object to store info about Routine centered_dot
         centered_dot = data.Routine(
             name='centered_dot',
-            components=[dot_centered],
+            components=[centered_dot_2, dot_centered],
         )
         centered_dot.status = NOT_STARTED
         continueRoutine = True
@@ -855,7 +878,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         if isinstance(trials, data.TrialHandler2) and thisTrial.thisN != trials.thisTrial.thisN:
             continueRoutine = False
         centered_dot.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine and routineTimer.getTime() < 5.0:
+        while continueRoutine:
             # get current time
             t = routineTimer.getTime()
             tThisFlip = win.getFutureFlipTime(clock=routineTimer)
@@ -936,13 +959,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         centered_dot.tStop = globalClock.getTime(format='float')
         centered_dot.tStopRefresh = tThisFlipGlobal
         thisExp.addData('centered_dot.stopped', centered_dot.tStop)
-        # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
-        if centered_dot.maxDurationReached:
-            routineTimer.addTime(-centered_dot.maxDuration)
-        elif centered_dot.forceEnded:
-            routineTimer.reset()
-        else:
-            routineTimer.addTime(-5.000000)
+        # the Routine "centered_dot" was not non-slip safe, so reset the non-slip timer
+        routineTimer.reset()
         thisExp.nextEntry()
         
     # completed 6.0 repeats of 'trials'
@@ -986,17 +1004,18 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         # create an object to store info about Routine dots
         dots = data.Routine(
             name='dots',
-            components=[dot],
+            components=[dots_2, dot],
         )
         dots.status = NOT_STARTED
         continueRoutine = True
         # update component parameters for each repeat
         # Run 'Begin Routine' code from code
         # Begin Routine
-        shuffle(positions)  # Shuffle the positions
+        shuffled_positions = list(positions.items())  # Convert dictionary to a list of tuples
+        shuffle(shuffled_positions)  # Shuffle the positions
         current_position_index = 0  # Start with the first position
-        total_positions = len(positions)  # Track the total number of positions
-        dot.pos = positions[current_position_index]  # Set initial dot position
+        total_positions = len(shuffled_positions)  # Track the total number of positions
+        dot.pos, direction = shuffled_positions[current_position_index]  # Set initial dot position and direction
         time_of_last_change = 0  # Variable to store the time of the last position change
         continueRoutine = True  # Ensure the routine continues
         ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
@@ -1060,8 +1079,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             if t - time_of_last_change >= t_dot:
                 current_position_index += 1  # Move to the next position
                 if current_position_index < total_positions:  # Ensure the index is within bounds
-                    dot.pos = positions[current_position_index]  # Update the dot position
-                    ioServer.getDevice('tracker').sendMessage("ET: dot moved!")
+                    dot.pos, direction = shuffled_positions[current_position_index]  # Update the dot position and direction
+                    ioServer.getDevice('tracker').sendMessage(f"ET: dot moved {direction}!")  # Log the direction of movement
                     time_of_last_change = t  # Reset the time of the last position change
                 else:
                     continueRoutine = False  # End the routine when all positions are visited
@@ -1150,7 +1169,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         # create an object to store info about Routine centered_dot
         centered_dot = data.Routine(
             name='centered_dot',
-            components=[dot_centered],
+            components=[centered_dot_2, dot_centered],
         )
         centered_dot.status = NOT_STARTED
         continueRoutine = True
@@ -1182,7 +1201,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         if isinstance(trials_2, data.TrialHandler2) and thisTrial_2.thisN != trials_2.thisTrial.thisN:
             continueRoutine = False
         centered_dot.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine and routineTimer.getTime() < 5.0:
+        while continueRoutine:
             # get current time
             t = routineTimer.getTime()
             tThisFlip = win.getFutureFlipTime(clock=routineTimer)
@@ -1263,13 +1282,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         centered_dot.tStop = globalClock.getTime(format='float')
         centered_dot.tStopRefresh = tThisFlipGlobal
         thisExp.addData('centered_dot.stopped', centered_dot.tStop)
-        # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
-        if centered_dot.maxDurationReached:
-            routineTimer.addTime(-centered_dot.maxDuration)
-        elif centered_dot.forceEnded:
-            routineTimer.reset()
-        else:
-            routineTimer.addTime(-5.000000)
+        # the Routine "centered_dot" was not non-slip safe, so reset the non-slip timer
+        routineTimer.reset()
         thisExp.nextEntry()
         
     # completed 5.0 repeats of 'trials_2'
@@ -1282,7 +1296,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # create an object to store info about Routine end
     end = data.Routine(
         name='end',
-        components=[text, ET_stop, key_resp_3],
+        components=[end_2, text, ET_stop, key_resp_3],
     )
     end.status = NOT_STARTED
     continueRoutine = True
