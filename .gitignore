@@ -165,4 +165,5 @@ cython_debug/
 visual_stimuli/test/fixation_dots/data/
 visual_stimuli/test/HCPh-fMRI-tasks/results/
 visual_stimuli/data/
+visual_stimuli/data_archive/
 .DS_Store
