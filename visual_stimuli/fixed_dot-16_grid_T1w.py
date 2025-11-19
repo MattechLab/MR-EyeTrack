@@ -19,6 +19,7 @@ prefs.hardware['audioLib'] = 'ptb'
 prefs.hardware['audioLatencyMode'] = '3'
 from psychopy import sound, gui, visual, core, data, event, logging, clock, colors, layout, iohub, hardware
 from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED, STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
+from psychopy.monitors import Monitor
 import socket
 import numpy as np  # whole numpy lib is available, prepend 'np.'
 from numpy import (sin, cos, tan, log, log10, pi, average, sqrt, std, deg2rad, rad2deg, linspace, asarray)
@@ -30,7 +31,7 @@ import math
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
 
-DUMMY_MODE = True  # Set to False when running with the real EyeLink tracker
+DUMMY_MODE = False  # Set to False when running with the real EyeLink tracker (use False for real tracker)
 
 def send_message(message, addr="localhost", port=2023):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -74,9 +75,17 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # Start Code - component code to be run after the window creation
 
+# Setup monitor
+WIN_SIZE = [800, 600]
+monitor = Monitor("testMonitor")
+monitor.setWidth(369.54e-3)  # screen width in meters
+monitor.setDistance(1020e-3)  # viewing distance in meters
+monitor.setSizePix(WIN_SIZE)  # screen resolution
+monitor.saveMon()
+
 # --- Setup the Window ---
 win = visual.Window(
-    size=[800, 600], fullscr=True, screen=0, 
+    size=WIN_SIZE, fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
     monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
     backgroundImage='', backgroundFit='none',
@@ -89,6 +98,7 @@ if expInfo['frameRate'] != None:
     frameDur = 1.0 / round(expInfo['frameRate'])
 else:
     frameDur = 1.0 / 60.0  # could not measure, so guess
+
 # --- Setup input devices ---
 ioConfig = {}
 
@@ -117,6 +127,9 @@ ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
 # Setup iohub keyboard
 ioConfig['Keyboard'] = dict(use_keymap='psychopy')
 
+# Let ioHub know the experiment filename (like lastrun) so it can manage data/device startup consistently
+ioConfig['Experiment'] = dict(filename=thisExp.dataFileName)
+
 ioSession = '1'
 if 'session' in expInfo:
     ioSession = str(expInfo['session'])
@@ -125,6 +138,37 @@ eyetracker = ioServer.getDevice('tracker')
 
 # create a default keyboard (e.g. to check for escape)
 defaultKeyboard = keyboard.Keyboard(backend='iohub')
+
+# --- Ensure tracker connection and open native EDF on host ---
+try:
+    if eyetracker:
+        eyetracker.setConnectionState(True)  # ensure connection to tracker host
+        # create an EyeLink-compatible native filename (<=8 chars, no extension, uppercase)
+        edf_base = f"EDF{expInfo['participant']}".upper()[:8]
+        # try common methods to ask the tracker to open the EDF file (safe/no-op if unavailable)
+        if hasattr(eyetracker, 'openDataFile'):
+            try:
+                eyetracker.openDataFile(edf_base)
+            except Exception as e:
+                print("openDataFile failed:", e)
+        elif hasattr(eyetracker, 'sendCommand'):
+            try:
+                # some backends expose a sendCommand to the tracker
+                eyetracker.sendCommand(f'open_datafile {edf_base}')
+            except Exception:
+                # try alternate common command
+                try:
+                    eyetracker.sendCommand(f'openfile {edf_base}')
+                except Exception:
+                    pass
+        # log to host/tracker and to terminal
+        try:
+            ioServer.getDevice('tracker').sendMessage(f"EDFFILE:{edf_base}")
+        except Exception:
+            pass
+        print("Requested EDF on host with name:", edf_base)
+except Exception as e:
+    print("Eyetracker EDF open error:", e)
 
 # --- Initialize components for Routine "trail" ---
 waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
@@ -587,7 +631,7 @@ for _ in range(1):  # Change to 6 if you want to repeat it 6 times
     thisExp.nextEntry()
 
 # Repeat the dots routine 30 times
-for _ in range(3):
+for _ in range(1):
     # --- Prepare to start Routine "dots" ---
     continueRoutine = True
     # Begin Routine
