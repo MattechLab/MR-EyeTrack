@@ -239,7 +239,7 @@ dot.extend([
 # Begin Experiment
 grid_size = 4  # 4x4 grid
 dot_size = 0.05  # Size of the dot
-t_dot = 1 #5*6.2/8.01  # Seconds of showing the dot per position. TR is decreased from 8.1 to 6.2ms
+t_dot = 5*6.2/8.01  # Seconds of showing the dot per position. TR is decreased from 8.1 to 6.2ms
 
 # Get the screen dimensions
 # In norm units, screen goes from -1 to +1 vertically, and aspect-ratio-scaled horizontally.
@@ -511,7 +511,7 @@ for thisComponent in start_ETComponents:
 routineTimer.reset()
 
 # Repeat the dot routine 6 times
-for _ in range(1):  # Change to 6 if you want to repeat it 6 times
+for _ in range(6):  # Change to 6 if you want to repeat it 6 times
     # --- Prepare to start Routine "dot" ---
     continueRoutine = True
     # update component parameters for each repeat
@@ -605,7 +605,7 @@ for _ in range(1):  # Change to 6 if you want to repeat it 6 times
     thisExp.nextEntry()
 
 # Repeat the dots routine 30 times
-for _ in range(1):
+for _ in range(30):
     # --- Prepare to start Routine "dots" ---
     continueRoutine = True
     # Begin Routine
@@ -710,7 +710,7 @@ for _ in range(1):
     thisExp.nextEntry()
 
 # Repeat the dot routine 5 times
-for _ in range(1):
+for _ in range(5):
     # --- Prepare to start Routine "dot" ---
     continueRoutine = True
     # ensure dot components are centered before the routine starts
