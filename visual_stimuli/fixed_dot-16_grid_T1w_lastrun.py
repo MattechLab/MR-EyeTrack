@@ -32,6 +32,7 @@ import sys  # to get file system encoding
 
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
+import socket
 
 # --- Setup global variables (available in all functions) ---
 # create a device manager to handle hardware (keyboards, mice, mirophones, speakers, etc.)
@@ -762,6 +763,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             # update status
             etRecord.status = STARTED
             etRecord.start()
+        
+        # if etRecord is stopping this frame...
         if etRecord.status == STARTED:
             etRecord.tStop = t  # not accounting for scr refresh
             etRecord.tStopRefresh = tThisFlipGlobal  # on global time
