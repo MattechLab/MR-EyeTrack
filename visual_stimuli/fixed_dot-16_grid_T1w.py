@@ -103,13 +103,12 @@ else:
 ioConfig = {}
 
 # Setup eyetracking
-#  ioConfig['eyetracker.eyelink.EyeTracker'] # ← Older API version
 ioConfig['eyetracker.hw.sr_research.eyelink.EyeTracker'] = {
     'name': 'tracker',
     'model_name': 'EYELINK 1000 DESKTOP',
     'simulation_mode': DUMMY_MODE,
     'network_settings': '100.1.1.1',
-    'default_native_data_file_name': 'MR-EyeTrack',
+    'default_native_data_file_name': 'EXPFILE',
     'runtime_settings': {
         'sampling_rate': 1000.0,
         'track_eyes': 'RIGHT_EYE',
@@ -134,15 +133,42 @@ ioConfig['Experiment'] = dict(filename=thisExp.dataFileName)
 ioSession = '1'
 if 'session' in expInfo:
     ioSession = str(expInfo['session'])
-    
-# Start ioHub server
 ioServer = io.launchHubServer(window=win, **ioConfig)
-
-# Get the eyetracker device
-et = ioServer.getDevice('tracker')
+eyetracker = ioServer.getDevice('tracker')
 
 # create a default keyboard (e.g. to check for escape)
 defaultKeyboard = keyboard.Keyboard(backend='iohub')
+
+# --- Ensure tracker connection and open native EDF on host ---
+# try:
+#     if eyetracker:
+#         eyetracker.setConnectionState(True)  # ensure connection to tracker host
+#         # create an EyeLink-compatible native filename (<=8 chars, no extension, uppercase)
+#         edf_base = f"EDF{expInfo['participant']}".upper()[:8]
+#         # try common methods to ask the tracker to open the EDF file (safe/no-op if unavailable)
+#         if hasattr(eyetracker, 'openDataFile'):
+#             try:
+#                 eyetracker.openDataFile(edf_base)
+#             except Exception as e:
+#                 print("openDataFile failed:", e)
+#         elif hasattr(eyetracker, 'sendCommand'):
+#             try:
+#                 # some backends expose a sendCommand to the tracker
+#                 eyetracker.sendCommand(f'open_datafile {edf_base}')
+#             except Exception:
+#                 # try alternate common command
+#                 try:
+#                     eyetracker.sendCommand(f'openfile {edf_base}')
+#                 except Exception:
+#                     pass
+#         # log to host/tracker and to terminal
+#         try:
+#             ioServer.getDevice('tracker').sendMessage(f"EDFFILE:{edf_base}")
+#         except Exception:
+#             pass
+#         print("Requested EDF on host with name:", edf_base)
+# except Exception as e:
+#     print("Eyetracker EDF open error:", e)
 
 # --- Initialize components for Routine "trail" ---
 waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
@@ -163,7 +189,7 @@ fix_desc = visual.TextStim(win=win, name='fix_desc',
 
 # --- Initialize components for Routine "start_ET" ---
 etRecord = hardware.eyetracker.EyetrackerControl(
-    tracker=et,
+    tracker=eyetracker,
     actionType='Start Only'
 )
 # Send logs to the ET
@@ -257,7 +283,7 @@ positions = {
     (x_offset_norm, 0): "right"
 }
 
-et.sendMessage("ET: Start experiment 'dots'")
+ioServer.getDevice('tracker').sendMessage("ET: Start experiment 'dots'")
 
 # --- Initialize components for Routine "end" ---
 text = visual.TextStim(win=win, name='text',
@@ -268,7 +294,7 @@ text = visual.TextStim(win=win, name='text',
     languageStyle='LTR',
     depth=0.0);
 ET_stop = hardware.eyetracker.EyetrackerControl(
-    tracker=et,
+    tracker=eyetracker,
     actionType='Stop Only'
 )
 key_resp_3 = keyboard.Keyboard()
@@ -285,7 +311,7 @@ calibration_2Target = visual.TargetStim(win,
 )
 # define parameters for calibration_2
 calibration_2 = hardware.eyetracker.EyetrackerCalibration(win, 
-    et, calibration_2Target,
+    eyetracker, calibration_2Target,
     units=None, colorSpace='rgb',
     progressMode='time', targetDur=1.5, expandScale=1.5,
     targetLayout='FIVE_POINTS', randomisePos=True, textColor='white',
@@ -397,7 +423,7 @@ while continueRoutine:
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        et.sendMessage("ET: key board escape")
+        ioServer.getDevice('tracker').sendMessage("key board escape")
         core.quit()
     
     # check if all components have finished
@@ -468,8 +494,9 @@ while continueRoutine:
         # update status
         etRecord.status = STARTED
         # Run 'Begin Routine' code from code_channel2
-        et.sendMessage("ET: Start recording")
+        ioServer.getDevice('tracker').sendMessage("Hello tracker record")
         etRecord.start()
+    
     
     # if etRecord is stopping this frame...
     if etRecord.status == STARTED:
@@ -482,11 +509,11 @@ while continueRoutine:
             thisExp.timestampOnFlip(win, 'etRecord.stopped')
             # update status
             etRecord.status = FINISHED
-            et.sendMessage("ET: Stop recording")
+            ioServer.getDevice('tracker').sendMessage("Bye tracker record")
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        et.sendMessage("ET: key board escape")
+        ioServer.getDevice('tracker').sendMessage("key board escape")
         core.quit()
     
     # check if all components have finished
@@ -554,7 +581,7 @@ for _ in range(6):  # Change to 6 if you want to repeat it 6 times
                 # update status
                 thisComponent.status = STARTED
                 thisComponent.setAutoDraw(True)
-                et.sendMessage("ET: Start routine 'centered dot'")
+                ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dot'")
             
             # if dot is active this frame...
             if thisComponent.status == STARTED:
@@ -576,7 +603,7 @@ for _ in range(6):  # Change to 6 if you want to repeat it 6 times
             
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-            et.sendMessage("ET: key board escape")
+            ioServer.getDevice('tracker').sendMessage("key board escape")
             core.quit()
         
         # check if all components have finished
@@ -619,7 +646,7 @@ for _ in range(30):
         comp.setPos(position)
     time_of_last_change = 0  # Variable to store the time of the last position change
     continueRoutine = True  # Ensure the routine continues
-    et.sendMessage("ET: Start routine 'moving dot'")
+    ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
     # update component parameters for each repeat
     # keep track of which components have finished
     dotComponents = [*dot]
@@ -677,14 +704,14 @@ for _ in range(30):
                 # Update all dot components to the new position so the dot visibly moves
                 for comp in dotComponents:
                     comp.setPos(position)
-                et.sendMessage(f"ET: dot moved {direction}!")  # Log the direction of movement
+                ioServer.getDevice('tracker').sendMessage(f"ET: dot moved {direction}!")  # Log the direction of movement
                 time_of_last_change = t  # Reset the time of the last position change
             else:
                 continueRoutine = False  # End the routine when all positions are visited
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-            et.sendMessage("ET: key board escape")
+            ioServer.getDevice('tracker').sendMessage("key board escape")
             core.quit()
         
         # check if all components have finished
@@ -759,7 +786,7 @@ for _ in range(5):
                 # update status
                 thisComponent.status = STARTED
                 thisComponent.setAutoDraw(True)
-                et.sendMessage("ET: Start routine 'centered dot'")
+                ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dot'")
             
             # if dot is active this frame...
             if thisComponent.status == STARTED:
@@ -781,7 +808,7 @@ for _ in range(5):
         
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-            et.sendMessage("ET: key board escape")
+            ioServer.getDevice('tracker').sendMessage("key board escape")
             core.quit()
         
         # check if all components have finished
@@ -816,7 +843,7 @@ key_resp_3.keys = []
 key_resp_3.rt = []
 _key_resp_3_allKeys = []
 # Run 'Begin Routine' code from code_3
-et.sendMessage("ET: Prepare to start routine 'end'")
+ioServer.getDevice('tracker').sendMessage("ET: Prepare to start routine 'end'")
 # keep track of which components have finished
 endComponents = [text, ET_stop, key_resp_3]
 for thisComponent in endComponents:
@@ -912,7 +939,7 @@ while continueRoutine:
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        et.sendMessage("ET: key board escape")
+        ioServer.getDevice('tracker').sendMessage("key board escape")
         core.quit()
     
     # check if all components have finished
@@ -936,7 +963,7 @@ for thisComponent in endComponents:
 # make sure the eyetracker recording stops
 if ET_stop.status != FINISHED:
     ET_stop.status = FINISHED
-et.sendMessage("ET: Stop eye tracker")
+ioServer.getDevice('tracker').sendMessage("ET: eye-tracker stopped")
 # check responses
 if key_resp_3.keys in ['', [], None]:  # No response was made
     key_resp_3.keys = None
@@ -956,9 +983,8 @@ thisExp.saveAsWideText(filename + '.csv', delim='auto')
 thisExp.saveAsPickle(filename)
 logging.flush()
 # make sure everything is closed down
-if et:
-    et.setConnectionState(False)
-    et.setRecordingState(False)
+if eyetracker:
+    eyetracker.setConnectionState(False)
 thisExp.abort()  # or data files will save again on exit
 win.close()
 core.quit()
