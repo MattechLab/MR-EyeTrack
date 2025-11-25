@@ -61,7 +61,7 @@ or run the experiment with `--pilot` as an argument. To change what pilot
 PILOTING = core.setPilotModeFromArgs()
 # start off with values from experiment settings
 _fullScr = True
-_winSize = [1280, 720]
+_winSize = [800, 600]
 # if in pilot mode, apply overrides according to preferences
 if PILOTING:
     # force windowed mode
