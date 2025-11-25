@@ -139,37 +139,6 @@ eyetracker = ioServer.getDevice('tracker')
 # create a default keyboard (e.g. to check for escape)
 defaultKeyboard = keyboard.Keyboard(backend='iohub')
 
-# --- Ensure tracker connection and open native EDF on host ---
-# try:
-#     if eyetracker:
-#         eyetracker.setConnectionState(True)  # ensure connection to tracker host
-#         # create an EyeLink-compatible native filename (<=8 chars, no extension, uppercase)
-#         edf_base = f"EDF{expInfo['participant']}".upper()[:8]
-#         # try common methods to ask the tracker to open the EDF file (safe/no-op if unavailable)
-#         if hasattr(eyetracker, 'openDataFile'):
-#             try:
-#                 eyetracker.openDataFile(edf_base)
-#             except Exception as e:
-#                 print("openDataFile failed:", e)
-#         elif hasattr(eyetracker, 'sendCommand'):
-#             try:
-#                 # some backends expose a sendCommand to the tracker
-#                 eyetracker.sendCommand(f'open_datafile {edf_base}')
-#             except Exception:
-#                 # try alternate common command
-#                 try:
-#                     eyetracker.sendCommand(f'openfile {edf_base}')
-#                 except Exception:
-#                     pass
-#         # log to host/tracker and to terminal
-#         try:
-#             ioServer.getDevice('tracker').sendMessage(f"EDFFILE:{edf_base}")
-#         except Exception:
-#             pass
-#         print("Requested EDF on host with name:", edf_base)
-# except Exception as e:
-#     print("Eyetracker EDF open error:", e)
-
 # --- Initialize components for Routine "trail" ---
 waiting_trigger = visual.TextStim(win=win, name='waiting_trigger',
     text="The program is ready for the scanner trigger. Press 's' to proceed manually.",
@@ -494,8 +463,8 @@ while continueRoutine:
         # update status
         etRecord.status = STARTED
         # Run 'Begin Routine' code from code_channel2
-        ioServer.getDevice('tracker').sendMessage("Hello tracker record")
-        etRecord.start()
+        ioServer.getDevice('tracker').sendMessage("ET: start recording")
+        etRecord.start() # this line is crucial to actually start recording the EDF!
     
     
     # if etRecord is stopping this frame...
@@ -509,7 +478,7 @@ while continueRoutine:
             thisExp.timestampOnFlip(win, 'etRecord.stopped')
             # update status
             etRecord.status = FINISHED
-            ioServer.getDevice('tracker').sendMessage("Bye tracker record")
+            ioServer.getDevice('tracker').sendMessage("ET: stop recording")
     
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -963,7 +932,7 @@ for thisComponent in endComponents:
 # make sure the eyetracker recording stops
 if ET_stop.status != FINISHED:
     ET_stop.status = FINISHED
-ioServer.getDevice('tracker').sendMessage("ET: eye-tracker stopped")
+ioServer.getDevice('tracker').sendMessage("ET: eye tracker stopped")
 # check responses
 if key_resp_3.keys in ['', [], None]:  # No response was made
     key_resp_3.keys = None
