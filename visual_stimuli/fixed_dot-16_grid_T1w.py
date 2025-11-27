@@ -616,6 +616,8 @@ for _ in range(30):
     time_of_last_change = 0  # Variable to store the time of the last position change
     continueRoutine = True  # Ensure the routine continues
     ioServer.getDevice('tracker').sendMessage("ET: Start routine 'dots'")
+    ioServer.getDevice('tracker').sendMessage(f"ET: dot moved {direction}!")  # Log the direction of movement
+
     # update component parameters for each repeat
     # keep track of which components have finished
     dotComponents = [*dot]
