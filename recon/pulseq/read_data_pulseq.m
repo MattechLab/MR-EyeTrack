@@ -6,7 +6,8 @@ addpath(genpath('/Users/cag/Documents/forclone/pulseq_v15'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseqmreye'));
 
-sequence_path = 'data/study/pulseq/yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq';
+% sequence_path = 'data/study/pulseq/yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq';
+sequence_path = 'data/study/pulseq/yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq';
 
 if ~isfile(sequence_path)
     error('File not found: %s', sequence_path);

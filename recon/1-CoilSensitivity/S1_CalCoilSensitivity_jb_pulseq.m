@@ -18,40 +18,76 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseqmreye'));
 
 %% Initialize the directories and acquire the Coil
 
-% subject_num = 3;
-datatype = 2;
+subject_num = 1;
 
-% subject_suffix = {'_ml', '_jb', '_yj',  '_phantom'};
 mask_note_list{1}= 'ori'; mask_note_list{2}= 'ptp';
-mask_note = mask_note_list{datatype};
 
-seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/test-pulseq/pulseq/sub_yj';
-datasetDir = '/home/debi/jaime/repos/MR-EyeTrack/data/test-pulseq/pulseq/sub_yj';
-reconDir = '/home/debi/jaime/repos/MR-EyeTrack/results';
+seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
+datasetDir = sprintf('/home/debi/jaime/repos/MR-EyeTrack/data/study/data/sub-%03d/rawdata', subject_num);
+reconDir = sprintf('/home/debi/jaime/repos/MR-EyeTrack/data/study/data/sub-%03d/recon', subject_num);
 
 seqName_list = {
-    '/yj_seq2_t1w_libre_main_TR8.0ms_TE3.6ms_swap1_FA4_RF2_mreye_track_3723_traj_ptp.seq', ...
-    '/yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_PhNeg.seq'};
+    'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
+    'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
 
-seqName = seqName_list{datatype};
-
-bodyCoilFile    = [datasetDir, '/meas_MID00096_FID00911_track_ptp_BC.dat'];
-arrayCoilFile   = [datasetDir, '/meas_MID00095_FID00910_track_ptp_HC.dat'];
-measureFile     = [datasetDir, '/meas_MID00094_FID00909_track_ptp.dat'];
+bodyCoilFile    = [datasetDir, '/meas_MID00427_FID15541_BC.dat'];
+arrayCoilFile   = [datasetDir, '/meas_MID00418_FID15532_HC.dat'];
+measureFile     = [datasetDir, '/meas_MID00434_FID15548_T1wLIBRE.dat'];
 
 %% Load and Configure Data
 % Read data using the library's `createRawDataReader` function
 % This readers makes the usage of Siemens and ISMRMRD files equivalent for
 % the library
+
+% =====================================================
+% Helper function to extract sequence definitions
+% =====================================================
+function params = extract_seq_params(seqFile)
+    params = struct();
+    if ~isfile(seqFile), return; end
+    try
+        seq = mr.Sequence();
+        seq.read(seqFile);
+        defs = seq.definitions;
+        keysList = keys(defs);
+        for i = 1:numel(keysList)
+            key = keysList{i};
+            val = defs(key);
+            cleanKey = regexprep(lower(key), '[^a-z0-9_]', '');
+            params.(cleanKey) = val;
+        end
+    catch ME
+        warning('Failed to read seq params from %s: %s', seqFile, ME.message);
+    end
+end
+
+% Sequence parameters
+seqFile = seqFolder + "/" + seqName_list{2};  % prescans
+seqParams = extract_seq_params(seqFile);
+
+% Body Coil Reader
 bodyCoilReader = createRawDataReader(bodyCoilFile, true);
-% bodyCoilReader.acquisitionParams.nShot_off = 14;
 bodyCoilReader.acquisitionParams.traj_type = 'pulseq';
-bodyCoilReader.acquisitionParams.pulseqTrajFile_name = strcat(seqFolder, seqName);
-%
+bodyCoilReader.acquisitionParams.pulseqTrajFile_name = strcat(seqFile);
+if isfield(seqParams, 'nshot')
+    bodyCoilReader.acquisitionParams.nShot = seqParams.nshot;
+end
+if isfield(seqParams, 'nseg')
+    bodyCoilReader.acquisitionParams.nSeg = seqParams.nseg;
+end
+bodyCoilReader.acquisitionParams.nShot_off = 14;
+
+% Head Coil Reader
 arrayCoilReader = createRawDataReader(arrayCoilFile, true);
-% arrayCoilReader.acquisitionParams.nShot_off = 14;
 arrayCoilReader.acquisitionParams.traj_type = 'pulseq';
-arrayCoilReader.acquisitionParams.pulseqTrajFile_name = strcat(seqFolder, seqName);
+arrayCoilReader.acquisitionParams.pulseqTrajFile_name = strcat(seqFile);
+if isfield(seqParams, 'nshot')
+    arrayCoilReader.acquisitionParams.nShot = seqParams.nshot;
+end
+if isfield(seqParams, 'nseg')
+    arrayCoilReader.acquisitionParams.nSeg = seqParams.nseg;
+end
+arrayCoilReader.acquisitionParams.nShot_off = 14;
 
 % Ensure consistency in number of shot-off points
 nShotOff = arrayCoilReader.acquisitionParams.nShot_off;
@@ -100,25 +136,21 @@ end
 %
 
 %% Save C into the folder
+
 % bmImage(C)
-saveCDirList = {strcat('/Sub',num2str(subject_num),'/T1_LIBRE_Binning/C/'),
-    strcat('/Sub',num2str(subject_num),'/T1_LIBRE_woBinning/C/')};
 
+saveCDir  = reconDir;
+CfileName = 'C.mat';
 
-for idx = 1:2
-    saveCDir     = [reconDir, saveCDirList{idx}];
-    CfileName = 'C.mat';
-    
-    % Create the folder if it doesn't exist
-    if ~exist(saveCDir, 'dir')
-        mkdir(saveCDir);
-    end
-    
-    % Full path to  C file
-    CfilePath = fullfile(saveCDir, CfileName);
-    
-    % Save the matrix C to the .mat file
-    save(CfilePath, 'C');
-    disp('Coil sensitivity C has been saved here:')
-    disp(CfilePath)
+% Create the folder if it doesn't exist
+if ~exist(saveCDir, 'dir')
+    mkdir(saveCDir);
 end
+
+% Full path to  C file
+CfilePath = fullfile(saveCDir, CfileName);
+
+% Save the matrix C to the .mat file
+save(CfilePath, 'C');
+disp('Coil sensitivity C has been saved here:')
+disp(CfilePath)
