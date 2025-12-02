@@ -8,50 +8,50 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 5;
+subject_num = 1;
 mask_type = 'clean';   % use char instead of string
 
 Matrix_size = 240;
 reconFov = 240;
 
-% Base paths
+% Pulseq
+seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
+seqName_list = {
+    'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
+    'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
+
+% Base directory
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
 
+% Construct subject folder name (zero-padded to 3 digits)
 subjectStr = sprintf('sub-%03d', subject_num);
 
+% Full path to dataset directories
 datasetDir = fullfile(baseDir, subjectStr, 'rawdata');
 reconDir   = fullfile(baseDir, subjectStr, 'recon');
 binsDir    = fullfile(reconDir, 'bins', mask_type, filesep);
 ETDir      = fullfile(baseDir, subjectStr, 'EyeMasks');
 saveCDir   = reconDir;
 
-seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
+% Full path to dataset directories
+subjectDir  = fullfile(baseDir, subjectStr);
+rawDir      = fullfile(subjectDir, 'rawdata');
+reconDir = fullfile(subjectDir, 'recon');
 
-seqName_list = {
-    'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
-    'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
+% Get the list of meas_MID... files
+files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
 
-% Identify files by suffix
-bcFileInfo = dir(fullfile(datasetDir, '*_BC.dat'));
-hcFileInfo = dir(fullfile(datasetDir, '*_HC.dat'));
-t1FileInfo = dir(fullfile(datasetDir, '*_T1wLIBRE.dat'));
-
-if isempty(bcFileInfo)
-    error('No *_BC.dat file found in %s', datasetDir);
-end
-if isempty(hcFileInfo)
-    error('No *_HC.dat file found in %s', datasetDir);
-end
-if isempty(t1FileInfo)
-    error('No *_T1wLIBRE.dat file found in %s', datasetDir);
+if numel(files) ~= 3
+    warning('Expected 3 files, found %d', numel(files));
 end
 
-bodyCoilFile  = fullfile(datasetDir, bcFileInfo(1).name);
-arrayCoilFile = fullfile(datasetDir, hcFileInfo(1).name);
-measureFile   = fullfile(datasetDir, t1FileInfo(1).name);
+% Identify files by pattern
+bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
+arrayCoilFile = fullfile(rawDir, dir(fullfile(rawDir, '*_HC.dat')).name);
+measureFile   = fullfile(rawDir, dir(fullfile(rawDir, '*_T1wLIBRE.dat')).name);
 
-% Display found files (optional)
-disp('Found rawdata files:');
+% Display or use them
+disp('Found files:');
 disp(bodyCoilFile);
 disp(arrayCoilFile);
 disp(measureFile);
