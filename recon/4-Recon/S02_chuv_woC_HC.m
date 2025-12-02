@@ -9,7 +9,7 @@ addpath(genpath('/Users/cag/Documents/forclone/monalisa'));
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 3;
+subject_num = 1;
 saveflag = 1;
 
 % Pulseq
@@ -71,12 +71,12 @@ function params = extract_seq_params(seqFile)
 end
 
 % Sequence parameters
-seqFile = seqFolder + "/" + seqName_list{1};  % main sequence
+seqFile = seqFolder + "/" + seqName_list{2};  % prescans
 seqParams = extract_seq_params(seqFile);
 
 % Reader
 autoFlag = true;  % Disable validation UI
-reader = createRawDataReader(measureFile, autoFlag);
+reader = createRawDataReader(arrayCoilFile, autoFlag);
 reader.acquisitionParams.nShot_off = 14;
 reader.acquisitionParams.traj_type = 'pulseq';
 reader.acquisitionParams.pulseqTrajFile_name = strcat(seqFile);
@@ -110,7 +110,7 @@ for iCh = 1:nCh
     disp(['Processing channel: ', num2str(iCh), '/', num2str(nCh)]);
 end
 
-bmImage(x0);
+% bmImage(x0);
 
 % x0Path = fullfile(reconDir, 'x0_noC.mat');
 % if saveflag
@@ -140,7 +140,7 @@ if ~exist(reconDir, 'dir')
     mkdir(reconDir);
 end
 
-xrmsPath = fullfile(reconDir, 'xrms.mat');
+xrmsPath = fullfile(reconDir, 'xrms_BC.mat');
 
 if saveflag
     save(xrmsPath, 'xrms', '-v7.3');
