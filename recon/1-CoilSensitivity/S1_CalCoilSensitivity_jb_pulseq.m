@@ -9,30 +9,49 @@
 % With readers, the param setting is more organized
 % =====================================================
 clc, clearvars;
-% addpath(genpath("/media/sinf/1,0 TB Disk/Backup/Recon_fork"));
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 addpath(genpath('/home/debi/MatTechLab/internal_monalisa'));
-addpath(genpath('/Users/cag/Documents/forclone/pulseq_v15'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
-addpath(genpath('/home/debi/yiwei/forclone/pulseqmreye'));
 
 %% Initialize the directories and acquire the Coil
 
+% Parameters
 subject_num = 1;
 
-mask_note_list{1}= 'ori'; mask_note_list{2}= 'ptp';
-
+% Pulseq
 seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
-datasetDir = sprintf('/home/debi/jaime/repos/MR-EyeTrack/data/study/data/sub-%03d/rawdata', subject_num);
-reconDir = sprintf('/home/debi/jaime/repos/MR-EyeTrack/data/study/data/sub-%03d/recon', subject_num);
-
 seqName_list = {
     'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
     'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
 
-bodyCoilFile    = [datasetDir, '/meas_MID00427_FID15541_BC.dat'];
-arrayCoilFile   = [datasetDir, '/meas_MID00418_FID15532_HC.dat'];
-measureFile     = [datasetDir, '/meas_MID00434_FID15548_T1wLIBRE.dat'];
+% Base directory
+baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
+
+% Construct subject folder name (zero-padded to 3 digits)
+subjectStr = sprintf('sub-%03d', subject_num);
+
+% Full path to dataset directories
+subjectDir  = fullfile(baseDir, subjectStr);
+rawDir      = fullfile(subjectDir, 'rawdata');
+reconDir = fullfile(subjectDir, 'recon');
+
+% Get the list of meas_MID... files
+files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
+
+if numel(files) ~= 3
+    warning('Expected 3 files, found %d', numel(files));
+end
+
+% Identify files by pattern
+bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
+arrayCoilFile = fullfile(rawDir, dir(fullfile(rawDir, '*_HC.dat')).name);
+measureFile   = fullfile(rawDir, dir(fullfile(rawDir, '*_T1wLIBRE.dat')).name);
+
+% Display or use them
+disp('Found files:');
+disp(bodyCoilFile);
+disp(arrayCoilFile);
+disp(measureFile);
 
 %% Load and Configure Data
 % Read data using the library's `createRawDataReader` function
