@@ -23,10 +23,11 @@ baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
 
 subjectStr = sprintf('sub-%03d', subject_num);
 
-datasetDir = fullfile(baseDir, subjectStr, 'rawdata');
-reconDir   = fullfile(baseDir, subjectStr, 'recon');
-binsDir    = fullfile(reconDir, 'bins', mask_type, filesep);
-ETDir      = fullfile(baseDir, subjectStr, 'EyeMasks');
+subjectDir  = fullfile(baseDir, subjectStr);
+rawDir      = fullfile(subjectDir, 'rawdata');
+ETDir       = fullfile(subjectDir, 'EyeMasks');
+reconDir    = fullfile(subjectDir, 'recon');
+binsDir     = fullfile(reconDir, 'bins', mask_type, filesep);
 
 % Directory existence check
 if ~isfolder(binsDir)
@@ -42,28 +43,6 @@ seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
 seqName_list = {
     'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
     'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
-
-% =====================================================
-% Helper function to extract sequence definitions
-% =====================================================
-function params = extract_seq_params(seqFile)
-    params = struct();
-    if ~isfile(seqFile), return; end
-    try
-        seq = mr.Sequence();
-        seq.read(seqFile);
-        defs = seq.definitions;
-        keysList = keys(defs);
-        for i = 1:numel(keysList)
-            key = keysList{i};
-            val = defs(key);
-            cleanKey = regexprep(lower(key), '[^a-z0-9_]', '');
-            params.(cleanKey) = val;
-        end
-    catch ME
-        warning('Failed to read seq params from %s: %s', seqFile, ME.message);
-    end
-end
 
 % Sequence parameters
 seqFile = seqFolder + "/" + seqName_list{1};  % main sequence

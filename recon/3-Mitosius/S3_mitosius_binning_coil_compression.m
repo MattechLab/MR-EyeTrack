@@ -63,7 +63,6 @@ myTwix = bmTwix(measureFile);
 
 %%
 t_tot = bmTraj(reader.acquisitionParams);                 % Compute trajectory
-
 ve_tot = bmVolumeElement(t_tot, 'voronoi_full_radial3');  % Volume elements
 
 %% Step 2: Load Coil Sensitivity Maps
@@ -238,26 +237,4 @@ for region_idx = 0:3
     disp('Mitosius files are saved!')
     disp(mDir)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+end

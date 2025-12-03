@@ -3,14 +3,14 @@ clc; clearvars;
 
 %% === Add paths ===
 addpath(genpath('/Users/cag/Documents/forclone/Recon_scripts'));
-addpath(genpath('/Users/cag/Documents/forclone/pulseq_v15'));
 addpath(genpath('/Users/cag/Documents/forclone/monalisa'));
+addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 3;
-saveflag = 1;
+subject_num = 1;
+saveflag = 0;
 
 % Pulseq
 seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
@@ -31,7 +31,6 @@ reconDir = fullfile(subjectDir, 'recon');
 
 % Get the list of meas_MID... files
 files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
-
 if numel(files) ~= 3
     warning('Expected 3 files, found %d', numel(files));
 end

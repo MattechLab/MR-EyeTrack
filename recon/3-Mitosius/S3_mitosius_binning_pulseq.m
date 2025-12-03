@@ -1,5 +1,4 @@
 clc; clearvars; close all;
-debug = false;
 
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
@@ -27,20 +26,13 @@ baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
 subjectStr = sprintf('sub-%03d', subject_num);
 
 % Full path to dataset directories
-datasetDir = fullfile(baseDir, subjectStr, 'rawdata');
-reconDir   = fullfile(baseDir, subjectStr, 'recon');
-binsDir    = fullfile(reconDir, 'bins', mask_type, filesep);
-ETDir      = fullfile(baseDir, subjectStr, 'EyeMasks');
-saveCDir   = reconDir;
-
-% Full path to dataset directories
 subjectDir  = fullfile(baseDir, subjectStr);
 rawDir      = fullfile(subjectDir, 'rawdata');
-reconDir = fullfile(subjectDir, 'recon');
+reconDir    = fullfile(subjectDir, 'recon');
+binsDir     = fullfile(reconDir, 'bins', mask_type, filesep);
 
 % Get the list of meas_MID... files
 files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
-
 if numel(files) ~= 3
     warning('Expected 3 files, found %d', numel(files));
 end
@@ -65,27 +57,6 @@ else
 end
 
 %% Step 1: Load the Raw Data
-% =====================================================
-% Helper function to extract sequence definitions
-% =====================================================
-function params = extract_seq_params(seqFile)
-    params = struct();
-    if ~isfile(seqFile), return; end
-    try
-        seq = mr.Sequence();
-        seq.read(seqFile);
-        defs = seq.definitions;
-        keysList = keys(defs);
-        for i = 1:numel(keysList)
-            key = keysList{i};
-            val = defs(key);
-            cleanKey = regexprep(lower(key), '[^a-z0-9_]', '');
-            params.(cleanKey) = val;
-        end
-    catch ME
-        warning('Failed to read seq params from %s: %s', seqFile, ME.message);
-    end
-end
 
 % Sequence parameters
 seqFile = seqFolder + "/" + seqName_list{1};  % main sequence
@@ -103,7 +74,7 @@ end
 if isfield(seqParams, 'nseg')
     reader.acquisitionParams.nSeg = seqParams.nseg;
 end
-%
+
 % Load the raw data and compute trajectory and volume elements
 y_tot = reader.readRawData(true, true);  % Filter nShotOff and SI
 
@@ -115,7 +86,7 @@ ve_tot = bmVolumeElement(t_tot, 'voronoi_full_radial3');  % Volume elements
 
 % Load the coil sensitivity previously measured
 CfileName = 'C.mat';
-CfilePath = fullfile(saveCDir, CfileName);
+CfilePath = fullfile(reconDir, CfileName);
 load(CfilePath, 'C');  % Load sensitivity maps
 disp(['C is loaded from:', CfilePath]);
 
@@ -135,6 +106,8 @@ N_u = [matrix_size, matrix_size, matrix_size];
 dK_u = [1, 1, 1]./FoV;
 
 %%
+
+%% Resize C
 C = bmImResize(C, [48, 48, 48], N_u);
 % C = flip(flip(flip(C, 1), 2), 3);
 
@@ -199,10 +172,9 @@ end
 
 for region_idx = 0:3
 
-    mDir = [reconDir,'/mitosius/', mask_type, '/mask_', num2str(region_idx), '/'];
-
     th_ratio = 0.75;
-    eMaskFilePath = [binsDir, sprintf('eMask_th%.2f_region%i.mat', th_ratio, region_idx)];
+    mDir = fullfile(reconDir, 'mitosius', mask_type, ['mask_', num2str(region_idx)]);
+    eMaskFilePath = fullfile(binsDir, sprintf('eMask_th%.2f_region%i.mat', th_ratio, region_idx));
 
     eyeMask = load(eMaskFilePath);
     fields = fieldnames(eyeMask);  % Get the field names

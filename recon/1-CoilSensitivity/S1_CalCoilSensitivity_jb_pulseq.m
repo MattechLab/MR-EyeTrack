@@ -33,7 +33,7 @@ subjectStr = sprintf('sub-%03d', subject_num);
 % Full path to dataset directories
 subjectDir  = fullfile(baseDir, subjectStr);
 rawDir      = fullfile(subjectDir, 'rawdata');
-reconDir = fullfile(subjectDir, 'recon');
+reconDir    = fullfile(subjectDir, 'recon');
 
 % Get the list of meas_MID... files
 files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
@@ -57,28 +57,6 @@ disp(measureFile);
 % Read data using the library's `createRawDataReader` function
 % This readers makes the usage of Siemens and ISMRMRD files equivalent for
 % the library
-
-% =====================================================
-% Helper function to extract sequence definitions
-% =====================================================
-function params = extract_seq_params(seqFile)
-    params = struct();
-    if ~isfile(seqFile), return; end
-    try
-        seq = mr.Sequence();
-        seq.read(seqFile);
-        defs = seq.definitions;
-        keysList = keys(defs);
-        for i = 1:numel(keysList)
-            key = keysList{i};
-            val = defs(key);
-            cleanKey = regexprep(lower(key), '[^a-z0-9_]', '');
-            params.(cleanKey) = val;
-        end
-    catch ME
-        warning('Failed to read seq params from %s: %s', seqFile, ME.message);
-    end
-end
 
 % Sequence parameters
 seqFile = seqFolder + "/" + seqName_list{2};  % prescans
