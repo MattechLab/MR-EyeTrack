@@ -105,7 +105,14 @@ matrix_size = 240;  % Max nominal spatial resolution
 N_u = [matrix_size, matrix_size, matrix_size];
 dK_u = [1, 1, 1]./FoV;
 
-%%
+%% Rotate C for sub-001
+if subject_num == 1
+    C_rot = rot90(C, 1);  % Rotate 90 degrees counter-clockwise
+    disp(size(C_rot));
+    % bmImage(C_rot);
+    bmImage(sqrt(sum(C_rot.^2, 4)));
+    C = C_rot;
+end
 
 %% Resize C
 C = bmImResize(C, [48, 48, 48], N_u);
