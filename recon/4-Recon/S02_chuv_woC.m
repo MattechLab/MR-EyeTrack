@@ -2,17 +2,17 @@
 clc; clearvars;
 
 %% === Add paths ===
-addpath(genpath('/Users/cag/Documents/forclone/Recon_scripts'));
-addpath(genpath('/Users/cag/Documents/forclone/monalisa'));
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 1;
+subject_num = 5;
 saveflag = 0;
 
-% Pulseq
+% PulseqS
 seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
 seqName_list = {
     'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
@@ -38,7 +38,8 @@ end
 % Identify files by pattern
 bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
 arrayCoilFile = fullfile(rawDir, dir(fullfile(rawDir, '*_HC.dat')).name);
-measureFile   = fullfile(rawDir, dir(fullfile(rawDir, '*_T1wLIBRE.dat')).name);
+% measureFile   = fullfile(rawDir, dir(fullfile(rawDir, '*_T1wLIBRE.dat')).name);
+measureFile   = fullfile(rawDir, dir(fullfile(rawDir, 'meas_MID00096_FID17023_csTFL_mp_rage_1mm_iso_CP_acc4_6_cobo.dat')).name);
 
 % Display or use them
 disp('Found files:');
@@ -47,27 +48,6 @@ disp(arrayCoilFile);
 disp(measureFile);
 
 %% Step 1: Load the Raw Data
-% =====================================================
-% Helper function to extract sequence definitions
-% =====================================================
-function params = extract_seq_params(seqFile)
-    params = struct();
-    if ~isfile(seqFile), return; end
-    try
-        seq = mr.Sequence();
-        seq.read(seqFile);
-        defs = seq.definitions;
-        keysList = keys(defs);
-        for i = 1:numel(keysList)
-            key = keysList{i};
-            val = defs(key);
-            cleanKey = regexprep(lower(key), '[^a-z0-9_]', '');
-            params.(cleanKey) = val;
-        end
-    catch ME
-        warning('Failed to read seq params from %s: %s', seqFile, ME.message);
-    end
-end
 
 % Sequence parameters
 seqFile = seqFolder + "/" + seqName_list{1};  % main sequence
@@ -119,15 +99,21 @@ bmImage(x0);
 % end
 
 %% === Root-mean-square combination ===
-[nx, ny, nz] = size(x0{1});
-numCoils = numel(x0);
+% Root mean square across the channels
+% Initialize an array to store sum of squared images
+[nx, ny, nz] = size(x0{1}); % Get the dimensions (240,240,240)
+numCoils = numel(x0); % Number of coils
 
 sum_of_squares = zeros(nx, ny, nz, 'single');
 
+% straightforward
+% sum_of_squares = sum_of_squares + abs(x0{coil}).^2;
+% eliminate extra square-root step
 for coil = 1:numCoils
     sum_of_squares = sum_of_squares + real( x0{coil} .* conj(x0{coil}) );
 end
 
+% Compute the root mean square (RMS)
 xrms = sqrt(sum_of_squares / numCoils);
 
 bmImage(xrms);

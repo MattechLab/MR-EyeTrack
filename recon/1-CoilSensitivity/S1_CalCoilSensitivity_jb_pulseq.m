@@ -16,7 +16,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 1;
+subject_num = 4;
 
 % Pulseq
 seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';

@@ -7,7 +7,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 1;
+subject_num = 4;
 mask_type = 'clean';   % use char instead of string
 
 Matrix_size = 240;
@@ -30,6 +30,13 @@ subjectDir  = fullfile(baseDir, subjectStr);
 rawDir      = fullfile(subjectDir, 'rawdata');
 reconDir    = fullfile(subjectDir, 'recon');
 binsDir     = fullfile(reconDir, 'bins', mask_type, filesep);
+
+% Output paths (for x0 woBin)
+x0Dir       = fullfile(reconDir, 'woBin');
+x0Path      = fullfile(x0Dir, ['x0.mat']);
+if ~exist(x0Dir, 'dir')
+    mkdir(x0Dir);
+end
 
 % Get the list of meas_MID... files
 files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
@@ -105,9 +112,15 @@ matrix_size = 240;  % Max nominal spatial resolution
 N_u = [matrix_size, matrix_size, matrix_size];
 dK_u = [1, 1, 1]./FoV;
 
-%% Rotate C for sub-001
+%% Rotate C
 if subject_num == 1
     C_rot = rot90(C, 1);  % Rotate 90 degrees counter-clockwise
+    disp(size(C_rot));
+    % bmImage(C_rot);
+    bmImage(sqrt(sum(C_rot.^2, 4)));
+    C = C_rot;
+elseif subject_num == 4
+    C_rot = rot90(C, -1);  % Rotate 90 degrees clockwise
     disp(size(C_rot));
     % bmImage(C_rot);
     bmImage(sqrt(sum(C_rot.^2, 4)));
@@ -126,7 +139,7 @@ else
     normalization = true;
 end
 if normalization
-    x_tot = bmMathilda(y_tot, t_tot, ve_tot, C, N_u, N_u, dK_u); 
+    x_tot = bmMathilda(y_tot, t_tot, ve_tot, C, N_u, N_u, dK_u);
     % x_perm = permute(x_tot, [2,3,1]);
     x0=x_tot;
     bmImage(x0);
@@ -152,23 +165,10 @@ if real(y_tot)<1
     end
 end
 
-%% [OPTIONAL] Save x0 recon 
-
-% x0Dir = fullfile(reconDir, ['Sub00', num2str(subject_num)], 'T1_LIBRE_Binning/output/');
-
-% if ~isfolder(x0Dir)
-%     % If it doesn't exist, create it
-%     mkdir(x0Dir);
-%     disp(['Directory created: ', x0Dir]);
-% else
-%     disp(['Directory already exists: ', x0Dir]);
-% end
-% x0Path = fullfile(x0Dir, 'x0.mat');
-
-% % Save the x0 to the .mat file
-% save(x0Path, 'x0', '-v7.3');
-% disp('x0 has been saved here:')
-% disp(x0Path)
+%% Save x0 recon woBin
+save(x0Path, 'x0', '-v7.3');
+disp('x0 has been saved here:')
+disp(x0Path)
 
 %% Before running this cell, make sure the Mask is well-prepared.
 % Load the masked coil sensitivity 
@@ -201,7 +201,7 @@ for region_idx = 0:3
     % Run the mitosis function and compute volume elements
     [y, t] = bmMitosis(y_tot_norm, t_tot, eyeMask); 
     y = bmPermuteToCol(y); 
-    ve  = bmVolumeElement(t, 'voronoi_full_radial3' ); 
+    ve  = bmVolumeElement(t, 'voronoi_full_radial3'); 
 
     % Save all the resulting datastructures on the disk. You are now ready
     % to run your reconstruction

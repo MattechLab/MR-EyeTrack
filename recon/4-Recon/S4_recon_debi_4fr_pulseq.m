@@ -7,9 +7,9 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 1;
+subject_num = 4;
 mask_type = 'clean';   % use char instead of string
-region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
+region_idx = 1; % 0:up 1:down 2:left 3:right 4:center mask
 
 % Pulseq
 seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
@@ -30,7 +30,11 @@ reconDir    = fullfile(subjectDir, 'recon');
 mDir        = fullfile(reconDir, 'mitosius', mask_type, ['mask_', num2str(region_idx)]);
 
 % Output paths (x path depends on nIter and delta, defined later)
-x0Path      = fullfile(reconDir, 'x0', ['x0_regionidx' num2str(region_idx) '.mat']);
+x0Dir       = fullfile(reconDir, mask_type, 'x0');
+x0Path      = fullfile(x0Dir, ['x0_regionidx' num2str(region_idx) '.mat']);
+if ~exist(x0Dir, 'dir')
+    mkdir(x0Dir);
+end
 
 % Get the list of meas_MID... files
 files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
@@ -98,14 +102,22 @@ N_u = [matrix_size, matrix_size, matrix_size]; % Matrix size: Size of the Virtua
 n_u = N_u; % Image size (output)
 dK_u = [1, 1, 1]./FoV; % Spacing of the virtual cartesian grid
 
-%% Rotate (if needed) and resize
+%% Rotate C for sub-001
 if subject_num == 1
     C_rot = rot90(C, 1);  % Rotate 90 degrees counter-clockwise
     disp(size(C_rot));
     % bmImage(C_rot);
     bmImage(sqrt(sum(C_rot.^2, 4)));
     C = C_rot;
+elseif subject_num == 4
+    C_rot = rot90(C, -1);  % Rotate 90 degrees clockwise
+    disp(size(C_rot));
+    % bmImage(C_rot);
+    bmImage(sqrt(sum(C_rot.^2, 4)));
+    C = C_rot;
 end
+
+%% Resize C
 C = bmImResize(C, [48, 48, 48], N_u);
 disp('C resized!')
 
@@ -117,7 +129,6 @@ x0 = cell(nFr, 1);
     % isequal(x0_p, x0)
     %
     bmImage(x0);
-
 
 %% Save the x0 to the .mat file
 save(x0Path, 'x0', '-v7.3');
@@ -148,7 +159,12 @@ x = bmSteva(  x0{1}, [], [], y{1}, ve{1}, C, Gu{1}, Gut{1}, n_u, ...
 bmImage(x)
 
 % Save the x to the .mat file
-xPath = fullfile(reconDir, 'x', sprintf('x_steva_regionidx_%i_nIter_%d_delta_%.3f.mat', region_idx, nIter, delta));
+xDir  = fullfile(reconDir, mask_type, 'x');
+xPath = fullfile(xDir, sprintf('x_steva_regionidx_%i_nIter_%d_delta_%.3f.mat', region_idx, nIter, delta));
+if ~exist(xDir, 'dir')
+    mkdir(xDir);
+end
+
 save(xPath, 'x');
 disp('x has been saved here:')
 disp(xPath)

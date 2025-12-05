@@ -7,12 +7,9 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 1;
+subject_num = 4;
 region_idx = 0;
 mask_type = 'clean';   % use char instead of string
-
-Matrix_size = 240;
-reconFov = 240;
 
 % Pulseq
 seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
@@ -32,27 +29,27 @@ rawDir      = fullfile(subjectDir, 'rawdata');
 reconDir    = fullfile(subjectDir, 'recon');
 
 %% Load and display images
-
-% File paths
-file1 = fullfile(reconDir, 'woBin', 'xrms.mat');
-file2 = fullfile(reconDir, mask_type, 'x0', sprintf('x0_regionidx%d.mat', region_idx));
-file3 = fullfile(reconDir, mask_type, 'x', sprintf('x_steva_regionidx_%d_nIter_20_delta_1.000.mat', region_idx));
-
 % Load files
 fprintf('Loading files for subject %d, region index %d...\n', subject_num, region_idx);
 
+file1 = fullfile(reconDir, 'woBin', 'xrms.mat');
 data1 = load(file1);
-data2 = load(file2);
-data3 = load(file3);
-
-% Display images
 bmImage(data1.xrms);
 title(sprintf('xrms.mat\nSub-%03d', subject_num));
 
-bmImage(data2.x0);
+file2 = fullfile(reconDir, 'woBin', 'xrms_HC.mat');
+data2 = load(file2);
+bmImage(data2.xrms);
+title(sprintf('xrms HC\nSub-%03d', subject_num));
+
+file3 = fullfile(reconDir, mask_type, 'x0', sprintf('x0_regionidx%d.mat', region_idx));
+data3 = load(file3);
+bmImage(data3.x0{1});
 title(sprintf('x0 regionidx%d\nSub-%03d', region_idx, subject_num));
 
-bmImage(data3.x);
+file4 = fullfile(reconDir, mask_type, 'x', sprintf('x_steva_regionidx_%d_nIter_20_delta_1.000.mat', region_idx));
+data4 = load(file4);
+bmImage(data4.x);
 title(sprintf('x steva regionidx %d\nSub-%03d', region_idx, subject_num));
 
 fprintf('Display complete.\n');

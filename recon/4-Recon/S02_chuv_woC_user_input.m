@@ -1,6 +1,24 @@
 %% Init
 clc; clearvars;
 
+%% === User Input Section ===
+% Open file dialogs for sequence and raw data files
+
+% Select sequence file
+[seqName, seqFolder] = uigetfile('*.seq', 'Select sequence file');
+if seqName == 0
+    error('Sequence file selection was cancelled');
+end
+
+% Select raw data file
+[measureFilename, rawDir] = uigetfile('*.dat', 'Select raw data file');
+if measureFilename == 0
+    error('Raw data file selection was cancelled');
+end
+
+% Create cell array with the selected sequence file
+seqName_list = {seqName};
+
 %% === Add paths ===
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
@@ -9,53 +27,24 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 4;
-saveflag = 1;
+saveflag = 0;
 
-% Pulseq
-seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
-seqName_list = {
-    'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
-    'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
+% Full path to the measurement file
+measureFile = fullfile(rawDir, measureFilename);
 
-% Base directory
-baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
-
-% Construct subject folder name (zero-padded to 3 digits)
-subjectStr = sprintf('sub-%03d', subject_num);
-
-% Full path to dataset directories
-subjectDir  = fullfile(baseDir, subjectStr);
-rawDir      = fullfile(subjectDir, 'rawdata');
-reconDir    = fullfile(subjectDir, 'recon');
-
-% Get the list of meas_MID... files
-files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
-
-if numel(files) ~= 3
-    warning('Expected 3 files, found %d', numel(files));
-end
-
-% Identify files by pattern
-bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
-arrayCoilFile = fullfile(rawDir, dir(fullfile(rawDir, '*_HC.dat')).name);
-measureFile   = fullfile(rawDir, dir(fullfile(rawDir, '*_T1wLIBRE.dat')).name);
-
-% Display or use them
-disp('Found files:');
-disp(bodyCoilFile);
-disp(arrayCoilFile);
-disp(measureFile);
+% Recon directory (same level as rawDir)
+[parentDir, ~] = fileparts(rawDir);
+reconDir = fullfile(parentDir, 'recon');
 
 %% Step 1: Load the Raw Data
 
-% Sequence parameters
-seqFile = seqFolder + "/" + seqName_list{2};  % prescans
+% Sequence file (already selected by user)
+seqFile = fullfile(seqFolder, seqName);
 seqParams = extract_seq_params(seqFile);
 
 % Reader
 autoFlag = true;  % Disable validation UI
-reader = createRawDataReader(arrayCoilFile, autoFlag);
+reader = createRawDataReader(measureFile, autoFlag);
 reader.acquisitionParams.nShot_off = 14;
 reader.acquisitionParams.traj_type = 'pulseq';
 reader.acquisitionParams.pulseqTrajFile_name = strcat(seqFile);
@@ -89,7 +78,7 @@ for iCh = 1:nCh
     disp(['Processing channel: ', num2str(iCh), '/', num2str(nCh)]);
 end
 
-% bmImage(x0);
+bmImage(x0);
 
 % x0Path = fullfile(reconDir, 'x0_noC.mat');
 % if saveflag
@@ -114,15 +103,27 @@ bmImage(xrms);
 
 %% Save RMS image
 
-% Create the folder if it doesn't exist
-if ~exist(reconDir, 'dir')
-    mkdir(reconDir);
-end
+% Ask user if they want to save the image
+saveChoice = questdlg('Do you want to save the RMS image?', 'Save Image', 'Yes', 'No', 'No');
 
-xrmsPath = fullfile(reconDir, 'woBin', 'xrms_HC.mat');
-
-if saveflag
-    save(xrmsPath, 'xrms', '-v7.3');
-    disp('Saved RMS image:');
-    disp(xrmsPath)
+if strcmp(saveChoice, 'Yes')
+    % Open file dialog to select save location and filename
+    [filename, pathname] = uiputfile('*.mat', 'Save RMS image as', 'xrms.mat');
+    
+    if filename ~= 0
+        % Construct full path
+        fullPath = fullfile(pathname, filename);
+        
+        % Create the folder if it doesn't exist
+        if ~exist(pathname, 'dir')
+            mkdir(pathname);
+        end
+        
+        % Save the image
+        save(fullPath, 'xrms', '-v7.3');
+        disp('Saved RMS image:');
+        disp(fullPath);
+    else
+        disp('Save cancelled by user');
+    end
 end

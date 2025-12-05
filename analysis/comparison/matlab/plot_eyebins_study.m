@@ -1,5 +1,5 @@
 %% Visual comparison with subplots
-clc; clearvars; close all;
+% clc; clearvars; close all;
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Config

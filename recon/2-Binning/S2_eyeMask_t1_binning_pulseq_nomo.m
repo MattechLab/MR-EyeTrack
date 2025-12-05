@@ -15,8 +15,8 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 1;
-mask_type = 'clean';
+subject_num = 4;
+mask_type = 'no-mo';
 
 % Base paths
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
@@ -51,11 +51,36 @@ seqParams = extract_seq_params(seqFile);
 nShotOff = 14; 
 nSeg = seqParams.nseg;
 
-%% Generate the (multiple) full eMask (for different gaze positions -- loop)
+%% Generate the (single) full eMask
 % This function will guide you manually select the raw data and ET masks
 % to generate the ET-guided binning mask for monalisa recon
 % If you'd like to generate 4 bins with 4 masks,
 % please enter nBin=4, and select ET masks for 4 times
+
+% winLen: the length of the readout sliding window to determine the preservation.
+% th_ratio: the ratio for thresholding the ET mask.
+winLen = 7;
+th_ratio = 0.9;
+
+% Generate the full eMask (4 x N matrix)
+eMask = eyeGenerateBinningWin(rawDir, nShotOff, nSeg, th_ratio, ETDir, winLen, true);
+
+% Saving data and Convert to Monalisa format
+%--------------------------------------------------------------------------
+% Extract the row corresponding to this region
+% single_eMask = eMask(region_idx + 1, :);  % +1 because MATLAB is 1-based indexing
+single_eMask = eMask(1, :);  % for single eMask generation
+
+% Define the file path for this region
+eMaskFilePath = [binsDir, sprintf('eMask_th%.2f_winLen%i.mat', th_ratio, winLen)];
+
+% Save this row into the .mat file (variable name is 'eMaskN')
+eMaskN = single_eMask;  % overwrite for saving clarity, or use different var name
+save(eMaskFilePath, 'eMaskN');
+
+% Display confirmation
+disp('eMask has been saved here:')
+disp(eMaskFilePath)
 
 % To be specific:
 % To determine if the current readout should be preserved or not,
@@ -65,33 +90,3 @@ nSeg = seqParams.nseg;
     % we will maintain the current readout, i.e. binningMask value = 1
 % else
     % discard this readout, i.e. binningMask value = 0
-
-% winLen: the length of the readout sliding window to determine the preservation.
-% th_ratio: the ratio for thresholding the ET mask.
-winLen = 10;
-th_ratio = 0.75;
-
-% Generate the full eMask (4 x N matrix)
-eMask = eyeGenerateBinningWin(rawDir, nShotOff, nSeg, th_ratio, ETDir, winLen, true);
-
-% Saving data and Convert to Monalisa format
-%--------------------------------------------------------------------------
-region_idx_list = 0:3;  % 0:up 1:down 2:left 3:right 4:center mask
-binsDirStr = string(binsDir);  % ensure text scalar support
-
-for region_idx = region_idx_list
-    % Extract the row corresponding to this region
-    single_eMask = eMask(region_idx + 1, :);
-
-    % Define the file path for this region (robust to string/char binsDir)
-    fileName = sprintf('eMask_th%.2f_region%i.mat', th_ratio, region_idx);
-    eMaskFilePath = fullfile(binsDirStr, fileName);
-
-    % Save this row into the .mat file (variable name is 'eMaskN')
-    eMaskN = single_eMask;
-    save(char(eMaskFilePath), 'eMaskN');  % char() for broad MATLAB version compatibility
-
-    % Display confirmation
-    disp('eMask has been saved here:')
-    disp(eMaskFilePath)
-end
