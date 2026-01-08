@@ -5,12 +5,12 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 %% Config
 
 % Variables
-subject_num = 1;
+subject_num = 3;
 mask_type = {'clean', 'clean_0.5'};
-region_idx = 0;  % 0:up 1:down 2:left 3:right 4:center mask
+region_idx = 2;  % 0:up 1:down 2:left 3:right 4:center mask
 
 % Base directory
-baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
+baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
 
 % Construct subject folder name (zero-padded to 3 digits)
 subjectStr = sprintf('sub-%03d', subject_num);
@@ -20,7 +20,7 @@ datasetDir = fullfile(baseDir, subjectStr, 'rawdata');
 reconDir   = fullfile(baseDir, subjectStr, 'recon');
 binsDir1    = fullfile(reconDir, 'bins', mask_type{1}, filesep);
 binsDir2    = fullfile(reconDir, 'bins', mask_type{2}, filesep);
-ETDir      = fullfile(baseDir, subjectStr, 'EyeMasks');
+ETDir      = fullfile(baseDir, subjectStr, 'eyemasks');
 
 % Eye bins
 mask_1_path = [binsDir1, '/eMask_th0.75_region', num2str(region_idx), '.mat'];

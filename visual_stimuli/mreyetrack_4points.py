@@ -44,7 +44,7 @@ _thisDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(_thisDir)
 # Store info about the experiment session
 psychopyVersion = '2024.2.1'
-expName = 'fixed_dot-16_grid_T1w'  # from the Builder filename that created this script
+expName = 'mreyetrack_4points'  # from the Builder filename that created this script
 expInfo = {
     'participant': f"{randint(0, 999):03.0f}",
     'session': '001',
@@ -63,7 +63,7 @@ filename = _thisDir + os.sep + u'data/%s_%s_%s' % (expInfo['participant'], expNa
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name=expName, version='',
     extraInfo=expInfo, runtimeInfo=None,
-    originPath='/c:/Users/jaime.barranco/Desktop/repos/mattechlab/MR-EyeTrack/visual_stimuli/fixed_dot-16_grid_T1w.py',
+    originPath='/c:/Users/jaime.barranco/Desktop/repos/mattechlab/MR-EyeTrack/visual_stimuli/mreyetrack_4points.py',
     savePickle=True, saveWideText=True,
     dataFileName=filename)
 # save a log file for detail verbose info

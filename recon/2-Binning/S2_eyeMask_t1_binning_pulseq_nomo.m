@@ -15,17 +15,17 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 4;
+subject_num = 3;
 mask_type = 'no-mo';
 
 % Base paths
-baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
+baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
 
 subjectStr = sprintf('sub-%03d', subject_num);
 
 subjectDir  = fullfile(baseDir, subjectStr);
 rawDir      = fullfile(subjectDir, 'rawdata');
-ETDir       = fullfile(subjectDir, 'EyeMasks');
+ETDir       = fullfile(subjectDir, 'eyemasks');
 reconDir    = fullfile(subjectDir, 'recon');
 binsDir     = fullfile(reconDir, 'bins', mask_type, filesep);
 
@@ -39,13 +39,13 @@ end
 
 %% Pulseq
 % nShotOff should be aligned with the case of woBinning
-seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
+seqFolder = fullfile(baseDir, 'pulseq');
 seqName_list = {
-    'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
-    'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
+    'yj_seq100_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA6_Traj1_nSeg44_nShot191_Fid0_mreye_2p0.seq', ...
+    'yj_seq202_t1w_libre_main_TR8.0ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872_gdsp.seq'};
 
 % Sequence parameters
-seqFile = seqFolder + "/" + seqName_list{1};  % main sequence
+seqFile = seqFolder + "/" + seqName_list{2};  % main sequence
 seqParams = extract_seq_params(seqFile);
 
 nShotOff = 14; 
@@ -63,7 +63,7 @@ winLen = 7;
 th_ratio = 0.9;
 
 % Generate the full eMask (4 x N matrix)
-eMask = eyeGenerateBinningWin(rawDir, nShotOff, nSeg, th_ratio, ETDir, winLen, true);
+eMask = eyeGenerateBinningWin(rawDir, nShotOff, nSeg, th_ratio, ETDir, winLen, true, true, mask_type);
 
 % Saving data and Convert to Monalisa format
 %--------------------------------------------------------------------------

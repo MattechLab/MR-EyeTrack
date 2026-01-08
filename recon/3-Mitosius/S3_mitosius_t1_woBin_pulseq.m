@@ -8,7 +8,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 % Variables
 subject_num = 3;
-mask_type = 'clean';   % use char instead of string
+mask_type = 'woBin';   % use char instead of string
 
 Matrix_size = 240;
 reconFov = 240;
@@ -33,9 +33,15 @@ binsDir     = fullfile(reconDir, 'bins', mask_type, filesep);
 
 % Output paths (for x0 woBin)
 x0Dir       = fullfile(reconDir, 'woBin');
-x0Path      = fullfile(x0Dir, 'x0.mat');
+x0Path      = fullfile(x0Dir, ['x0.mat']);
 if ~exist(x0Dir, 'dir')
     mkdir(x0Dir);
+end
+
+% Mitosius output directory
+mDir = fullfile(reconDir, 'mitosius', mask_type);
+if ~exist(mDir, 'dir')
+    mkdir(mDir);
 end
 
 % Get the list of meas_MID... files
@@ -170,43 +176,36 @@ save(x0Path, 'x0', '-v7.3');
 disp('x0 has been saved here:')
 disp(x0Path)
 
-%% Before running this cell, make sure the Mask is well-prepared.
-% Load the masked coil sensitivity 
+%% Prepare eye mask
 
-% if woBinning
-% MaskFilePath = [binsDir, 'eMask_woBin.mat'];
-% if withBinning
+eMaskFilePath = [binsDir, 'eMask_woBin'];
 
-for region_idx = 0:3
+eyeMask = load(eMaskFilePath); 
+fields = fieldnames(eyeMask);  % Get the field names
+firstField = fields{1};  % Get the first field name
+eyeMask = eyeMask.(firstField);  % Access the first field's value
+disp(eMaskFilePath)
+disp('is loaded!')
+% Eliminate the first segment of all the spokes for accuracies
 
-    th_ratio = 0.75;
-    mDir = fullfile(reconDir, 'mitosius', mask_type, ['mask_', num2str(region_idx)]);
-    eMaskFilePath = fullfile(binsDir, sprintf('eMask_th%.2f_region%i.mat', th_ratio, region_idx));
+size_Mask = size(eyeMask);
+nbins = size_Mask(1);
+eyeMask = reshape(eyeMask, [nbins, reader.acquisitionParams.nSeg, reader.acquisitionParams.nShot]); 
+eyeMask(:, 1, :) = [];
 
-    eyeMask = load(eMaskFilePath);
-    fields = fieldnames(eyeMask);  % Get the field names
-    firstField = fields{1};  % Get the first field name
-    eyeMask = eyeMask.(firstField);  % Access the first field's value
-    disp(eMaskFilePath)
-    disp('is loaded!')
-    
-    % Eliminate the first segment of all the spokes for accuracies
-    size_Mask = size(eyeMask);
-    nbins = size_Mask(1);
-    eyeMask = reshape(eyeMask, [nbins, reader.acquisitionParams.nSeg, reader.acquisitionParams.nShot]); 
-    eyeMask(:, 1, :) = [];  % SI
-    eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = [];  % SS
-    eyeMask = bmPointReshape(eyeMask); 
-        
-    % Run the mitosis function and compute volume elements
-    [y, t] = bmMitosis(y_tot_norm, t_tot, eyeMask); 
-    y = bmPermuteToCol(y); 
-    ve  = bmVolumeElement(t, 'voronoi_full_radial3'); 
+eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = []; 
+eyeMask = bmPointReshape(eyeMask);
 
-    % Save all the resulting datastructures on the disk. You are now ready
-    % to run your reconstruction
-    bmMitosius_create(mDir, y, t, ve); 
-    disp('Mitosius files are saved!')
-    disp(mDir)
 
-end
+%% Run the mitosis function and compute volume elements
+
+[y, t] = bmMitosis(y_tot_norm, t_tot, eyeMask); 
+y = bmPermuteToCol(y); 
+ve  = bmVolumeElement(t, 'voronoi_full_radial3'); 
+
+% Save all the resulting datastructures on the disk. You are now ready
+% to run your reconstruction
+
+bmMitosius_create(mDir, y, t, ve); 
+disp('Mitosius files are saved!')
+disp(mDir)

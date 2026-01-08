@@ -1,24 +1,13 @@
 clc; clearvars; close all;
 
-addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
-addpath(genpath('/home/debi/MatTechLab/monalisa'));
-addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
-
 %% Config
 
 % Variables
 subject_num = 3;
-mask_type = 'clean';   % use char instead of string
-region_idx = 3; % 0:up 1:down 2:left 3:right 4:center mask
+mask_type = 'woBin';   % use char instead of string
 
 % Base directory
-baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
-
-% Pulseq
-seqFolder = fullfile(baseDir, 'pulseq');
-seqName_list = {
-    'yj_seq100_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA6_Traj1_nSeg44_nShot191_Fid0_mreye_2p0.seq', ...
-    'yj_seq202_t1w_libre_main_TR8.0ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872_gdsp.seq'};
+baseDir = '/usr/src/app/data/study';
 
 % Construct subject folder name (zero-padded to 3 digits)
 subjectStr = sprintf('sub-%03d', subject_num);
@@ -27,55 +16,34 @@ subjectStr = sprintf('sub-%03d', subject_num);
 subjectDir  = fullfile(baseDir, subjectStr);
 rawDir      = fullfile(subjectDir, 'rawdata');
 reconDir    = fullfile(subjectDir, 'recon');
-mDir        = fullfile(reconDir, 'mitosius', mask_type, ['mask_', num2str(region_idx)]);
+mDir        = fullfile(reconDir, 'mitosius', mask_type);
 
 % Output paths (x path depends on nIter and delta, defined later)
 x0Dir       = fullfile(reconDir, mask_type, 'x0');
-x0Path      = fullfile(x0Dir, ['x0_regionidx' num2str(region_idx) '.mat']);
+x0Path      = fullfile(x0Dir, 'x0.mat');
 if ~exist(x0Dir, 'dir')
     mkdir(x0Dir);
 end
 
 % Get the list of meas_MID... files
 files = dir(fullfile(rawDir, 'sub-*.dat'));
-if numel(files) ~= 3
-    warning('Expected 3 files, found %d', numel(files));
-end
 
 % Identify files by pattern
-bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
 arrayCoilFile = fullfile(rawDir, dir(fullfile(rawDir, '*_HC.dat')).name);
-measureFile   = fullfile(rawDir, dir(fullfile(rawDir, '*_T1wLIBRE.dat')).name);
 
 % Display or use them
 disp('Found files:');
-disp(bodyCoilFile);
 disp(arrayCoilFile);
-disp(measureFile);
 
 %% Step 1: Load the Raw Data
-
-% Sequence parameters
-seqFile = seqFolder + "/" + seqName_list{2};  % main sequence
-seqParams = extract_seq_params(seqFile);
-
 % Reader
 autoFlag = true;  % Disable validation UI
 reader = createRawDataReader(arrayCoilFile, autoFlag);
-reader.acquisitionParams.nShot_off = 14;
-reader.acquisitionParams.traj_type = 'pulseq';
-reader.acquisitionParams.pulseqTrajFile_name = strcat(seqFile);
-if isfield(seqParams, 'nshot')
-    reader.acquisitionParams.nShot = seqParams.nshot;
-end
-if isfield(seqParams, 'nseg')
-    reader.acquisitionParams.nSeg = seqParams.nseg;
-end
 
 %% Load mitosius
-y   = bmMitosius_load(mDir, 'y'); 
-t   = bmMitosius_load(mDir, 't'); 
-ve  = bmMitosius_load(mDir, 've'); 
+y   = bmMitosius_load(mDir, 'y');
+t   = bmMitosius_load(mDir, 't');
+ve  = bmMitosius_load(mDir, 've');
 
 disp('Mitosius has been loaded!')
 
@@ -128,7 +96,7 @@ x0 = cell(nFr, 1);
     end
     % isequal(x0_p, x0)
     %
-    bmImage(x0);
+    % bmImage(x0);
 
 %% Save the x0 to the .mat file
 save(x0Path, 'x0', '-v7.3');
@@ -156,11 +124,11 @@ x = bmSteva(  x0{1}, [], [], y{1}, ve{1}, C, Gu{1}, Gut{1}, n_u, ...
                                         nIter, ...
                                         bmWitnessInfo('steva_d0p1_r1_nCGD4', witness_ind));
 
-bmImage(x)
+% bmImage(x)
 
 % Save the x to the .mat file
 xDir  = fullfile(reconDir, mask_type, 'x');
-xPath = fullfile(xDir, sprintf('x_steva_regionidx_%i_nIter_%d_delta_%.3f.mat', region_idx, nIter, delta));
+xPath = fullfile(xDir, sprintf('x_steva_nIter_%d_delta_%.3f.mat', nIter, delta));
 if ~exist(xDir, 'dir')
     mkdir(xDir);
 end

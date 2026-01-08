@@ -5,7 +5,7 @@
 clear; clc, close all;
 
 % Define base path and subject directories
-basePath = '/home/debi/jaime/repos/MR-EyeTrack/data/251204/recon_results';
+basePath = '/home/debi/jaime/repos/MR-EyeTrack/data/pilot_pulseq/test/251204_pulseq/recon_results';
 subjects = {'Sub001', 'Sub002', 'Sub003', 'Sub004', 'Sub005', 'Sub006', 'Sub007'};
 
 % Create a figure for each subject
@@ -49,8 +49,3 @@ for i = 1:length(subjects)
         fprintf('Warning: xrms.mat not found in any subdirectory of %s\n', outputDir);
     end
 end
-
-%%
-t = 8;
-t_tot = (6*t + 30*4*t + 5*t)*1000; %ms
-t_tot

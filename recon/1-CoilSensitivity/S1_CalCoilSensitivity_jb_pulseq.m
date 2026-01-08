@@ -16,16 +16,10 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 4;
-
-% Pulseq
-seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
-seqName_list = {
-    'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
-    'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
+subject_num = 3;
 
 % Base directory
-baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
+baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
 
 % Construct subject folder name (zero-padded to 3 digits)
 subjectStr = sprintf('sub-%03d', subject_num);
@@ -35,8 +29,8 @@ subjectDir  = fullfile(baseDir, subjectStr);
 rawDir      = fullfile(subjectDir, 'rawdata');
 reconDir    = fullfile(subjectDir, 'recon');
 
-% Get the list of meas_MID... files
-files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
+% Get the list of dat files
+files = dir(fullfile(rawDir, 'sub-*.dat'));
 
 if numel(files) ~= 3
     warning('Expected 3 files, found %d', numel(files));
@@ -58,8 +52,14 @@ disp(measureFile);
 % This readers makes the usage of Siemens and ISMRMRD files equivalent for
 % the library
 
+% Pulseq
+seqFolder = fullfile(baseDir, 'pulseq');
+seqName_list = {
+    'yj_seq100_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA6_Traj1_nSeg44_nShot191_Fid0_mreye_2p0.seq', ...
+    'yj_seq202_t1w_libre_main_TR8.0ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872_gdsp.seq'};
+
 % Sequence parameters
-seqFile = seqFolder + "/" + seqName_list{2};  % prescans
+seqFile = seqFolder + "/" + seqName_list{1};  % prescans
 seqParams = extract_seq_params(seqFile);
 
 % Body Coil Reader

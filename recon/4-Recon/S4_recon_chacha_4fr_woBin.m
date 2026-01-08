@@ -2,10 +2,10 @@
 clc; clearvars; close all;
 
 %% config
-subject_num = 3;
+subject_num = 1;
 
 datasetDir = ['/usr/src/app/dataset/sub-00', num2str(subject_num), '/rawdata'];
-reconDir = '/usr/src/app/recon_f';
+reconDir = '/usr/src/app/recon';
 mDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/mitosius/mask_woBin'];
 saveCDir = [reconDir, '/Sub00', num2str(subject_num), '/T1_LIBRE_woBinning/C/'];
 resultsDir = '/usr/src/app/results';

@@ -7,9 +7,9 @@ function result = padArrayWithZeros(inputArray, desiredLength)
         % Calculate the number of zeros to prepend
         numZeros = desiredLength - currentLength;
         
-        % Prepend zeros to the beginning of the array
-        result = [zeros(1, numZeros), inputArray];
-        disp('Padding the zeros at the beginning')
+        % Prepend zeros to the end of the array
+        result = [inputArray, zeros(1, numZeros)];
+        disp('Padding the zeros at the end')
     else
         % If the length is already sufficient, return the array unchanged
         result = inputArray;

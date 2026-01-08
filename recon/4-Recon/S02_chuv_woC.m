@@ -9,17 +9,17 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 5;
-saveflag = 0;
-
-% PulseqS
-seqFolder = '/home/debi/jaime/repos/MR-EyeTrack/data/study/pulseq';
-seqName_list = {
-    'yj_seq2_t1w_libre_main_TR6.2ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872.seq', ...
-    'yj0_seq8_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA4_RF2_rfmod2_trajPTP_nSeg88_nShot89.seq'};
+subject_num = 3;
+saveflag = 1;
 
 % Base directory
-baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study/data';
+baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
+
+% Pulseq
+seqFolder = fullfile(baseDir, 'pulseq');
+seqName_list = {
+    'yj_seq100_t1w_libre_pre_TR6.2ms_TE3.6ms_swap1_FA6_Traj1_nSeg44_nShot191_Fid0_mreye_2p0.seq', ...
+    'yj_seq202_t1w_libre_main_TR8.0ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872_gdsp.seq'};
 
 % Construct subject folder name (zero-padded to 3 digits)
 subjectStr = sprintf('sub-%03d', subject_num);
@@ -30,7 +30,7 @@ rawDir      = fullfile(subjectDir, 'rawdata');
 reconDir = fullfile(subjectDir, 'recon');
 
 % Get the list of meas_MID... files
-files = dir(fullfile(rawDir, 'meas_MID*_FID*.dat'));
+files = dir(fullfile(rawDir, 'sub-*.dat'));
 if numel(files) ~= 3
     warning('Expected 3 files, found %d', numel(files));
 end
@@ -38,8 +38,7 @@ end
 % Identify files by pattern
 bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
 arrayCoilFile = fullfile(rawDir, dir(fullfile(rawDir, '*_HC.dat')).name);
-% measureFile   = fullfile(rawDir, dir(fullfile(rawDir, '*_T1wLIBRE.dat')).name);
-measureFile   = fullfile(rawDir, dir(fullfile(rawDir, 'meas_MID00096_FID17023_csTFL_mp_rage_1mm_iso_CP_acc4_6_cobo.dat')).name);
+measureFile   = fullfile(rawDir, dir(fullfile(rawDir, '*_T1wLIBRE.dat')).name);
 
 % Display or use them
 disp('Found files:');
@@ -50,7 +49,7 @@ disp(measureFile);
 %% Step 1: Load the Raw Data
 
 % Sequence parameters
-seqFile = seqFolder + "/" + seqName_list{1};  % main sequence
+seqFile = seqFolder + "/" + seqName_list{2};  % main sequence
 seqParams = extract_seq_params(seqFile);
 
 % Reader
@@ -125,7 +124,7 @@ if ~exist(reconDir, 'dir')
     mkdir(reconDir);
 end
 
-xrmsPath = fullfile(reconDir, 'xrms.mat');
+xrmsPath = fullfile(reconDir, 'woBin', 'xrms.mat');
 
 if saveflag
     save(xrmsPath, 'xrms', '-v7.3');
