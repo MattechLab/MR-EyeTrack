@@ -7,7 +7,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 3;
+subject_num = 1;
 mask_type = 'woBin';   % use char instead of string
 
 Matrix_size = 240;
@@ -32,8 +32,8 @@ reconDir    = fullfile(subjectDir, 'recon');
 binsDir     = fullfile(reconDir, 'bins', mask_type, filesep);
 
 % Output paths (for x0 woBin)
-x0Dir       = fullfile(reconDir, 'woBin');
-x0Path      = fullfile(x0Dir, ['x0.mat']);
+x0Dir       = fullfile(reconDir, mask_type);
+x0Path      = fullfile(x0Dir, 'x0.mat');
 if ~exist(x0Dir, 'dir')
     mkdir(x0Dir);
 end
@@ -90,6 +90,9 @@ end
 
 % Load the raw data and compute trajectory and volume elements
 y_tot = reader.readRawData(true, true);  % Filter nShotOff and SI
+
+%% Twix
+myTwix = bmTwix(measureFile);
 
 %%
 t_tot = bmTraj(reader.acquisitionParams);                 % Compute trajectory
@@ -166,7 +169,7 @@ if real(y_tot)<1
         y_tot_norm = y_tot/normalize_val; 
         y_tot_norm(1,1,123)
     else
-        y_tot_norm = y_tot/(2.5e-10); 
+        y_tot_norm = y_tot/(2.5e-10);
         y_tot_norm(1,1,123)
     end
 end

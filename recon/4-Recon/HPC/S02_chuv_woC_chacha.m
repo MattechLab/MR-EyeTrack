@@ -1,10 +1,6 @@
 %% Init
 clc; clearvars;
-
-%% === Add paths ===
-addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack'));
-addpath(genpath('/home/debi/MatTechLab/monalisa'));
-addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
+addpath(genpath('/home/jaime.barrancohernandez/shared_datasets/pulseq'))
 
 %% Initialize the directories and acquire the Coil
 
@@ -13,7 +9,7 @@ subject_num = 10;
 saveflag = 1;
 
 % Base directory
-baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
+baseDir = '/home/jaime.barrancohernandez/mnt/jaime.barranco/MR-EyeTrack/data/study';
 
 % Pulseq
 seqFolder = fullfile(baseDir, 'pulseq');
@@ -27,10 +23,13 @@ subjectStr = sprintf('sub-%03d', subject_num);
 % Full path to dataset directories
 subjectDir  = fullfile(baseDir, subjectStr);
 rawDir      = fullfile(subjectDir, 'rawdata');
-reconDir    = fullfile(subjectDir, 'recon');
+reconDir = fullfile(subjectDir, 'recon');
 
 % Get the list of meas_MID... files
 files = dir(fullfile(rawDir, 'sub-*.dat'));
+if numel(files) ~= 3
+    warning('Expected 3 files, found %d', numel(files));
+end
 
 % Identify files by pattern
 bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
@@ -46,12 +45,12 @@ disp(measureFile);
 %% Step 1: Load the Raw Data
 
 % Sequence parameters
-seqFile = seqFolder + "/" + seqName_list{1};  % prescans
+seqFile = seqFolder + "/" + seqName_list{2};  % main sequence
 seqParams = extract_seq_params(seqFile);
 
 % Reader
 autoFlag = true;  % Disable validation UI
-reader = createRawDataReader(arrayCoilFile, autoFlag);
+reader = createRawDataReader(measureFile, autoFlag);
 reader.acquisitionParams.nShot_off = 14;
 reader.acquisitionParams.traj_type = 'pulseq';
 reader.acquisitionParams.pulseqTrajFile_name = strcat(seqFile);
@@ -85,7 +84,7 @@ for iCh = 1:nCh
     disp(['Processing channel: ', num2str(iCh), '/', num2str(nCh)]);
 end
 
-% bmImage(x0);
+bmImage(x0);
 
 % x0Path = fullfile(reconDir, 'x0_noC.mat');
 % if saveflag
@@ -95,15 +94,21 @@ end
 % end
 
 %% === Root-mean-square combination ===
-[nx, ny, nz] = size(x0{1});
-numCoils = numel(x0);
+% Root mean square across the channels
+% Initialize an array to store sum of squared images
+[nx, ny, nz] = size(x0{1}); % Get the dimensions (240,240,240)
+numCoils = numel(x0); % Number of coils
 
 sum_of_squares = zeros(nx, ny, nz, 'single');
 
+% straightforward
+% sum_of_squares = sum_of_squares + abs(x0{coil}).^2;
+% eliminate extra square-root step
 for coil = 1:numCoils
     sum_of_squares = sum_of_squares + real( x0{coil} .* conj(x0{coil}) );
 end
 
+% Compute the root mean square (RMS)
 xrms = sqrt(sum_of_squares / numCoils);
 
 bmImage(xrms);
@@ -115,7 +120,7 @@ if ~exist(reconDir, 'dir')
     mkdir(reconDir);
 end
 
-xrmsPath = fullfile(reconDir, 'woBin', 'xrms_HC.mat');
+xrmsPath = fullfile(reconDir, 'woBin', 'xrms.mat');
 if ~exist(fullfile(reconDir, 'woBin'), 'dir')
     mkdir(fullfile(reconDir, 'woBin'));
 end

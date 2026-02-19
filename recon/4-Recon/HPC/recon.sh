@@ -1,21 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 #SBATCH --job-name=mreyetrack_recon
-#SBATCH --nodelist=dance        # dance, disco, chacha
-#SBATCH --ntasks=1               # total number of tasks across all nodes 
-#SBATCH --cpus-per-task=20       # cpu-cores per task (>1 if multi-threaded tasks) 
-#SBATCH --mem=480G               # total memory per node (4 GB per cpu-core is default) 
-#SBATCH --time=01:00:00          # total run time limit (HH:MM:SS) 
-#SBATCH --mail-type=begin        # send email when job begins 
-#SBATCH --mail-type=end          # send email when job ends 
-#SBATCH --mail-user=jaime.barrancohernandez@hevs.ch 
-#SBATCH --output=/home/jaime.barrancohernandez/shared_datasets/mreyetrack/data/study/logs/%x_%j.out 
-#SBATCH --error=/home/jaime.barrancohernandez/shared_datasets/mreyetrack/data/study/logs/%x_%j.err 
-#module purge 
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=480G
+#SBATCH --time=01:00:00
+#SBATCH --output=/home/jaime.barrancohernandez/shared_datasets/mreyetrack/recon/4-Recon/HPC/logs/%x_%j.out
+#SBATCH --error=/home/jaime.barrancohernandez/shared_datasets/mreyetrack/recon/4-Recon/HPC/logs/%x_%j.err
+#SBATCH --mail-type=begin
+#SBATCH --mail-type=end
+#SBATCH --mail-user=jaime.barrancohernandez@hevs.ch
 
-srun apptainer exec \ 
---bind /home/jaime.barrancohernandez/shared_datasets/mreyetrack/recon:/usr/src/app/scripts \
---bind /home/jaime.barrancohernandez/shared_datasets/mreyetrack/data/study:/usr/src/app/data/study \
---writable-tmpfs --fakeroot \ 
---env MLM_LICENSE_FILE=27000@matlablm.hevs.ch \ 
-/home/jaime.barrancohernandez/shared_datasets/monalisa/monalisa_251215.sif \ 
-bash -c "chmod -R ugo+x /usr/src/app/scripts && matlab -batch 'addpath(genpath(\"/usr/src/app/\")); compile_mex_for_monalisa; S4_recon_chacha_4fr_woBin_pulseq; exit;'" 
+echo "Job ID: $SLURM_JOB_ID" 
+
+SIF="/home/jaime.barrancohernandez/shared_datasets/monalisa/monalisa_251215.sif"
+MATLAB_CMD="addpath(genpath('/usr/src/app')); compile_mex_for_monalisa; run('/usr/src/app/scripts/4-Recon/HPC/S02_chuv_woC_chacha.m'); exit;"
+
+apptainer exec \
+  --bind /home/jaime.barrancohernandez/shared_datasets/mreyetrack/recon:/usr/src/app/scripts \
+  --bind /home/jaime.barrancohernandez/mnt/jaime.barranco/MR-EyeTrack/data/study:/usr/src/app/data/study \
+  --bind /home/jaime.barrancohernandez/shared_datasets/pulseq:/usr/src/app/pulseq \
+  --writable-tmpfs \
+  --env MLM_LICENSE_FILE=27000@matlablm.hevs.ch \
+  $SIF \
+  bash -c "chmod -R ugo+x /usr/src/app/scripts && matlab -nodisplay -nosplash -r \"$MATLAB_CMD\""

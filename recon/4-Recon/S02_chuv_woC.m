@@ -1,5 +1,5 @@
 %% Init
-clc; clearvars;
+clc, clearvars, close all;
 
 %% === Add paths ===
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
@@ -9,8 +9,9 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 3;
+subject_num = 10;
 saveflag = 1;
+matrix_size = 48; % 240 for full res, 48 for eyes ROI
 
 % Base directory
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
@@ -28,12 +29,6 @@ subjectStr = sprintf('sub-%03d', subject_num);
 subjectDir  = fullfile(baseDir, subjectStr);
 rawDir      = fullfile(subjectDir, 'rawdata');
 reconDir = fullfile(subjectDir, 'recon');
-
-% Get the list of meas_MID... files
-files = dir(fullfile(rawDir, 'sub-*.dat'));
-if numel(files) ~= 3
-    warning('Expected 3 files, found %d', numel(files));
-end
 
 % Identify files by pattern
 bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
@@ -73,7 +68,6 @@ t_tot = bmTraj(reader.acquisitionParams);
 ve_tot = bmVolumeElement(t_tot, 'voronoi_full_radial3');
 
 %% === Reconstruction configuration ===
-matrix_size = 240;
 N_u   = [matrix_size matrix_size matrix_size];
 dK_u  = [1 1 1] / 240;
 
@@ -124,7 +118,10 @@ if ~exist(reconDir, 'dir')
     mkdir(reconDir);
 end
 
-xrmsPath = fullfile(reconDir, 'woBin', 'xrms.mat');
+xrmsPath = fullfile(reconDir, 'woBin', sprintf('xrms%d.mat', matrix_size));
+if ~exist(fullfile(reconDir, 'woBin'), 'dir')
+    mkdir(fullfile(reconDir, 'woBin'));
+end
 
 if saveflag
     save(xrmsPath, 'xrms', '-v7.3');

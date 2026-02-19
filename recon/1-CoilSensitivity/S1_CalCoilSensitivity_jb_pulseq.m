@@ -8,7 +8,7 @@
 % The old script has issue when running mask generation
 % With readers, the param setting is more organized
 % =====================================================
-clc, clearvars;
+clc, clearvars, close all;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 addpath(genpath('/home/debi/MatTechLab/internal_monalisa'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
@@ -16,7 +16,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 3;
+subject_num = 10;
 
 % Base directory
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
@@ -134,7 +134,9 @@ end
 
 %% Save C into the folder
 
-% bmImage(C)
+bmImage(C);
+crms = cal_crms(C);
+bmImage(crms);
 
 saveCDir  = reconDir;
 CfileName = 'C.mat';

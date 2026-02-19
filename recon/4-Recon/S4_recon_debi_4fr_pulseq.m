@@ -7,9 +7,9 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 3;
-mask_type = 'clean';   % use char instead of string
-region_idx = 3; % 0:up 1:down 2:left 3:right 4:center mask
+subject_num =3;
+mask_type = 'clean_comp/clean_comp_10';   % use char instead of string
+region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
 
 % Base directory
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
@@ -80,9 +80,10 @@ ve  = bmMitosius_load(mDir, 've');
 disp('Mitosius has been loaded!')
 
 %% Load Coil Sensitivity Maps
-CfileName = 'C.mat';
+CfileName = 'C_comp_10.mat';  % C or C_comp if compressed 
 CfilePath = fullfile(reconDir, CfileName);
-load(CfilePath, 'C');  % Load sensitivity maps
+load(CfilePath, 'C_comp');  % C or C_comp if compressed
+C = C_comp;  % use C_comp for compressed coil
 disp(['C is loaded from:', CfilePath]);
 
 %% compileScript()

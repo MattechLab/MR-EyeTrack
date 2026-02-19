@@ -14,7 +14,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 3;
+subject_num = 7;
 mask_type = 'woBin';
 
 % Base paths
@@ -38,12 +38,6 @@ binsDir     = fullfile(reconDir, 'bins', mask_type, filesep);
 % Create binsDir if it doesn't exist
 if ~isfolder(binsDir)
     mkdir(binsDir);
-end
-
-% Get the list of meas_MID... files
-files = dir(fullfile(rawDir, 'sub-*.dat'));
-if numel(files) ~= 3
-    warning('Expected 3 files, found %d', numel(files));
 end
 
 % Identify files by pattern

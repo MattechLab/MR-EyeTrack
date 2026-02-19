@@ -9,7 +9,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 10;
+subject_num = 4;
 saveflag = 1;
 
 % Base directory
@@ -32,6 +32,10 @@ reconDir    = fullfile(subjectDir, 'recon');
 % Get the list of meas_MID... files
 files = dir(fullfile(rawDir, 'sub-*.dat'));
 
+if numel(files) ~= 3
+    warning('Expected 3 files, found %d', numel(files));
+end
+
 % Identify files by pattern
 bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
 arrayCoilFile = fullfile(rawDir, dir(fullfile(rawDir, '*_HC.dat')).name);
@@ -51,7 +55,7 @@ seqParams = extract_seq_params(seqFile);
 
 % Reader
 autoFlag = true;  % Disable validation UI
-reader = createRawDataReader(arrayCoilFile, autoFlag);
+reader = createRawDataReader(bodyCoilFile, autoFlag);
 reader.acquisitionParams.nShot_off = 14;
 reader.acquisitionParams.traj_type = 'pulseq';
 reader.acquisitionParams.pulseqTrajFile_name = strcat(seqFile);
@@ -115,7 +119,7 @@ if ~exist(reconDir, 'dir')
     mkdir(reconDir);
 end
 
-xrmsPath = fullfile(reconDir, 'woBin', 'xrms_HC.mat');
+xrmsPath = fullfile(reconDir, 'woBin', 'xrms_BC.mat');
 if ~exist(fullfile(reconDir, 'woBin'), 'dir')
     mkdir(fullfile(reconDir, 'woBin'));
 end

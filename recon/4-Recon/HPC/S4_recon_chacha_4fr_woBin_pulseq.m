@@ -3,7 +3,7 @@ clc; clearvars; close all;
 %% Config
 
 % Variables
-subject_num = 3;
+subject_num = 4;
 mask_type = 'woBin';   % use char instead of string
 
 % Base directory
@@ -19,7 +19,7 @@ reconDir    = fullfile(subjectDir, 'recon');
 mDir        = fullfile(reconDir, 'mitosius', mask_type);
 
 % Output paths (x path depends on nIter and delta, defined later)
-x0Dir       = fullfile(reconDir, mask_type, 'x0');
+x0Dir       = fullfile(reconDir, mask_type);
 x0Path      = fullfile(x0Dir, 'x0.mat');
 if ~exist(x0Dir, 'dir')
     mkdir(x0Dir);
@@ -127,7 +127,7 @@ x = bmSteva(  x0{1}, [], [], y{1}, ve{1}, C, Gu{1}, Gut{1}, n_u, ...
 % bmImage(x)
 
 % Save the x to the .mat file
-xDir  = fullfile(reconDir, mask_type, 'x');
+xDir  = fullfile(reconDir, mask_type);
 xPath = fullfile(xDir, sprintf('x_steva_nIter_%d_delta_%.3f.mat', nIter, delta));
 if ~exist(xDir, 'dir')
     mkdir(xDir);
