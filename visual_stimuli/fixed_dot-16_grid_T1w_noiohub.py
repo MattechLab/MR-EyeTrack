@@ -161,7 +161,7 @@ def set_dot_pos(pos):
 grid_size = 4
 dot_size = 0.05
 # Preserve same t_dot as original
-t_dot = 5 * 6.2 / 8.01
+t_dot = 5  # * 6.2 / 8.01
 
 # Compute reasonable normalized offsets (keep in norm units)
 x_offset_norm = 1.33 * 2 / 3
