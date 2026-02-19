@@ -1,55 +1,35 @@
 %% Init
 clc; clearvars; close all;
-addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/results'));
-addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
-addpath(genpath('/home/debi/MatTechLab/internal_monalisa'));
+addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 %% Config
-
 % Paths
-x_1_path = 'data/study/data/sub-004/recon/woBin/xrms.mat';
-x_2_path = 'data/study/data/sub-006/recon/woBin/xrms.mat';
+x_1_path = 'data/study/sub-004/recon/woBin/x0_comp_10.mat';
+x_2_path = 'data/study/sub-004/recon/woBin/x0_comp_20.mat';
 disp(['x_1_path: ', x_1_path]);
 disp(['x_2_path: ', x_2_path]);
-
 % Load images
-x_1 = load(x_1_path, 'xrms');
-x_2 = load(x_2_path, 'xrms');
-
+x_1 = load(x_1_path, 'x0_comp');
+x_2 = load(x_2_path, 'x0_comp');
 % Prepare volumes for comparison
-x1 = x_1.xrms;
-x2 = x_2.xrms;
-% x{2} = x_gdsp;
-% x{3} = flip(flip(permute(x_idea, [2,1,3]),1),3);
-% x2 = flip(permute(x0904, [2 1 3]), 2);
+x1 = x_1.x0_comp;
+x2 = x_2.x0_comp;
 
 %% Normalization
-% close all;
-
-% Normalization 1 image
-% x1_trans = norm_image(x1);
-% x1_sag = norm_image(rot90(permute(x1_trans, [1,3,2]), 1));
-% x1_coronal = norm_image(permute(x1_trans, [3,2,1]));
-% bmImage(x1_trans);
-% bmImage(x1_sag);
-% bmImage(x1_coronal);
-
-% x2_trans = norm_image(x2);
-% x2_sag = norm_image(rot90(permute(x2_trans, [1,3,2]),1));
-% x2_coronal = norm_image(permute(x2_trans, [3,2,1]));
-% bmImage(x2_trans);
-% bmImage(x2_sag);
-% bmImage(x2_coronal);
-
-% [img1_trans, img2_trans] = norm_two_image(x1_trans, x2_trans);
-% img_1_2_trans = cat(2, img1_trans, img2_trans);
-% bmImage(img_1_2_trans)
-
 % Normalization 2 images
 [img1_trans, img2_trans] = norm_two_image(x1, x2);
-img_1_2_trans = cat(1, img1_trans, img2_trans);
+img_1_2_trans = cat(2, img1_trans, img2_trans);
 bmImage(img_1_2_trans)
+
+%% Overlapping
+% Axial
+x_cell_ax = {norm_image(x1, [0,0.7]), norm_image(x2, [0,0.7])};
+bmImage(x_cell_ax);
+% Sagittal
+x_cell_sag = {norm_image(rot90(permute(x1, [1,3,2]), 1), [0,0.7]), norm_image(rot90(permute(x2, [1,3,2]), 1), [0,0.7])};
+bmImage(x_cell_sag);
 
 %% Axial
 close all;
