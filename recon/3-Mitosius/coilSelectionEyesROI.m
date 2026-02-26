@@ -32,6 +32,8 @@ function weights_norm = coilSelectionEyesROI(reconDir, C)
 
     % normalize across coils
     weights_norm = rawWeights / sum(rawWeights);
+    weights_norm_path = fullfile(reconDir, 'mitosius/woBin_comp/weights_norm.mat');
+    save(weights_norm_path, "weights_norm");
 
     % sort coils by weights
     [sortedW, idx] = sort(weights_norm, 'descend');
