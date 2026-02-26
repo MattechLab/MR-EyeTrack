@@ -7,11 +7,10 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 1;
-mask_type = 'woBin';   % use char instead of string
+subject_num = 5;
+mask_type = 'woBin';  % use char instead of string
 
-Matrix_size = 240;
-reconFov = 240;
+matrix_size = 240;  % Max nominal spatial resolution
 
 % Base directory
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
@@ -42,12 +41,6 @@ end
 mDir = fullfile(reconDir, 'mitosius', mask_type);
 if ~exist(mDir, 'dir')
     mkdir(mDir);
-end
-
-% Get the list of meas_MID... files
-files = dir(fullfile(rawDir, 'sub-*.dat'));
-if numel(files) ~= 3
-    warning('Expected 3 files, found %d', numel(files));
 end
 
 % Identify files by pattern
@@ -92,7 +85,7 @@ end
 y_tot = reader.readRawData(true, true);  % Filter nShotOff and SI
 
 %% Twix
-myTwix = bmTwix(measureFile);
+% myTwix = bmTwix(measureFile);
 
 %%
 t_tot = bmTraj(reader.acquisitionParams);                 % Compute trajectory
@@ -113,11 +106,10 @@ FoV = reader.acquisitionParams.FoV;  % Field of View
 % ==============================================
 % Warning: due to the memory limit, all the voxel_size set on debi
 % is always >= 1 to make sure the matrix size <=240
-voxel_size = round(FoV/240);
+% voxel_size = round(FoV/240);
 % So the mitosius saved on debi
 % is the smaller than the full resolution.
 % ===============================================
-matrix_size = 240;  % Max nominal spatial resolution
 N_u = [matrix_size, matrix_size, matrix_size];
 dK_u = [1, 1, 1]./FoV;
 
@@ -142,13 +134,13 @@ C = bmImResize(C, [48, 48, 48], N_u);
 
 %% Step 3: Normalize the Raw Data
 
-if N_u >240
+if N_u > 240
     normalization = false;
 else 
     normalization = true;
 end
 if normalization
-    x_tot = bmMathilda(y_tot, t_tot, ve_tot, C, N_u, N_u, dK_u);
+    x_tot = bmMathilda(y_tot, t_tot, ve_tot, C, N_u, N_u, dK_u, [], [], [], []);
     % x_perm = permute(x_tot, [2,3,1]);
     x0=x_tot;
     bmImage(x0);
@@ -175,9 +167,9 @@ if real(y_tot)<1
 end
 
 %% Save x0 recon woBin
-save(x0Path, 'x0', '-v7.3');
-disp('x0 has been saved here:')
-disp(x0Path)
+% save(x0Path, 'x0', '-v7.3');
+% disp('x0 has been saved here:')
+% disp(x0Path)
 
 %% Prepare eye mask
 
@@ -198,7 +190,6 @@ eyeMask(:, 1, :) = [];
 
 eyeMask(:, :, 1:reader.acquisitionParams.nShot_off) = []; 
 eyeMask = bmPointReshape(eyeMask);
-
 
 %% Run the mitosis function and compute volume elements
 

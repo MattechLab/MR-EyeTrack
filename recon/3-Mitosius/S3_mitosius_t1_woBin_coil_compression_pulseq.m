@@ -7,15 +7,13 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/analysis/comparison/matlab'));
 
 % Config
-
-% Variables
-subject_num = 5;
+subject_num = 10;
 nChCompressed = 20;  % Number of virtual coils after compression
 coilCompression = 3;  % 0: SVD-based compression; 1: coil selection based on energy; 2: coil selection with eye ROIs; 3: topN coils from analysis
 
 mask_type = sprintf('woBin_comp/woBin_comp_%d', nChCompressed);   % use char instead of string
 
-Matrix_size = 240;
+matrix_size = 240;
 reconFov = 240;
 
 % Base directory
@@ -47,12 +45,6 @@ x0Path      = fullfile(x0Dir, 'x0.mat');
 mDir = fullfile(reconDir, 'mitosius', mask_type);
 if ~exist(mDir, 'dir')
     mkdir(mDir);
-end
-
-% Get the list of meas_MID... files
-files = dir(fullfile(rawDir, 'sub-*.dat'));
-if numel(files) ~= 3
-    warning('Expected 3 files, found %d', numel(files));
 end
 
 % Identify files by pattern
@@ -122,7 +114,6 @@ voxel_size = round(FoV/240);
 % So the mitosius saved on debi
 % is the smaller than the full resolution.
 % ===============================================
-matrix_size = 240;  % Max nominal spatial resolution
 N_u = [matrix_size, matrix_size, matrix_size];
 dK_u = [1, 1, 1]./FoV;
 
@@ -154,7 +145,6 @@ bmImage(x0)
 save(x0Path, 'x0', '-v7.3');
 disp('x0 has been saved here:')
 disp(x0Path)
-
 
 %% Coil compression
 
