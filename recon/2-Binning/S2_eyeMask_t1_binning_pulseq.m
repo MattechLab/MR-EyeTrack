@@ -15,7 +15,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 3;
+subject_num = 8;
 mask_type = 'clean';
 
 % Base paths
@@ -50,6 +50,7 @@ seqParams = extract_seq_params(seqFile);
 
 nShotOff = 14; 
 nSeg = seqParams.nseg;
+nShot = seqParams.nshot;
 
 %% Generate the (multiple) full eMask (for different gaze positions -- loop)
 % This function will guide you manually select the raw data and ET masks
