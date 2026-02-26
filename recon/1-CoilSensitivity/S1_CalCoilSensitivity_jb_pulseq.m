@@ -10,13 +10,13 @@
 % =====================================================
 clc, clearvars, close all;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
-addpath(genpath('/home/debi/MatTechLab/internal_monalisa'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 10;
+subject_num = 5;
 
 % Base directory
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
@@ -31,10 +31,6 @@ reconDir    = fullfile(subjectDir, 'recon');
 
 % Get the list of dat files
 files = dir(fullfile(rawDir, 'sub-*.dat'));
-
-if numel(files) ~= 3
-    warning('Expected 3 files, found %d', numel(files));
-end
 
 % Identify files by pattern
 bodyCoilFile  = fullfile(rawDir, dir(fullfile(rawDir, '*_BC.dat')).name);
