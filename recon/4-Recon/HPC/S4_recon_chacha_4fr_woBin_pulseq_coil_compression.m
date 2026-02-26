@@ -4,10 +4,11 @@ clc; clearvars; close all;
 
 % Variables
 subject_num = 5;
-mask_type = 'woBin';   % use char instead of string
+nChCompressed = 20;  % Number of virtual coils after compression
+mask_type = sprintf('woBin_comp/woBin_comp_%d', nChCompressed);   % use char instead of string
 
 % Base directory
-baseDir = '/usr/src/app/data/study';
+baseDir = '/usr/src/app/data/study';  % HPC
 
 % Construct subject folder name (zero-padded to 3 digits)
 subjectStr = sprintf('sub-%03d', subject_num);
@@ -19,8 +20,7 @@ reconDir    = fullfile(subjectDir, 'recon');
 mDir        = fullfile(reconDir, 'mitosius', mask_type);
 
 % Output paths (x path depends on nIter and delta, defined later)
-x0Dir       = fullfile(reconDir, mask_type);
-x0Path      = fullfile(x0Dir, 'x0.mat');
+x0Dir       = fullfile(reconDir, 'woBin', filesep);
 if ~exist(x0Dir, 'dir')
     mkdir(x0Dir);
 end
@@ -48,10 +48,11 @@ ve  = bmMitosius_load(mDir, 've');
 disp('Mitosius has been loaded!')
 
 %% Load Coil Sensitivity Maps
-CfileName = 'C.mat';
+CfileName = 'C_comp_20.mat';
 CfilePath = fullfile(reconDir, CfileName);
-load(CfilePath, 'C');  % Load sensitivity maps
-disp(['C is loaded from:', CfilePath]);
+load(CfilePath, 'C_comp');  % Load sensitivity maps
+disp(['C_comp is loaded from:', CfilePath]);
+C = C_comp;  % Use the compressed coil sensitivity maps for reconstruction
 
 %% compileScript()
 nFr     = 1; 
@@ -87,20 +88,22 @@ end
 
 %% Resize C
 C = bmImResize(C, [48, 48, 48], N_u);
-disp('C resized!')
+disp('C_comp resized!')
 
 %%
-x0 = cell(nFr, 1);
+x0_comp = cell(nFr, 1);
     for i = 1:nFr
-        x0{i} = bmMathilda(y{i}, t{i}, ve{i}, C, N_u, n_u, dK_u, [], [], [], []);
+        x0_comp{i} = bmMathilda(y{i}, t{i}, ve{i}, C, N_u, n_u, dK_u, [], [], [], []);
     end
     % isequal(x0_p, x0)
     % bmImage(x0);
 
 %% Save the x0 to the .mat file
-save(x0Path, 'x0', '-v7.3');
-disp('x0 has been saved here:')
-disp(x0Path)
+x0CompPath = fullfile(x0Dir, sprintf('x0_comp_%d.mat', nChCompressed));
+% Save the x0 to the .mat file
+save(x0CompPath, 'x0_comp', '-v7.3');
+disp('x0_comp has been saved here:')
+disp(x0CompPath)
 
 %%
 [Gu, Gut] = bmTraj2SparseMat(t, ve, N_u, dK_u);
@@ -118,22 +121,22 @@ nCGD      = 4;
 ve_max    = 10*prod(dK_u(:));
 
 
-x = bmSteva(  x0{1}, [], [], y{1}, ve{1}, C, Gu{1}, Gut{1}, n_u, ...
+x_comp = bmSteva(  x0_comp{1}, [], [], y{1}, ve{1}, C, Gu{1}, Gut{1}, n_u, ...
                                         delta, rho, nCGD, ve_max, ...
                                         nIter, ...
                                         bmWitnessInfo('steva_d0p1_r1_nCGD4', witness_ind));
 
-% bmImage(x)
+% bmImage(x_comp)
 
 % Save the x to the .mat file
-xDir  = fullfile(reconDir, mask_type);
-xPath = fullfile(xDir, sprintf('x_steva_nIter_%d_delta_%.3f.mat', nIter, delta));
+xDir  = fullfile(reconDir, 'woBin', filesep);
+xPath = fullfile(xDir, sprintf('x_comp_%d_steva_nIter_%d_delta_%.3f.mat', nChCompressed, nIter, delta));
 if ~exist(xDir, 'dir')
     mkdir(xDir);
 end
 
-save(xPath, 'x');
-disp('x has been saved here:')
+save(xPath, 'x_comp', '-v7.3');
+disp('x_comp has been saved here:')
 disp(xPath)
 
 % %% .mat to .nii.gz
