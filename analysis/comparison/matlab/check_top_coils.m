@@ -118,6 +118,20 @@ topN_table = table((1:N)', topN_coils, topN_meanRank, ...
 disp(topN_table)
 
 % Save topN_coils to .mat
-outMatFile = fullfile(outPath, sprintf('top%d_coils.mat', N));
+outMatFile = fullfile(outPath, sprintf('top%d_coils_N15.mat', N));
 save(outMatFile, 'topN_coils', 'topN_meanRank');
 fprintf('MAT file written to: %s\n', fullfile(pwd, outMatFile));
+
+%% Compare the order of N=5 with N=15
+n5 = load('analysis/comparison/matlab/top20_coils_N5.mat');
+n15 = load('analysis/comparison/matlab/top20_coils_N15.mat');
+
+% Find the positions of the N=5 top coils in the N=15 list
+[isInN15, locInN15] = ismember(n5.topN_coils, n15.topN_coils);
+
+% Table showing N=5 coil, its position in N=15 (if present), and mean rank
+compareTable = table((1:numel(n5.topN_coils))', n5.topN_coils(:), locInN15(:), ...
+    'VariableNames', {'N5_Order', 'Coil', 'PositionInN15'});
+
+disp('Comparison of N=5 top coils order in N=15 list:');
+disp(compareTable);

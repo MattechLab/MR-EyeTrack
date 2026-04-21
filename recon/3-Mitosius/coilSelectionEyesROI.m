@@ -37,6 +37,12 @@ function weights_norm = coilSelectionEyesROI(reconDir, C)
 
     % sort coils by weights
     [sortedW, idx] = sort(weights_norm, 'descend');
+
+    % Save idx on the base mDir folder
+    idx_path = fullfile(reconDir, 'mitosius/woBin_comp/idx_coilSelection.mat');
+    save(idx_path, 'idx', '-v7.3');
+    disp(['Coil selection indices saved here: ', idx_path]);
+
     % plot
     figure;
     bar( idx, sortedW, 'LineWidth', 1.2);
@@ -50,6 +56,7 @@ function weights_norm = coilSelectionEyesROI(reconDir, C)
     
     % top 10 coils
     numTop = 10;   % change if needed
+
     % plot
     figure;
     bar(weights_norm, 'FaceColor', [0.6 0.6 0.6]); hold on;
