@@ -1,4 +1,4 @@
-clc; clearvars; close all;
+clc; clearvars -except mask_type region_idx subject_num; close all;
 
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
@@ -7,9 +7,15 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num =3;
-mask_type = 'clean_comp/clean_comp_10';   % use char instead of string
-region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
+subject_num = 5;
+if ~exist('mask_type', 'var')
+    mask_type = 'clean_0.50';   % use char instead of string
+end
+if ~exist('region_idx', 'var')
+    region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
+end
+
+fprintf('Running config: subject_num=%d, mask_type=%s, region_idx=%d\n', subject_num, mask_type, region_idx);
 
 % Base directory
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
@@ -80,10 +86,9 @@ ve  = bmMitosius_load(mDir, 've');
 disp('Mitosius has been loaded!')
 
 %% Load Coil Sensitivity Maps
-CfileName = 'C_comp_10.mat';  % C or C_comp if compressed 
+CfileName = 'C.mat';  % C or C_comp if compressed 
 CfilePath = fullfile(reconDir, CfileName);
-load(CfilePath, 'C_comp');  % C or C_comp if compressed
-C = C_comp;  % use C_comp for compressed coil
+load(CfilePath, 'C');  % C or C_comp if compressed
 disp(['C is loaded from:', CfilePath]);
 
 %% compileScript()
