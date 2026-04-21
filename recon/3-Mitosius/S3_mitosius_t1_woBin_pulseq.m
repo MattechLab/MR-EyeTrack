@@ -144,15 +144,24 @@ if normalization
     % x_perm = permute(x_tot, [2,3,1]);
     x0=x_tot;
     bmImage(x0);
-    temp_im = getimage(gca);
-    bmImage(temp_im); 
-    temp_roi = roipoly; 
-    normalize_val = mean(temp_im(temp_roi(:))); 
+    
+    % temp_im = getimage(gca);
+    temp_im = x_tot(...
+        round(matrix_size/4):round(matrix_size/4*3), ...
+        round(matrix_size/4):round(matrix_size/4*3), ...
+        round(matrix_size/2));
+    bmImage(temp_im);
+    
+    % temp_roi = roipoly;
+    % normalize_val = mean(temp_im(temp_roi(:)));
+
+    normalize_val = mean(temp_im(:));
+
     % The normalize_val is super small, it is 5e-10, very small
     % again 3e-9
     % The value of one complex point is like: -0.0396 - 0.1162i
-    disp('normalize_val')
-    disp(normalize_val)
+    disp(['normalize_val: ', num2str(normalize_val)])
+
     y_tot(1,1,123)
 end
 % only once !!!!
