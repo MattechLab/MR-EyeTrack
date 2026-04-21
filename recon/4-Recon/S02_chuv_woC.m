@@ -75,13 +75,19 @@ nCh = size(y_tot, 1);
 disp(['Number of channels: ', num2str(nCh)]);
 
 %% === Perform reconstruction per coil ===
-x0 = cell(nCh, 1);
+%tic
+% Parallel pool
+maxNumCompThreads(1);  % 1 BLAS thread per worker
+nWorkers = 18;  % CPUs
+parpool('local', nWorkers);
 
-for iCh = 1:nCh
+x0 = cell(nCh, 1);
+parfor iCh = 1:nCh
     x0{iCh} = bmMathilda(y_tot(iCh,:), t_tot, ve_tot, [], N_u, N_u, dK_u, [], [], [], []);
     disp(['Processing channel: ', num2str(iCh), '/', num2str(nCh)]);
 end
-
+% elapsed = toc(tic);
+% fprintf('Total runtime: %.2f seconds\n', elapsed);
 bmImage(x0);
 
 % x0Path = fullfile(reconDir, 'x0_noC.mat');
