@@ -10,11 +10,12 @@ clearvars; clc; close all;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Config
 
 % Variables
-subject_num = 7;
+subject_num = 15;
 mask_type = 'woBin';
 
 % Base paths

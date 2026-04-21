@@ -11,11 +11,12 @@ clearvars; clc;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Config
 
 % Variables
-subject_num = 3;
+subject_num = 15;
 mask_type = 'no-mo';
 
 % Base paths
@@ -50,6 +51,7 @@ seqParams = extract_seq_params(seqFile);
 
 nShotOff = 14; 
 nSeg = seqParams.nseg;
+nShot = seqParams.nshot;
 
 %% Generate the (single) full eMask
 % This function will guide you manually select the raw data and ET masks

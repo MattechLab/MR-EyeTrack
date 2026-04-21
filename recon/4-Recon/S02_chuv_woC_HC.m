@@ -1,5 +1,5 @@
 %% Init
-clc; clearvars;
+clc; clearvars, close all;
 
 %% === Add paths ===
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack'));

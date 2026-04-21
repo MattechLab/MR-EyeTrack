@@ -1,7 +1,4 @@
 % =====================================================
-% Author: Yiwei Jia
-% Date: June 23
-% ------------------------------------------------
 % This script is used for generate binning mask 
 % according to the ET mask, where
 % sampling rate of ET mask: 1ms
@@ -11,11 +8,12 @@ clearvars; clc;
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon/Recon_scripts'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
 
 %% Config
 
 % Variables
-subject_num = 8;
+subject_num = 15;
 mask_type = 'clean';
 
 % Base paths
