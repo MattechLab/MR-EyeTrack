@@ -3,7 +3,7 @@ clc; clearvars; close all;
 %% Config
 
 % Variables
-subject_num = 5;
+subject_num = 6;
 mask_type = 'woBin';   % use char instead of string
 
 % Base directory

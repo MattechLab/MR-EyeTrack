@@ -5,7 +5,7 @@ addpath(genpath('/home/jaime.barrancohernandez/shared_datasets/pulseq'))
 %% Initialize the directories and acquire the Coil
 
 % Parameters
-subject_num = 10;
+subject_num = 15;
 saveflag = 1;
 
 % Base directory
@@ -77,13 +77,20 @@ nCh = size(y_tot, 1);
 disp(['Number of channels: ', num2str(nCh)]);
 
 %% === Perform reconstruction per coil ===
-x0 = cell(nCh, 1);
 
-for iCh = 1:nCh
+% Parallel pool
+maxNumCompThreads(1)  % 1 BLAS thread per worker
+nWorkers = str2double(getenv('SLURM_CPUS_PER_TASK'));
+parpool('local', nWorkers);
+
+% Reconstruction per coil
+x0 = cell(nCh, 1);
+parfor iCh = 1:nCh
     x0{iCh} = bmMathilda(y_tot(iCh,:), t_tot, ve_tot, [], N_u, N_u, dK_u, [], [], [], []);
     disp(['Processing channel: ', num2str(iCh), '/', num2str(nCh)]);
 end
 
+% Recon image per coil
 bmImage(x0);
 
 % x0Path = fullfile(reconDir, 'x0_noC.mat');
@@ -111,6 +118,7 @@ end
 % Compute the root mean square (RMS)
 xrms = sqrt(sum_of_squares / numCoils);
 
+% Recon image after root-mean-square combination
 bmImage(xrms);
 
 %% Save RMS image
