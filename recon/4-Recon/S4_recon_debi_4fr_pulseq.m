@@ -1,4 +1,4 @@
-clc; clearvars -except mask_type region_idx subject_num; close all;
+% clc; clearvars -except mask_type region_idx subject_num; close all;
 
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
 addpath(genpath('/home/debi/MatTechLab/monalisa'));
@@ -7,13 +7,18 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 5;
+if ~exist('subject_num', 'var')
+    subject_num = 5;
+end
 if ~exist('mask_type', 'var')
     mask_type = 'clean_0.50';   % use char instead of string
 end
 if ~exist('region_idx', 'var')
     region_idx = 0; % 0:up 1:down 2:left 3:right 4:center mask
 end
+nIter = 20; %20, 30
+deltaArray = 1;
+delta = deltaArray(1);
 
 fprintf('Running config: subject_num=%d, mask_type=%s, region_idx=%d\n', subject_num, mask_type, region_idx);
 
@@ -40,6 +45,18 @@ x0Dir       = fullfile(reconDir, mask_type, 'x0');
 x0Path      = fullfile(x0Dir, ['x0_regionidx' num2str(region_idx) '.mat']);
 if ~exist(x0Dir, 'dir')
     mkdir(x0Dir);
+end
+
+xDir  = fullfile(reconDir, mask_type, 'x');
+xPath = fullfile(xDir, sprintf('x_steva_regionidx_%i_nIter_%d_delta_%.3f.mat', region_idx, nIter, delta));
+if ~exist(xDir, 'dir')
+    mkdir(xDir);
+end
+
+if exist(xPath, 'file')
+    disp('x already exists, skipping recon:')
+    disp(xPath)
+    return
 end
 
 % Get the list of meas_MID... files
@@ -120,7 +137,7 @@ if isKey(rotationMap, subject_num)
     k = rotationMap(subject_num);
     C = rot90(C, k);
     disp(size(C));
-    bmImage(sqrt(sum(C.^2, 4)));
+    % bmImage(sqrt(sum(C.^2, 4)));
 end
 
 %% Resize C
@@ -129,28 +146,29 @@ disp('C resized!')
 
 %%
 x0 = cell(nFr, 1);
+if exist(x0Path, 'file')
+    load(x0Path, 'x0');
+    disp('Existing x0 loaded from:')
+    disp(x0Path)
+else
     for i = 1:nFr
         x0{i} = bmMathilda(y{i}, t{i}, ve{i}, C, N_u, n_u, dK_u, [], [], [], []);
     end
     % isequal(x0_p, x0)
     %
-    bmImage(x0);
+    % bmImage(x0);
 
-%% Save the x0 to the .mat file
-save(x0Path, 'x0', '-v7.3');
-disp('x0 has been saved here:')
-disp(x0Path)
+    %% Save the x0 to the .mat file
+    save(x0Path, 'x0', '-v7.3');
+    disp('x0 has been saved here:')
+    disp(x0Path)
+end
 
 %%
 [Gu, Gut] = bmTraj2SparseMat(t, ve, N_u, dK_u);
 
 %% bmSteva
-deltaArray = 1;
-
-% nIter = 30; % iterations before stopping
-nIter = 20; %20, 30
 witness_ind = [];
-delta = deltaArray(1);
 % delta     = 0.1; %0.01, 0.1, 1
 rho       = 10*delta;
 nCGD      = 4;
@@ -162,18 +180,12 @@ x = bmSteva(  x0{1}, [], [], y{1}, ve{1}, C, Gu{1}, Gut{1}, n_u, ...
                                         nIter, ...
                                         bmWitnessInfo('steva_d0p1_r1_nCGD4', witness_ind));
 
-bmImage(x)
-
-% Save the x to the .mat file
-xDir  = fullfile(reconDir, mask_type, 'x');
-xPath = fullfile(xDir, sprintf('x_steva_regionidx_%i_nIter_%d_delta_%.3f.mat', region_idx, nIter, delta));
-if ~exist(xDir, 'dir')
-    mkdir(xDir);
-end
+% bmImage(x)
 
 save(xPath, 'x');
 disp('x has been saved here:')
 disp(xPath)
+close all;
 
 % %% .mat to .nii.gz
 % image = load(xPath);

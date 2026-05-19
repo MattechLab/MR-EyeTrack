@@ -190,3 +190,11 @@ visual_stimuli/data_archive/
 # MATLAB
 *.asv
 *.mat
+
+# runs
+/recon/4-Recon/.runs*
+/recon/3-Mitosius/.runs*
+
+# Other
+CLAUDE.md
+.codex
