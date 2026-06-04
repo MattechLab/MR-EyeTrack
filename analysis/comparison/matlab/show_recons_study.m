@@ -7,7 +7,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 %% Config
 
 % Variables
-subject_num = 4;
+subject_num = 2;
 region_idx = 0;
 mask_type = 'clean';   % use char instead of string
 

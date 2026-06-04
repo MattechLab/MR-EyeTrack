@@ -1,5 +1,9 @@
 %% Init
-clc, clearvars, close all;
+clc; close all;
+if ~exist('subject_num',  'var'); subject_num  = 1;  end
+if ~exist('saveflag',     'var'); saveflag     = 1;  end
+if ~exist('matrix_size',  'var'); matrix_size  = 48; end  % 240 for full res, 48 for eyes ROI
+clearvars -except subject_num saveflag matrix_size
 
 %% === Add paths ===
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/recon'));
@@ -7,11 +11,6 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 %% Initialize the directories and acquire the Coil
-
-% Parameters
-subject_num = 10;
-saveflag = 1;
-matrix_size = 48; % 240 for full res, 48 for eyes ROI
 
 % Base directory
 baseDir = '/home/debi/jaime/repos/MR-EyeTrack/data/study';
@@ -75,27 +74,28 @@ nCh = size(y_tot, 1);
 disp(['Number of channels: ', num2str(nCh)]);
 
 %% === Perform reconstruction per coil ===
-%tic
+
 % Parallel pool
 maxNumCompThreads(1);  % 1 BLAS thread per worker
 nWorkers = 18;  % CPUs
 parpool('local', nWorkers);
 
+tic
 x0 = cell(nCh, 1);
 parfor iCh = 1:nCh
     x0{iCh} = bmMathilda(y_tot(iCh,:), t_tot, ve_tot, [], N_u, N_u, dK_u, [], [], [], []);
     disp(['Processing channel: ', num2str(iCh), '/', num2str(nCh)]);
 end
-% elapsed = toc(tic);
-% fprintf('Total runtime: %.2f seconds\n', elapsed);
+elapsed = toc;
+fprintf('Total runtime: %.2f seconds\n', elapsed);
 bmImage(x0);
 
-% x0Path = fullfile(reconDir, 'x0_noC.mat');
-% if saveflag
-%     save(x0Path, 'x0', '-v7.3');
-%     disp('Saved:');
-%     disp(x0Path);
-% end
+x0Path = fullfile(reconDir, 'woBin', sprintf('x0_noC_%d.mat', matrix_size));
+if saveflag
+    save(x0Path, 'x0', '-v7.3');
+    disp('Saved per-coil x0:');
+    disp(x0Path);
+end
 
 %% === Root-mean-square combination ===
 % Root mean square across the channels

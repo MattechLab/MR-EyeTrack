@@ -5,17 +5,23 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 %% Config
+subject_num = 2;
+mask_type = 'clean';
+regions_to_compare = {0, 1};
+
 % Paths
-x_1_path = 'data/study/sub-004/recon/woBin/x0_comp_10.mat';
-x_2_path = 'data/study/sub-004/recon/woBin/x0_comp_20.mat';
+x_1_path = sprintf('data/study/sub-%03d/recon/%s/x/x_steva_regionidx_%d_nIter_20_delta_1.000.mat', subject_num, mask_type, regions_to_compare{1});
+x_2_path = sprintf('data/study/sub-%03d/recon/%s/x/x_steva_regionidx_%d_nIter_20_delta_1.000.mat', subject_num, mask_type, regions_to_compare{2});
 disp(['x_1_path: ', x_1_path]);
 disp(['x_2_path: ', x_2_path]);
+
 % Load images
-x_1 = load(x_1_path, 'x0_comp');
-x_2 = load(x_2_path, 'x0_comp');
+x_1 = load(x_1_path, 'x');
+x_2 = load(x_2_path, 'x');
+
 % Prepare volumes for comparison
-x1 = x_1.x0_comp;
-x2 = x_2.x0_comp;
+x1 = x_1.x;
+x2 = x_2.x;
 
 %% Normalization
 % Normalization 2 images

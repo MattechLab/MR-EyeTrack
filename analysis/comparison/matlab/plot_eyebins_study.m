@@ -5,7 +5,7 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 %% Config
 
 % Variables
-subject_num = 1;
+subject_num = 2;
 mask_type = {'clean', 'clean_0.75'};
 region_idx = 0;  % 0:up 1:down 2:left 3:right 4:center mask
 

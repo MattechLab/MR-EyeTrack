@@ -1,58 +1,104 @@
-%% Convert one reconstruction .mat volume to NIfTI using a reference NIfTI/JSON
+%% Convert all reconstruction .mat volumes to NIfTI using a reference NIfTI/JSON
 clc; clearvars; close all;
 
+subject_num = 7;   % <-- set subject number here
+
 repoRoot = '/home/debi/jaime/repos/MR-EyeTrack';
+subID    = sprintf('sub-%03d', subject_num);
+subDir   = fullfile(repoRoot, 'data/study', subID);
 
-matFile = fullfile(repoRoot, ...
-    'data/study/sub-001/recon/woBin/x_steva_nIter_20_delta_1.000.mat');
-refNifti = fullfile(repoRoot, ...
-    'data/study/sub-001/dicom/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/sub-001.nii.gz');
-refJson = fullfile(repoRoot, ...
-    'data/study/sub-001/dicom/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/sub-001.json');
-outputNiiGz = fullfile(repoRoot, ...
-    'data/study/sub-001/recon/woBin/x_steva_nIter_20_delta_1.000.nii.gz');
+refNifti = fullfile(subDir, 'dicom/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR', [subID '.nii.gz']);
+refJson  = fullfile(subDir, 'dicom/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR', [subID '.json']);
 
-assert(exist(matFile, 'file') == 2, 'MAT file not found: %s', matFile);
 assert(exist(refNifti, 'file') == 2, 'Reference NIfTI not found: %s', refNifti);
-assert(exist(refJson, 'file') == 2, 'Reference JSON not found: %s', refJson);
+assert(exist(refJson,  'file') == 2, 'Reference JSON not found: %s', refJson);
 
-fprintf('Loading reconstruction volume from:\n  %s\n', matFile);
+refInfo     = niftiinfo(refNifti);
+refJsonInfo = jsondecode(fileread(refJson));
+validate_reference_orientation(refInfo, refJsonInfo);
+
+% Build list of [matFile, outputNiiGz] pairs
+
+% woBin — all .mat files found in the folder
+woBinDir  = fullfile(subDir, 'recon/woBin');
+woBinMats = dir(fullfile(woBinDir, '*.mat'));
+nWoBin    = numel(woBinMats);
+
+maskTypes  = {'clean', 'clean_0.50', 'clean_0.75', 'clean_0.95'};
+nJobs = nWoBin + numel(maskTypes) * 4 * 2;   % woBin files + masks × regions × (x0,x)
+jobs  = cell(nJobs, 2);
+iJob  = 1;
+
+for iFile = 1:nWoBin
+    [~, baseName] = fileparts(woBinMats(iFile).name);
+    jobs(iJob, :) = { ...
+        fullfile(woBinDir, woBinMats(iFile).name), ...
+        fullfile(woBinDir, [baseName '.nii.gz'])};
+    iJob = iJob + 1;
+end
+
+% clean variants — x0 and x (steva) for each of the 4 gaze directions
+for iMask = 1:numel(maskTypes)
+    mask = maskTypes{iMask};
+    for rIdx = 0:3
+        jobs(iJob, :) = { ...
+            fullfile(subDir, 'recon', mask, 'x0', sprintf('x0_regionidx%d.mat', rIdx)), ...
+            fullfile(subDir, 'recon', mask, 'x0', sprintf('x0_regionidx%d.nii.gz', rIdx))};
+        iJob = iJob + 1;
+        jobs(iJob, :) = { ...
+            fullfile(subDir, 'recon', mask, 'x',  sprintf('x_steva_regionidx_%d_nIter_20_delta_1.000.mat', rIdx)), ...
+            fullfile(subDir, 'recon', mask, 'x',  sprintf('x_steva_regionidx_%d_nIter_20_delta_1.000.nii.gz', rIdx))};
+        iJob = iJob + 1;
+    end
+end
+
+% Process each job
+nJobs = size(jobs, 1);
+for iJob = 1:nJobs
+    matFile     = jobs{iJob, 1};
+    outputNiiGz = jobs{iJob, 2};
+
+    if ~exist(matFile, 'file')
+        fprintf('[%d/%d] skip (no MAT):  %s\n', iJob, nJobs, matFile);
+        continue;
+    end
+    if exist(outputNiiGz, 'file') == 2
+        fprintf('[%d/%d] skip (exists):  %s\n', iJob, nJobs, outputNiiGz);
+        continue;
+    end
+
+    fprintf('\n[%d/%d] Converting:\n  %s\n', iJob, nJobs, matFile);
+    convert_single(matFile, outputNiiGz, refInfo);
+end
+
+fprintf('\nAll done.\n');
+
+
+function convert_single(matFile, outputNiiGz, refInfo)
+fprintf('  Loading... ');
 vol = load_recon_volume(matFile);
-fprintf('Raw MAT size: %s\n', mat2str(size(vol)));
+fprintf('raw size %s\n', mat2str(size(vol)));
 
-% Reorder the MAT array so the voxel data follows the template NIfTI
-% orientation instead of preserving the original MAT storage order.
 vol = reorient_volume_to_template(vol);
 vol = single(abs(vol));
-fprintf('Oriented MAT size: %s\n', mat2str(size(vol)));
-
-refInfo = niftiinfo(refNifti);
-refJsonInfo = jsondecode(fileread(refJson));
-
-validate_reference_orientation(refInfo, refJsonInfo);
 
 newInfo = build_output_header(refInfo, vol, outputNiiGz);
 
 tmpNii = erase(outputNiiGz, '.gz');
-if exist(tmpNii, 'file') == 2
-    delete(tmpNii);
-end
-if exist(outputNiiGz, 'file') == 2
-    delete(outputNiiGz);
-end
+if exist(tmpNii,     'file') == 2, delete(tmpNii);     end
+if exist(outputNiiGz,'file') == 2, delete(outputNiiGz); end
 
-fprintf('Writing NIfTI:\n  %s\n', tmpNii);
 niftiwrite(vol, tmpNii, newInfo, 'Compressed', false);
 gzip(tmpNii);
 delete(tmpNii);
 synchronize_qform_with_sform(outputNiiGz);
-
-fprintf('Done.\nSaved:\n  %s\n', outputNiiGz);
+fprintf('  Saved: %s\n', outputNiiGz);
+end
 
 
 function vol = load_recon_volume(matFile)
 data = load(matFile);
-candidateFields = {'x', 'x0', 'xrms'};
+candidateFields = {'x', 'x0', 'xrms', 'x0_comp'};
 
 for iField = 1:numel(candidateFields)
     fieldName = candidateFields{iField};

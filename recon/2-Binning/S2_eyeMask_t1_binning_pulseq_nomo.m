@@ -61,8 +61,8 @@ nShot = seqParams.nshot;
 
 % winLen: the length of the readout sliding window to determine the preservation.
 % th_ratio: the ratio for thresholding the ET mask.
-winLen = 7;
-th_ratio = 0.9;
+winLen = 10;
+th_ratio = 0.75;
 
 % Generate the full eMask (4 x N matrix)
 eMask = eyeGenerateBinningWin(rawDir, nShotOff, nSeg, th_ratio, ETDir, winLen, true, true, mask_type);

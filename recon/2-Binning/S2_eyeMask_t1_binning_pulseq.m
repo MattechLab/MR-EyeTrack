@@ -13,7 +13,7 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 %% Config
 
 % Variables
-subject_num = 15;
+subject_num = 2;
 mask_type = 'clean';
 
 % Base paths
