@@ -63,7 +63,10 @@ S = load(matFile);
 assert(isfield(S, volumeField), ...
     'Variable "%s" not found in MAT file', volumeField);
 
-x = S.(volumeField);           % cell array of 3D volumes
+x = S.(volumeField);
+if ~iscell(x)
+    x = {x};  % wrap plain 3D array as single-frame cell
+end
 N = numel(x);
 
 volSize = size(x{1});
