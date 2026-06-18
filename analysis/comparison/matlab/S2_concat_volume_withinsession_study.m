@@ -5,7 +5,7 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 %% Config
-subject_num = 2;
+subject_num = 1;
 mask_type = 'clean';
 regions_to_compare = {0, 1};
 
@@ -29,11 +29,11 @@ x2 = x_2.x;
 img_1_2_trans = cat(2, img1_trans, img2_trans);
 bmImage(img_1_2_trans)
 
-%% Overlapping
-% Axial
+%% Overlapping Axial
 x_cell_ax = {norm_image(x1, [0,0.7]), norm_image(x2, [0,0.7])};
 bmImage(x_cell_ax);
-% Sagittal
+
+%% Overlapping Sagittal
 x_cell_sag = {norm_image(rot90(permute(x1, [1,3,2]), 1), [0,0.7]), norm_image(rot90(permute(x2, [1,3,2]), 1), [0,0.7])};
 bmImage(x_cell_sag);
 
