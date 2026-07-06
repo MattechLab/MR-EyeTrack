@@ -198,3 +198,5 @@ visual_stimuli/data_archive/
 # Other
 CLAUDE.md
 .codex
+*.trl
+*.ses
