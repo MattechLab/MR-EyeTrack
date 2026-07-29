@@ -202,3 +202,9 @@ CLAUDE.md
 .codex
 *.trl
 *.ses
+
+# macOS AppleDouble resource forks (created when copying to non-HFS filesystems)
+._*
+
+# editor backup files
+*~
