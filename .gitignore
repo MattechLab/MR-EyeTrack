@@ -172,6 +172,8 @@ visual_stimuli/data_archive/
 /old_study/raw_data
 /old_study/new_binning
 /old_study/et_data
+/old_study/et_data.zip
+/old_study/new_binning.zip
 
 # results
 /results/*
