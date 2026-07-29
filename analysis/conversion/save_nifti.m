@@ -10,9 +10,6 @@ arguments (Input)
     niftiFile
 end
 
-fprintf("This is the updated save_nifti()\n");
-
-
 % Load twix
 twix = mapVBVD_JH_for_monalisa(twixFile);
 if iscell(twix), twix = twix{end}; end
@@ -77,6 +74,8 @@ vol4d = single(vol4d);
 matrix_size = size(vol4d, 1:3);  % Nx Ny Nz
 fprintf("matrix_size = [%s] voxel\n", num2str(matrix_size));
 
+vol4d = flip(vol4d, 1);  % flip LR
+
 % Get FOV and Twix FOV
 FOV = (1 ./ dK_u);  % mm
 fprintf("FOV = [%s] mm\n", num2str(FOV));
@@ -118,6 +117,13 @@ y_dir = cross(n, x_dir);
 
 R_lps = [x_dir, y_dir, n];   % 3×3
 
+if det(R_lps) < 0
+    fprintf("====== determinant of R_lps is less than 0, inverting it =====\n");
+    R_lps(:,1) = -R_lps(:,1);
+else
+    fprintf("====== determinant of R_lps is greater or equal to 0 =====\n");
+end
+
 %% Voxel size
 pixdim = diag(voxel_size);
 
@@ -126,9 +132,18 @@ pixdim = diag(voxel_size);
 % vol_center_mm  = pixdim * (vol_center_vox - 1);
 
 %% Slice position (LPS, mm)
-if isfield(sa.sPosition, "dSag"), dSag = sa.sPosition.dSag; else, dSag = 0; end
-if isfield(sa.sPosition, "dCor"), dCor = sa.sPosition.dCor; else, dCor = 0; end
-if isfield(sa.sPosition, "dTra"), dTra = sa.sPosition.dTra; else, dTra = 0; end
+if isfield(sa, "sPosition")
+    sp = sa.sPosition;
+    if isfield(sp, "dSag"), dSag = sp.dSag; else, dSag = 0; end
+    if isfield(sp, "dCor"), dCor = sp.dCor; else, dCor = 0; end
+    if isfield(sp, "dTra"), dTra = sp.dTra; else, dTra = 0; end
+else
+    % Default: isocenter
+    fprintf("sPosition not found in Twix → assuming isocenter (0,0,0)\n");
+    dSag = 0;
+    dCor = 0;
+    dTra = 0;
+end
 pos_lps = [dSag;
            dCor;
            dTra];
@@ -140,7 +155,6 @@ T_lps = pos_lps ...
         - R_lps(:,1) * (FOV(1)/2) ...
         - R_lps(:,2) * (FOV(2)/2) ...
         - R_lps(:,3) * (FOV(3)/2);
-
 
 %% Full affine
 A_lps = eye(4);
@@ -155,7 +169,9 @@ A_ras = LPS2RAS * A_lps;
 % quat = rotm2quat(rot_mat);
 trans_vec = A_ras(1:3,4);
 
-rot_mat = LPS2RAS(1:3,1:3) * R_lps;   % 3x3
+% rot_mat = LPS2RAS(1:3,1:3) * R_lps;   % 3x3
+rot_mat = A_ras(1:3,1:3) ./ voxel_size;
+
 detR   = det(rot_mat);
 qfac   = sign(detR);    % +1 or -1; if detR==0, set qfac=+1
 if qfac == 0, qfac = 1; end

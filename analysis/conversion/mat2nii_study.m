@@ -1,7 +1,7 @@
 %% Convert all reconstruction .mat volumes to NIfTI using a reference NIfTI/JSON
 clc; clearvars; close all;
 
-subject_num = 7;   % <-- set subject number here
+subject_num = 3;   % <-- set subject number here
 
 repoRoot = '/home/debi/jaime/repos/MR-EyeTrack';
 subID    = sprintf('sub-%03d', subject_num);
@@ -25,7 +25,7 @@ woBinMats = dir(fullfile(woBinDir, '*.mat'));
 nWoBin    = numel(woBinMats);
 
 maskTypes  = {'clean', 'clean_0.50', 'clean_0.75', 'clean_0.95'};
-nJobs = nWoBin + numel(maskTypes) * 4 * 2;   % woBin files + masks × regions × (x0,x)
+nJobs = nWoBin + numel(maskTypes) * 4 * 3;   % woBin files + masks × regions × (x0, x, x_joint)
 jobs  = cell(nJobs, 2);
 iJob  = 1;
 
@@ -48,6 +48,10 @@ for iMask = 1:numel(maskTypes)
         jobs(iJob, :) = { ...
             fullfile(subDir, 'recon', mask, 'x',  sprintf('x_steva_regionidx_%d_nIter_20_delta_1.000.mat', rIdx)), ...
             fullfile(subDir, 'recon', mask, 'x',  sprintf('x_steva_regionidx_%d_nIter_20_delta_1.000.nii.gz', rIdx))};
+        iJob = iJob + 1;
+        jobs(iJob, :) = { ...
+            fullfile(subDir, 'recon', mask, 'x_joint', sprintf('x_joint_regionidx_%d_nIter_20_ds_1.000_dt_0.100.mat', rIdx)), ...
+            fullfile(subDir, 'recon', mask, 'x_joint', sprintf('x_joint_regionidx_%d_nIter_20_ds_1.000_dt_0.100.nii.gz', rIdx))};
         iJob = iJob + 1;
     end
 end

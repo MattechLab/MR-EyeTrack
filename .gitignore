@@ -169,7 +169,8 @@ visual_stimuli/data_archive/
 .DS_Store
 .vscode/
 /data
-/other
+/old_study/raw_data
+/old_study/new_binning
 
 # results
 /results/*
@@ -190,6 +191,7 @@ visual_stimuli/data_archive/
 # MATLAB
 *.asv
 *.mat
+*.dat
 
 # runs
 /recon/4-Recon/.runs*

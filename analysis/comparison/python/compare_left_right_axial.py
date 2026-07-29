@@ -6,6 +6,8 @@ Four panels: Left | Right | Difference | Toggle (blink)
   ← / →       switch the toggle panel between Left and Right
 """
 
+import matplotlib
+matplotlib.use("TkAgg")
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
@@ -13,15 +15,24 @@ import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider
 
 # ── Config ────────────────────────────────────────────────────────────────────
-SUBJECT_NUM = 3
+SUBJECT_NUM = 15
 MASK_TYPE   = "clean"
+RECON_TYPE  = "x"          # "x" | "x0" | "x_joint"
 BASE_DIR    = "/home/debi/jaime/repos/MR-EyeTrack"
 
 CLIP    = 0.7   # upper clip after [0,1] normalisation
 SL_INIT = 106   # initial axial slice
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-tmpl = f"{BASE_DIR}/data/study/sub-{SUBJECT_NUM:03d}/recon/{MASK_TYPE}/x/x_steva_regionidx_{{r}}_nIter_20_delta_1.000.nii.gz"
+sub_recon = f"{BASE_DIR}/data/study/sub-{SUBJECT_NUM:03d}/recon/{MASK_TYPE}"
+if RECON_TYPE == "x":
+    tmpl = f"{sub_recon}/x/x_steva_regionidx_{{r}}_nIter_20_delta_1.000.nii.gz"
+elif RECON_TYPE == "x0":
+    tmpl = f"{sub_recon}/x0/x0_regionidx{{r}}.nii.gz"
+elif RECON_TYPE == "x_joint":
+    tmpl = f"{sub_recon}/x_joint/x_joint_regionidx_{{r}}_nIter_20_ds_1.000_dt_0.100.nii.gz"
+else:
+    raise ValueError(f"Unknown RECON_TYPE: {RECON_TYPE!r}")
 path_left  = tmpl.format(r=2)
 path_right = tmpl.format(r=3)
 print(f"left  path: {path_left}")

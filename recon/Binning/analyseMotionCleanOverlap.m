@@ -4,7 +4,7 @@
 % assigned to that clean bin also fall in the motion period (0's in the
 % no-mo mask).  Run from the MR-EyeTrack root directory.
 
-subject_num = 7;
+subject_num = 2;
 sub_str     = sprintf('sub-%03d', subject_num);
 
 % Resolve repo root regardless of where the script is called from

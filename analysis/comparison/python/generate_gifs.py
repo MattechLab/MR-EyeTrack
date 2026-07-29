@@ -10,6 +10,7 @@ difference is visible as a blink comparison.
 """
 
 import io
+import os
 import numpy as np
 import nibabel as nib
 import matplotlib
@@ -18,11 +19,12 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 # ── Config ────────────────────────────────────────────────────────────────────
-BASE_DIR  = "/home/debi/jaime/repos/MR-EyeTrack"
-MASK_TYPE = "clean"
-CLIP      = 0.7        # normalisation upper clip
-DURATION  = 300        # ms per frame
-DPI       = 120
+BASE_DIR   = "/home/debi/jaime/repos/MR-EyeTrack"
+MASK_TYPE  = "clean"
+RECON_TYPE = "x_joint"       # "x" | "x0" | "x_joint"
+CLIP       = 0.7       # normalisation upper clip
+DURATION   = 300       # ms per frame
+DPI        = 120
 
 # subject → (axial_slice, sagittal_slice)
 SLICES = {
@@ -86,10 +88,23 @@ def save_gif(frames, path):
     print(f"  saved → {path}")
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
-nii_tmpl = f"{BASE_DIR}/data/study/sub-{{s:03d}}/recon/{MASK_TYPE}/x/x_steva_regionidx_{{r}}_nIter_20_delta_1.000.nii.gz"
+if RECON_TYPE == "x":
+    nii_tmpl = f"{BASE_DIR}/data/study/sub-{{s:03d}}/recon/{MASK_TYPE}/x/x_steva_regionidx_{{r}}_nIter_20_delta_1.000.nii.gz"
+elif RECON_TYPE == "x0":
+    nii_tmpl = f"{BASE_DIR}/data/study/sub-{{s:03d}}/recon/{MASK_TYPE}/x0/x0_regionidx{{r}}.nii.gz"
+elif RECON_TYPE == "x_joint":
+    nii_tmpl = f"{BASE_DIR}/data/study/sub-{{s:03d}}/recon/{MASK_TYPE}/x_joint/x_joint_regionidx_{{r}}_nIter_20_ds_1.000_dt_0.100.nii.gz"
+else:
+    raise ValueError(f"Unknown RECON_TYPE: {RECON_TYPE!r}")
 out_tmpl = f"{BASE_DIR}/data/study/sub-{{s:03d}}/recon/{MASK_TYPE}"
 
 for subj, (ax_sl, sag_sl) in SLICES.items():
+    required = [nii_tmpl.format(s=subj, r=r) for r in (0, 1, 2, 3)]
+    missing  = [p for p in required if not os.path.isfile(p)]
+    if missing:
+        print(f"\nsub-{subj:03d}  skip — missing {len(missing)}/4 NIfTI(s)")
+        continue
+
     print(f"\nsub-{subj:03d}  axial={ax_sl}  sagittal={sag_sl}")
     out_dir = out_tmpl.format(s=subj)
 
@@ -104,7 +119,7 @@ for subj, (ax_sl, sag_sl) in SLICES.items():
     frame_l = make_frame(sl_l, title_ax, "Left gaze (2)")
     frame_r = make_frame(sl_r, title_ax, "Right gaze (3)")
 
-    gif_ax = f"{out_dir}/sub-{subj:03d}_axial_sl{ax_sl}_left_right.gif"
+    gif_ax = f"{out_dir}/sub-{subj:03d}_axial_sl{ax_sl}_left_right_{RECON_TYPE}.gif"
     save_gif([frame_l, frame_r], gif_ax)
 
     # ── Sagittal: up (0) vs down (1) ─────────────────────────────────────────
@@ -121,7 +136,7 @@ for subj, (ax_sl, sag_sl) in SLICES.items():
     frame_u = make_frame(sl_u, title_sag, "Up gaze (0)")
     frame_d = make_frame(sl_d, title_sag, "Down gaze (1)")
 
-    gif_sag = f"{out_dir}/sub-{subj:03d}_sagittal_sl{sag_sl}_up_down.gif"
+    gif_sag = f"{out_dir}/sub-{subj:03d}_sagittal_sl{sag_sl}_up_down_{RECON_TYPE}.gif"
     save_gif([frame_u, frame_d], gif_sag)
 
 print("\nDone.")

@@ -5,23 +5,40 @@ addpath(genpath('/home/debi/MatTechLab/monalisa'));
 addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 
 %% Config
-subject_num = 1;
-mask_type = 'clean';
-regions_to_compare = {0, 1};
+subject_num = 3;
+mask_type   = 'clean';          % 'clean' | 'clean_0.50' | 'clean_0.75' | 'clean_0.95'
+recon_type  = 'x';              % 'x' | 'x0' | 'x_joint'
+regions_to_compare = {0, 1};    % region indices: 0=up 1=down 2=left 3=right
 
 % Paths
-x_1_path = sprintf('data/study/sub-%03d/recon/%s/x/x_steva_regionidx_%d_nIter_20_delta_1.000.mat', subject_num, mask_type, regions_to_compare{1});
-x_2_path = sprintf('data/study/sub-%03d/recon/%s/x/x_steva_regionidx_%d_nIter_20_delta_1.000.mat', subject_num, mask_type, regions_to_compare{2});
-disp(['x_1_path: ', x_1_path]);
-disp(['x_2_path: ', x_2_path]);
+base_dir = sprintf('data/study/sub-%03d/recon/%s', subject_num, mask_type);
+
+switch recon_type
+    case 'x'
+        x_1_path = sprintf('%s/x/x_steva_regionidx_%d_nIter_20_delta_1.000.mat', base_dir, regions_to_compare{1});
+        x_2_path = sprintf('%s/x/x_steva_regionidx_%d_nIter_20_delta_1.000.mat', base_dir, regions_to_compare{2});
+        var_name = 'x';
+    case 'x0'
+        x_1_path = sprintf('%s/x0/x0_regionidx%d.mat', base_dir, regions_to_compare{1});
+        x_2_path = sprintf('%s/x0/x0_regionidx%d.mat', base_dir, regions_to_compare{2});
+        var_name = 'x0';
+    case 'x_joint'
+        x_1_path = sprintf('%s/x_joint/x_joint_regionidx_%d_nIter_20_ds_1.000_dt_0.100.mat', base_dir, regions_to_compare{1});
+        x_2_path = sprintf('%s/x_joint/x_joint_regionidx_%d_nIter_20_ds_1.000_dt_0.100.mat', base_dir, regions_to_compare{2});
+        var_name = 'x';
+end
+
+disp(['recon_type: ', recon_type]);
+disp(['x_1_path:   ', x_1_path]);
+disp(['x_2_path:   ', x_2_path]);
 
 % Load images
-x_1 = load(x_1_path, 'x');
-x_2 = load(x_2_path, 'x');
+x_1 = load(x_1_path, var_name);
+x_2 = load(x_2_path, var_name);
 
 % Prepare volumes for comparison
-x1 = x_1.x;
-x2 = x_2.x;
+x1 = x_1.(var_name);
+x2 = x_2.(var_name);
 
 %% Normalization
 % Normalization 2 images
@@ -29,12 +46,19 @@ x2 = x_2.x;
 img_1_2_trans = cat(2, img1_trans, img2_trans);
 bmImage(img_1_2_trans)
 
+%% Normalization Sagittal
+x1_sag = rot90(permute(x1, [1,3,2]), 1);
+x2_sag = rot90(permute(x2, [1,3,2]), 1);
+[img1_sag, img2_sag] = norm_two_image(x1_sag, x2_sag);
+img_1_2_sag = cat(2, img1_sag, img2_sag);
+bmImage(img_1_2_sag)
+
 %% Overlapping Axial
-x_cell_ax = {norm_image(x1, [0,0.7]), norm_image(x2, [0,0.7])};
+x_cell_ax = {norm_image(x1), norm_image(x2)};
 bmImage(x_cell_ax);
 
 %% Overlapping Sagittal
-x_cell_sag = {norm_image(rot90(permute(x1, [1,3,2]), 1), [0,0.7]), norm_image(rot90(permute(x2, [1,3,2]), 1), [0,0.7])};
+x_cell_sag = {norm_image(rot90(permute(x1, [1,3,2]), 1)), norm_image(rot90(permute(x2, [1,3,2]), 1))};
 bmImage(x_cell_sag);
 
 %% Axial
