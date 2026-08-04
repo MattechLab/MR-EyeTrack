@@ -1,0 +1,25 @@
+{
+  "label": "yiwei_t1w",
+  "ref": "/mnt/filer01/MatTechLab/yiwei.jia/datasets/0005/dicom_0005/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/mprage.nii.gz",
+  "test": "/home/debi/Downloads/yiwei_0005_MID00030_T1w_libre.nii.gz",
+  "results": {
+    "as written": {
+      "mi": -0.319113,
+      "cc": -0.340487,
+      "rotation_deg": 4.984117202735977,
+      "translation_mm": 6.792336102208216
+    },
+    "mirrored": {
+      "mi": -0.206616,
+      "cc": -0.114875,
+      "rotation_deg": 5.189693989760467,
+      "translation_mm": 6.946075480657996
+    },
+    "margins": {
+      "mi": 0.11249699999999999,
+      "cc": 0.22561199999999998,
+      "converged": true,
+      "verdict": "PASS - left-right is correct as written"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "label": "yiwei_t2w_vs_t1w",
+  "ref": "/home/debi/Downloads/yiwei_0005_MID00030_T1w_libre.nii.gz",
+  "test": "/home/debi/Downloads/yiwei_0005_MID00025_T2w_libre.nii.gz",
+  "results": {
+    "as written": {
+      "mi": -0.155347,
+      "cc": -0.06882,
+      "rotation_deg": 0.9552644272264703,
+      "translation_mm": 1.7874347097892356
+    },
+    "mirrored": {
+      "mi": -0.319643,
+      "cc": -0.114734,
+      "rotation_deg": 0.6724975116854675,
+      "translation_mm": 1.8177449247443234
+    },
+    "margins": {
+      "mi": -0.164296,
+      "cc": -0.045913999999999996,
+      "converged": true,
+      "verdict": "FAIL - the mirrored volume fits better; left-right is flipped"
+    }
+  }
+}

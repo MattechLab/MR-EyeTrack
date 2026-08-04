@@ -1,0 +1,2 @@
+dataset,header_only_dice,registered_dice,dice_gap,centroid_distance_mm,hd95_mm,rotation_deg,translation_mm,brain_disp_mean_mm,brain_disp_p95_mm,min_affine_scale,control_true_rank,control_margin_over_best_wrong,verdict
+yiwei_t2wFIXED,0.9396,0.9792,0.0396,5.39,6.40,5.58,5.54,6.18,10.56,,1,0.0017,PASS - header-only overlap is at the registration ceiling

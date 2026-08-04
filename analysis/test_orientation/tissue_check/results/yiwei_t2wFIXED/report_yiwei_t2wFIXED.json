@@ -1,0 +1,708 @@
+{
+  "label": "yiwei_t2wFIXED",
+  "ref": "/mnt/filer01/MatTechLab/yiwei.jia/datasets/0005/dicom_0005/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/mprage.nii.gz",
+  "test": "/home/debi/Downloads/yiwei_0005_MID00025_T2w_libre_FIXED.nii.gz",
+  "header_only_dice": 0.939634371382524,
+  "registered_dice": 0.9791883549785108,
+  "dice_gap": 0.03955398359598672,
+  "centroid_distance_mm": 5.390817647136023,
+  "hd95_mm": 6.403125280005973,
+  "rigid": {
+    "rotation_deg": 5.577574875071514,
+    "translation_mm": 5.540163327913089,
+    "translation_ras_mm": [
+      -0.5481737852096558,
+      0.738251805305481,
+      5.46332311630249
+    ],
+    "scales": [
+      1.0000000070269082,
+      0.9999999829966987,
+      0.9999999437520917
+    ],
+    "brain_displacement_mean_mm": 6.184560228200494,
+    "brain_displacement_p95_mm": 10.562455331479578,
+    "brain_displacement_max_mm": 12.149837771553413
+  },
+  "affine": null,
+  "verdict": "PASS - header-only overlap is at the registration ceiling",
+  "controls": [
+    {
+      "perm": [
+        0,
+        1,
+        2
+      ],
+      "flips": [
+        false,
+        false,
+        false
+      ],
+      "identity": true,
+      "dice": 0.939634371382524
+    },
+    {
+      "perm": [
+        0,
+        1,
+        2
+      ],
+      "flips": [
+        false,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.9379430896829016
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2
+      ],
+      "flips": [
+        true,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.8786464820837981
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2
+      ],
+      "flips": [
+        true,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.8774502136734983
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0
+      ],
+      "flips": [
+        false,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.6741662363680283
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0
+      ],
+      "flips": [
+        false,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.6726888863897871
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0
+      ],
+      "flips": [
+        true,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.6720200830647164
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0
+      ],
+      "flips": [
+        true,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.6703578727378395
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0
+      ],
+      "flips": [
+        true,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.6486167930259319
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0
+      ],
+      "flips": [
+        true,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.6454691375150801
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0
+      ],
+      "flips": [
+        true,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.6447518339100347
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0
+      ],
+      "flips": [
+        true,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.641042603606989
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1
+      ],
+      "flips": [
+        false,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.6007151780622514
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1
+      ],
+      "flips": [
+        false,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.5980020744701504
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1
+      ],
+      "flips": [
+        false,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.594237711715947
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1
+      ],
+      "flips": [
+        false,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.5918294598912753
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1
+      ],
+      "flips": [
+        true,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.5909755566041973
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1
+      ],
+      "flips": [
+        true,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.5883436790436294
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1
+      ],
+      "flips": [
+        false,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.5831789414027864
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1
+      ],
+      "flips": [
+        false,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.5812395560709697
+    },
+    {
+      "perm": [
+        0,
+        1,
+        2
+      ],
+      "flips": [
+        true,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.568353303814761
+    },
+    {
+      "perm": [
+        0,
+        1,
+        2
+      ],
+      "flips": [
+        true,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.5682376024846957
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2
+      ],
+      "flips": [
+        true,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.5191254849954721
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2
+      ],
+      "flips": [
+        true,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.5189722493144527
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2
+      ],
+      "flips": [
+        false,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.4551570071544936
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2
+      ],
+      "flips": [
+        false,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.45497015291180465
+    },
+    {
+      "perm": [
+        0,
+        1,
+        2
+      ],
+      "flips": [
+        false,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.42033149819604493
+    },
+    {
+      "perm": [
+        0,
+        1,
+        2
+      ],
+      "flips": [
+        false,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.4195706446417459
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1
+      ],
+      "flips": [
+        true,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.41315222267384055
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1
+      ],
+      "flips": [
+        true,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.4123546289084603
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1
+      ],
+      "flips": [
+        true,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.41193855230290244
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1
+      ],
+      "flips": [
+        true,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.41118716269059885
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1
+      ],
+      "flips": [
+        true,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.38631812718701075
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1
+      ],
+      "flips": [
+        false,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.3860814912125529
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1
+      ],
+      "flips": [
+        true,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.38492877900369327
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1
+      ],
+      "flips": [
+        false,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.3847220396643301
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0
+      ],
+      "flips": [
+        false,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.3599528271715049
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0
+      ],
+      "flips": [
+        false,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.3587570989080605
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0
+      ],
+      "flips": [
+        false,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.3547647910078296
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0
+      ],
+      "flips": [
+        false,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.3538006075033253
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0
+      ],
+      "flips": [
+        false,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.3228561231137962
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0
+      ],
+      "flips": [
+        false,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.32084473399502167
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0
+      ],
+      "flips": [
+        true,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.3188826388210319
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0
+      ],
+      "flips": [
+        true,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.3171443598615917
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2
+      ],
+      "flips": [
+        false,
+        false,
+        false
+      ],
+      "identity": false,
+      "dice": 0.29028516750756617
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2
+      ],
+      "flips": [
+        false,
+        false,
+        true
+      ],
+      "identity": false,
+      "dice": 0.2902079670901434
+    },
+    {
+      "perm": [
+        0,
+        1,
+        2
+      ],
+      "flips": [
+        true,
+        true,
+        true
+      ],
+      "identity": false,
+      "dice": 0.2705646604125565
+    },
+    {
+      "perm": [
+        0,
+        1,
+        2
+      ],
+      "flips": [
+        true,
+        true,
+        false
+      ],
+      "identity": false,
+      "dice": 0.27043421522154804
+    }
+  ],
+  "control_summary": {
+    "true_rank": 1,
+    "margin_over_best_wrong": 0.0016912816996224045,
+    "median_dice": 0.48706462823447316
+  }
+}

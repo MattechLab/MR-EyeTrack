@@ -1,0 +1,11 @@
+# The tools write their volumes into --out alongside the reports. Keep the
+# CSV/JSON/PNG results, never the NIfTIs: brain masks are small but the prepared
+# volumes and warped outputs run to hundreds of MB each, and all of them are
+# reproducible from the raw data.
+*.nii
+*.nii.gz
+
+# The root .gitignore excludes *.mat for the MATLAB reconstruction outputs, which
+# also swallows the ANTs transforms. Those are ~130 bytes and are what let
+# lr_inspect.py align planes without re-running the registration, so keep them.
+!*GenericAffine.mat

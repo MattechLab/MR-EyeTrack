@@ -1,0 +1,25 @@
+{
+  "label": "yiwei_t2wFIXED",
+  "ref": "/mnt/filer01/MatTechLab/yiwei.jia/datasets/0005/dicom_0005/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/mprage.nii.gz",
+  "test": "/home/debi/Downloads/yiwei_0005_MID00025_T2w_libre_FIXED.nii.gz",
+  "results": {
+    "as written": {
+      "mi": -0.235023,
+      "cc": -0.158643,
+      "rotation_deg": 5.614982392032924,
+      "translation_mm": 5.551237825944856
+    },
+    "mirrored": {
+      "mi": -0.221309,
+      "cc": -0.133289,
+      "rotation_deg": 4.751283355194382,
+      "translation_mm": 4.895072632683282
+    },
+    "margins": {
+      "mi": 0.013714000000000004,
+      "cc": 0.025354000000000015,
+      "converged": true,
+      "verdict": "INCONCLUSIVE - margins too small to call; this subject's anatomy may be unusually symmetric at this resolution"
+    }
+  }
+}

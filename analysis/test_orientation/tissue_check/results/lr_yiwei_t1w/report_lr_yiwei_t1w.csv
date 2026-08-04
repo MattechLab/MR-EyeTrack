@@ -1,0 +1,2 @@
+dataset,mi_as_written,mi_mirrored,cc_as_written,cc_mirrored,mi_margin,cc_margin,rot_as_written,rot_mirrored,verdict
+yiwei_t1w,-0.3191,-0.2066,-0.3405,-0.1149,0.1125,0.2256,4.98,5.19,PASS - left-right is correct as written

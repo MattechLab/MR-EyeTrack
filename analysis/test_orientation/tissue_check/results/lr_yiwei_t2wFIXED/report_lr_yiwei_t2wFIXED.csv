@@ -1,0 +1,2 @@
+dataset,mi_as_written,mi_mirrored,cc_as_written,cc_mirrored,mi_margin,cc_margin,rot_as_written,rot_mirrored,verdict
+yiwei_t2wFIXED,-0.2350,-0.2213,-0.1586,-0.1333,0.0137,0.0254,5.61,4.75,INCONCLUSIVE - margins too small to call; this subject's anatomy may be unusually symmetric at this resolution

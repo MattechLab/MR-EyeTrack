@@ -1,0 +1,2 @@
+dataset,mi_as_written,mi_mirrored,cc_as_written,cc_mirrored,mi_margin,cc_margin,rot_as_written,rot_mirrored,verdict
+CONTROL_mprage_vs_t1w,-0.2629,-0.1581,-0.1714,-0.0647,0.1048,0.1067,5.01,5.17,PASS - left-right is correct as written

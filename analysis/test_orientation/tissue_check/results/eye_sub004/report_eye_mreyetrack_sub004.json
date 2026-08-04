@@ -1,0 +1,229 @@
+{
+  "label": "mreyetrack_sub004",
+  "ref": "/home/debi/jaime/repos/MR-EyeTrack/data/study/sub-004/dicom/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/sub-004.nii.gz",
+  "test": "/home/debi/jaime/repos/MR-EyeTrack/data/study/sub-004/recon/woBin/x_steva_nIter_20_delta_1.000_twix.nii.gz",
+  "search_mm": 8.0,
+  "structures": [
+    {
+      "structure": "sub004[1]-L",
+      "voxels": 105,
+      "displacement_mm": 9.486836311265668,
+      "displacement_ras_mm": [
+        3.945039549842477,
+        7.631111040711403,
+        4.025278925895691
+      ],
+      "separability_at_header": 0.37409839034080505,
+      "separability_at_best": 1.8035086393356323,
+      "centroid_ref_ras": [
+        -28.610266733009894,
+        109.61502886817215,
+        -13.737160057184255
+      ]
+    },
+    {
+      "structure": "sub004[2]-L",
+      "voxels": 4825,
+      "displacement_mm": 8.306621926771262,
+      "displacement_ras_mm": [
+        -1.2986638359725475,
+        1.033343505114317,
+        -8.139142539352179
+      ],
+      "separability_at_header": 0.41197699308395386,
+      "separability_at_best": 0.809566080570221,
+      "centroid_ref_ras": [
+        -27.936955478753447,
+        101.33334556317624,
+        -13.465637298229439
+      ]
+    },
+    {
+      "structure": "sub004[3]-L",
+      "voxels": 640,
+      "displacement_mm": 5.9999975181424015,
+      "displacement_ras_mm": [
+        -2.2348088398575783,
+        3.4576190933585167,
+        -4.364684395492077
+      ],
+      "separability_at_header": 0.055509623140096664,
+      "separability_at_best": 1.0094636678695679,
+      "centroid_ref_ras": [
+        -19.13824996097246,
+        78.7798772922979,
+        -15.595844726555526
+      ]
+    },
+    {
+      "structure": "sub004[4]-L",
+      "voxels": 2333,
+      "displacement_mm": 5.196151433834309,
+      "displacement_ras_mm": [
+        -1.179104233160615,
+        0.38813770934939384,
+        -5.045696388930082
+      ],
+      "separability_at_header": 0.2016405463218689,
+      "separability_at_best": 1.2041443586349487,
+      "centroid_ref_ras": [
+        -24.9010668746525,
+        85.52457030584168,
+        -13.299711647859027
+      ]
+    },
+    {
+      "structure": "sub004[5]-L",
+      "voxels": 2477,
+      "displacement_mm": 5.999999858386128,
+      "displacement_ras_mm": [
+        -0.1812594160437584,
+        -0.6954660415649414,
+        -5.95680034160614
+      ],
+      "separability_at_header": 0.2378687560558319,
+      "separability_at_best": 0.6692402362823486,
+      "centroid_ref_ras": [
+        -33.49278229038349,
+        90.37313023910411,
+        -19.888710918033567
+      ]
+    },
+    {
+      "structure": "sub004[5]-L",
+      "voxels": 68,
+      "displacement_mm": 11.747336994945472,
+      "displacement_ras_mm": [
+        -7.376362446695566,
+        7.187232989817858,
+        -5.650918994098902
+      ],
+      "separability_at_header": 0.16824635863304138,
+      "separability_at_best": 1.4270707368850708,
+      "centroid_ref_ras": [
+        -22.46394949340643,
+        70.01310504671625,
+        -13.746509836438833
+      ]
+    },
+    {
+      "structure": "sub004[5]-L",
+      "voxels": 352,
+      "displacement_mm": 5.099020294698373,
+      "displacement_ras_mm": [
+        -0.12211961857974529,
+        -1.572493851184845,
+        -4.848954305052757
+      ],
+      "separability_at_header": 0.4626104533672333,
+      "separability_at_best": 1.2174632549285889,
+      "centroid_ref_ras": [
+        -16.285983707909253,
+        87.3533835617815,
+        -4.951258687619969
+      ]
+    },
+    {
+      "structure": "sub004[5]-L",
+      "voxels": 430,
+      "displacement_mm": 6.164412979624117,
+      "displacement_ras_mm": [
+        -1.2093141358345747,
+        0.2722267024219036,
+        -6.038496445864439
+      ],
+      "separability_at_header": 0.14256319403648376,
+      "separability_at_best": 0.9130580425262451,
+      "centroid_ref_ras": [
+        -11.664792845359202,
+        98.43046650588514,
+        -18.094013337271164
+      ]
+    },
+    {
+      "structure": "sub004[6]-L",
+      "voxels": 537,
+      "displacement_mm": 4.1231055364956415,
+      "displacement_ras_mm": [
+        -1.1199644356966019,
+        -0.4888901002705097,
+        -3.9378503523766994
+      ],
+      "separability_at_header": 0.6184312105178833,
+      "separability_at_best": 1.9766408205032349,
+      "centroid_ref_ras": [
+        -30.728775465139492,
+        81.58174218916903,
+        -17.253874168757292
+      ]
+    },
+    {
+      "structure": "sub004[7]-L",
+      "voxels": 594,
+      "displacement_mm": 4.99999988198844,
+      "displacement_ras_mm": [
+        -0.15104951336979866,
+        -0.5795550346374512,
+        -4.9640002846717834
+      ],
+      "separability_at_header": 0.36220020055770874,
+      "separability_at_best": 1.9760091304779053,
+      "centroid_ref_ras": [
+        -14.528235821075327,
+        86.6272914318073,
+        -16.89041813791603
+      ]
+    },
+    {
+      "structure": "sub004[8]-L",
+      "voxels": 274,
+      "displacement_mm": 7.071068553431034,
+      "displacement_ras_mm": [
+        -0.18253942392766476,
+        -1.8043158650398254,
+        -6.834554418921471
+      ],
+      "separability_at_header": 0.14192667603492737,
+      "separability_at_best": 1.9452930688858032,
+      "centroid_ref_ras": [
+        -22.92101392316475,
+        90.35978911175346,
+        -24.596319754845894
+      ]
+    },
+    {
+      "structure": "sub004[8]-L",
+      "voxels": 135,
+      "displacement_mm": 4.358897021046379,
+      "displacement_ras_mm": [
+        1.1765442173928022,
+        -2.605837356299162,
+        3.2901882342994213
+      ],
+      "separability_at_header": 0.3208961486816406,
+      "separability_at_best": 1.370652675628662,
+      "centroid_ref_ras": [
+        -17.779179713681884,
+        72.32212610907024,
+        -21.933026532332093
+      ]
+    },
+    {
+      "structure": "sub004[9]-L",
+      "voxels": 1043,
+      "displacement_mm": 4.582574024718915,
+      "displacement_ras_mm": [
+        -1.1778242252767086,
+        1.4969875328242779,
+        -4.167942311614752
+      ],
+      "separability_at_header": 0.11030498147010803,
+      "separability_at_best": 1.0815900564193726,
+      "centroid_ref_ras": [
+        -22.96687572916268,
+        85.43516759912117,
+        -5.77727246990969
+      ]
+    }
+  ]
+}

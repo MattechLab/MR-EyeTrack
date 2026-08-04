@@ -1,0 +1,25 @@
+{
+  "label": "mreyetrack_sub004",
+  "ref": "/home/debi/jaime/repos/MR-EyeTrack/data/study/sub-004/dicom/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/sub-004.nii.gz",
+  "test": "/home/debi/jaime/repos/MR-EyeTrack/data/study/sub-004/recon/woBin/x_steva_nIter_20_delta_1.000_twix.nii.gz",
+  "results": {
+    "as written": {
+      "mi": -0.468062,
+      "cc": -0.625971,
+      "rotation_deg": 7.530719686543181,
+      "translation_mm": 5.2159021312343
+    },
+    "mirrored": {
+      "mi": -0.220137,
+      "cc": -0.167686,
+      "rotation_deg": 8.015994412080829,
+      "translation_mm": 5.518781115148215
+    },
+    "margins": {
+      "mi": 0.24792499999999998,
+      "cc": 0.45828500000000005,
+      "converged": true,
+      "verdict": "PASS - left-right is correct as written"
+    }
+  }
+}

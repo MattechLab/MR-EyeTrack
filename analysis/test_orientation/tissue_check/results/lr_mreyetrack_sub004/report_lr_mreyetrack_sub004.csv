@@ -1,0 +1,2 @@
+dataset,mi_as_written,mi_mirrored,cc_as_written,cc_mirrored,mi_margin,cc_margin,rot_as_written,rot_mirrored,verdict
+mreyetrack_sub004,-0.4681,-0.2201,-0.6260,-0.1677,0.2479,0.4583,7.53,8.02,PASS - left-right is correct as written

@@ -1,0 +1,25 @@
+{
+  "label": "CONTROL_mprage_vs_t1w",
+  "ref": "/home/debi/Downloads/yiwei_0005_MID00030_T1w_libre.nii.gz",
+  "test": "/mnt/filer01/MatTechLab/yiwei.jia/datasets/0005/dicom_0005/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/mprage.nii.gz",
+  "results": {
+    "as written": {
+      "mi": -0.262886,
+      "cc": -0.171432,
+      "rotation_deg": 5.009156509810067,
+      "translation_mm": 6.694836733021627
+    },
+    "mirrored": {
+      "mi": -0.158113,
+      "cc": -0.0647142,
+      "rotation_deg": 5.170358819985005,
+      "translation_mm": 6.553246649590029
+    },
+    "margins": {
+      "mi": 0.104773,
+      "cc": 0.1067178,
+      "converged": true,
+      "verdict": "PASS - left-right is correct as written"
+    }
+  }
+}

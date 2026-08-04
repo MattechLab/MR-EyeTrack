@@ -1,0 +1,25 @@
+{
+  "label": "yiwei_t2wFIXED_vs_t1w",
+  "ref": "/home/debi/Downloads/yiwei_0005_MID00030_T1w_libre.nii.gz",
+  "test": "/home/debi/Downloads/yiwei_0005_MID00025_T2w_libre_FIXED.nii.gz",
+  "results": {
+    "as written": {
+      "mi": -0.319856,
+      "cc": -0.114683,
+      "rotation_deg": 0.6949613638965697,
+      "translation_mm": 1.8065276248670308
+    },
+    "mirrored": {
+      "mi": -0.155147,
+      "cc": -0.0687934,
+      "rotation_deg": 0.9581096768696505,
+      "translation_mm": 1.7815223752024767
+    },
+    "margins": {
+      "mi": 0.16470899999999997,
+      "cc": 0.04588959999999999,
+      "converged": true,
+      "verdict": "PASS - left-right is correct as written"
+    }
+  }
+}

@@ -1,0 +1,2 @@
+dataset,mi_as_written,mi_mirrored,cc_as_written,cc_mirrored,mi_margin,cc_margin,rot_as_written,rot_mirrored,verdict
+yiwei_t2w_vs_t1w,-0.1553,-0.3196,-0.0688,-0.1147,-0.1643,-0.0459,0.96,0.67,FAIL - the mirrored volume fits better; left-right is flipped
