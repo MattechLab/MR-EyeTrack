@@ -24,10 +24,18 @@ function mat2nii_twix(matFile, twixFile, seqFile, refNifti, outputNiiGz, twixMet
 %   twixMetaFile  (optional) Path to a .mat cache for Twix metadata
 %                 (sa, FOV, TR).  Avoids re-reading the full raw .dat on
 %                 repeated calls — reading raw data is slow (~minutes).
-%   reorientFcn   (optional) Function handle that maps the raw MAT volume
-%                 to RAS axis order (+R, +A, +S) before the affine is
+%   reorientFcn   (optional) Function handle that reorders the raw MAT volume
+%                 to match the REFERENCE's axis order before the affine is
 %                 applied.  Each pipeline / reconstruction has its own
 %                 raw-axis convention; pass [] or omit to skip reorientation.
+%
+%                 Note this is the reference's storage order, which is only
+%                 (+R,+A,+S) when the reference itself is stored RAS.  The
+%                 output of reorientFcn is written verbatim and the direction
+%                 cosines come from the reference, so the two must agree.
+%                 MR-EyeTrack MPRAGEs are ('R','A','S'), but Yiwei's are
+%                 ('P','I','L') — there the written array runs A-P, S-I, L-R,
+%                 so the left-right axis is dim 3, not dim 1.
 %
 %                 Known conventions (use these in the calling test script):
 %                   MR-EyeTrack LIBRE  raw=(−A,−R,+S):
@@ -36,8 +44,14 @@ function mat2nii_twix(matFile, twixFile, seqFile, refNifti, outputNiiGz, twixMet
 %                     @(v) flip(flip(v,1),2)
 %                   Yiwei 2.0 T1w LIBRE (MID00030) raw=(−S,+R,−A):
 %                     @(v) flip(flip(permute(v,[2 3 1 (4:ndims(v))]),2),3)
-%                   Yiwei 2.0 T2w LIBRE (MID00025) raw=(+R,−S,−A):
-%                     @(v) flip(flip(permute(v,[1 3 2 (4:ndims(v))]),2),3)
+%                   Yiwei 2.0 T2w LIBRE (MID00025) raw=(−R,−S,−A):
+%                     @(v) flip(permute(v,[1 3 2 (4:ndims(v))]),2)
+%
+%                 Visual checks cannot validate the left-right sign: a mirrored
+%                 brain looks plausible and a mirror changes neither axis
+%                 identity nor rotation.  The T2w entry above was corrected
+%                 after analysis/test_orientation/tissue_check/lr_flip_test.py
+%                 found the old one mirrored.
 
 if nargin < 6, twixMetaFile = ''; end
 if nargin < 7, reorientFcn  = []; end

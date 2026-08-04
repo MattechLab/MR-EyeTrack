@@ -124,8 +124,19 @@ seqFile2  = fullfile(datasetDir, ...
 outNii2   = fullfile(outDir, 'yiwei_0005_MID00025_T2w_libre.nii.gz');
 metaFile2 = fullfile(outDir, 'yiwei_0005_MID00025_twix_meta.mat');
 
-% T2w raw=(+R,−S,−A) → swap dims 2↔3, negate both
-reorientFcn_t2w = @(v) flip(flip(permute(v, [1 3 2 (4:ndims(v))]), 2), 3);
+% T2w raw=(−R,−S,−A) → swap dims 2↔3, negate dim 2
+%
+% The dim-3 flip that used to be here made the volume left-right mirrored.
+% Note dim 3 is the left-right axis for this dataset, not dim 1: mat2nii_twix
+% writes the reorientFcn output directly and takes the direction cosines from
+% the reference, and Yiwei's MPRAGE is stored ('P','I','L'), so the written
+% array runs A-P, S-I, L-R.  Removing the flip is what corrects the handedness.
+%
+% Found by analysis/test_orientation/tissue_check/lr_flip_test.py: registering
+% the volume and a mirrored copy to the same-session T1w LIBRE and comparing
+% MI/CC.  Visual checks in Mango cannot catch this -- a mirrored brain looks
+% entirely plausible, and axis identity and rotation are unchanged by a mirror.
+reorientFcn_t2w = @(v) flip(permute(v, [1 3 2 (4:ndims(v))]), 2);
 fprintf('\n=== Yiwei Sample 2 — T2w LIBRE (MID00025) ===\n');
 mat2nii_twix(matFile2, twixFile2, seqFile2, refNifti, outNii2, metaFile2, reorientFcn_t2w);
 
