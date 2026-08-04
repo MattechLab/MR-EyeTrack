@@ -118,35 +118,62 @@ end
 % -----------------------------------------------------------------------
 % Step 5 — Central-slice visual comparison
 %
-% Slices are taken at the centre voxel of each volume independently, so
-% they may not be anatomically co-registered — they are only meant to
-% confirm the overall orientation looks correct (not flipped/swapped).
-% rot90(..., 2) rotates 180° so superior is toward the top of the subplot.
+% Both volumes are reoriented to canonical RAS (dim1=R, dim2=A, dim3=S)
+% using their affines before slicing.  This makes the subplot assignment
+% (axial / coronal / sagittal) correct regardless of how the NIfTI stores
+% data internally (which varies by scanner, sequence, and dcm2niix version).
+%
+% Display uses flipud(slice') — equivalent to 90° CW rotation — which
+% produces a neurological view (right=right, anterior=top) for any
+% canonical RAS volume.  4D volumes use the first frame.
 % -----------------------------------------------------------------------
 fprintf('\nLoading image data...\n');
 volRef   = niftiread(refPath);
 volRecon = niftiread(reconPath);
 
+if ndims(volRef)   > 3, volRef   = volRef(:,:,:,1);   end
+if ndims(volRecon) > 3, volRecon = volRecon(:,:,:,1); end
+
 norm_vol = @(v) double(abs(v)) / double(max(abs(v(:))) + eps);
-vRef   = norm_vol(volRef);
-vRecon = norm_vol(volRecon);
+vRef   = norm_vol(reorient_to_ras(volRef,   A_ref));
+vRecon = norm_vol(reorient_to_ras(volRecon, A_recon));
 
 cRef   = round(size(vRef,   1:3) / 2);
 cRecon = round(size(vRecon, 1:3) / 2);
 
-views   = {'Axial (z)',   'Coronal (y)', 'Sagittal (x)'};
-slRef   = {squeeze(vRef(:,:,cRef(3))),   squeeze(vRef(:,cRef(2),:)),   squeeze(vRef(cRef(1),:,:))};
+views   = {'Axial', 'Coronal', 'Sagittal'};
+slRef   = {squeeze(vRef(:,:,cRef(3))),     squeeze(vRef(:,cRef(2),:)),     squeeze(vRef(cRef(1),:,:))};
 slRecon = {squeeze(vRecon(:,:,cRecon(3))), squeeze(vRecon(:,cRecon(2),:)), squeeze(vRecon(cRecon(1),:,:))};
 
 figure('Name', 'Orientation Check', 'NumberTitle', 'off', 'Position', [100 100 1200 700]);
 for v = 1:3
     subplot(2,3,v);
-    imagesc(rot90(slRef{v}', 2)); axis image off; colormap gray;
+    imagesc(flipud(slRef{v}')); axis image off; colormap gray;
     title(sprintf('REF — %s', views{v}), 'FontSize', 9);
 
     subplot(2,3,v+3);
-    imagesc(rot90(slRecon{v}', 2)); axis image off; colormap gray;
+    imagesc(flipud(slRecon{v}')); axis image off; colormap gray;
     title(sprintf('RECON — %s', views{v}), 'FontSize', 9);
 end
 sgtitle(figTitle);
+end
+
+
+% -----------------------------------------------------------------------
+% Local helper
+% -----------------------------------------------------------------------
+
+function vol_ras = reorient_to_ras(vol, affine)
+% Permute and flip vol so dim1→R, dim2→A, dim3→S.
+% Works for any NIfTI storage order; only the first 3 dims are touched.
+R = affine(1:3, 1:3) ./ vecnorm(affine(1:3, 1:3), 2, 1);  % unit direction cosines
+[~, perm] = max(abs(R), [], 2);   % perm(d) = data dim most aligned with RAS axis d
+assert(numel(unique(perm)) == 3, ...
+    'Cannot determine unique axis permutation — is this an oblique acquisition?');
+vol_ras = permute(vol, perm);
+for d = 1:3
+    if R(d, perm(d)) < 0
+        vol_ras = flip(vol_ras, d);
+    end
+end
 end

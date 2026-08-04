@@ -1,4 +1,4 @@
-%% check_nifti_orientation_test.m
+%% check_nifti_orientation_test.m -- MR-Eye Track
 % Test script: compare the DICOM MPRAGE reference against the Twix-converted
 % reconstruction for sub-XXX using check_nifti_orientation.
 % Edit subjectNum or reconPath to test a different subject or NIfTI variant.
@@ -37,3 +37,22 @@ check_nifti_orientation(refNifti, yannickNii, sprintf('MPRAGE vs Yannick BOLD â€
 
 % My conversion vs MPRAGE
 check_nifti_orientation(refNifti, myNii, sprintf('MPRAGE vs my BOLD recon â€” %s', subID));
+
+
+%% --- Yiwei 2.0 MR-Eye orientation check ---
+
+clc; clearvars; close all;
+
+filerRoot  = '/mnt/filer01/MatTechLab/yiwei.jia';
+datasetDir = fullfile(filerRoot, 'datasets', '0005');
+outDir     = '/home/debi/Downloads';
+
+refNifti = fullfile(datasetDir, 'dicom_0005', 'csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR', 'mprage.nii.gz');
+outNii1  = fullfile(outDir, 'yiwei_0005_MID00030_T1w_libre.nii.gz');
+outNii2  = fullfile(outDir, 'yiwei_0005_MID00025_T2w_libre.nii.gz');
+
+% Sample 1: T1w LIBRE vs MPRAGE
+check_nifti_orientation(refNifti, outNii1, 'MPRAGE vs Yiwei T1w LIBRE (MID00030)');
+
+% Sample 2: T2w LIBRE vs MPRAGE
+check_nifti_orientation(refNifti, outNii2, 'MPRAGE vs Yiwei T2w LIBRE (MID00025)');

@@ -1,9 +1,9 @@
-function mat2nii_twix(matFile, twixFile, seqFile, refNifti, outputNiiGz, twixMetaFile)
+function mat2nii_twix(matFile, twixFile, seqFile, refNifti, outputNiiGz, twixMetaFile, reorientFcn)
 %MAT2NII_TWIX  Convert a reconstruction .mat volume to NIfTI.
 %
 % Orientation strategy — three components from three sources:
 %   Direction cosines  DICOM MPRAGE reference NIfTI (empirically validated
-%                      to match the raw MAT axis layout after permute/flip)
+%                      to match the raw MAT axis layout after reorientation)
 %   Voxel size         Twix FOV / reconstruction matrix dimensions
 %                      (acquisition-native; independent of the MPRAGE)
 %   Origin             Twix sPosition (LIBRE FOV centre) shifted to the
@@ -12,6 +12,7 @@ function mat2nii_twix(matFile, twixFile, seqFile, refNifti, outputNiiGz, twixMet
 % Usage:
 %   mat2nii_twix(matFile, twixFile, seqFile, refNifti, outputNiiGz)
 %   mat2nii_twix(..., twixMetaFile)
+%   mat2nii_twix(..., twixMetaFile, reorientFcn)
 %
 % Inputs:
 %   matFile       Path to .mat reconstruction file (field x, x0, or xrms)
@@ -23,10 +24,23 @@ function mat2nii_twix(matFile, twixFile, seqFile, refNifti, outputNiiGz, twixMet
 %   twixMetaFile  (optional) Path to a .mat cache for Twix metadata
 %                 (sa, FOV, TR).  Avoids re-reading the full raw .dat on
 %                 repeated calls — reading raw data is slow (~minutes).
+%   reorientFcn   (optional) Function handle that maps the raw MAT volume
+%                 to RAS axis order (+R, +A, +S) before the affine is
+%                 applied.  Each pipeline / reconstruction has its own
+%                 raw-axis convention; pass [] or omit to skip reorientation.
+%
+%                 Known conventions (use these in the calling test script):
+%                   MR-EyeTrack LIBRE  raw=(−A,−R,+S):
+%                     @(v) flip(flip(permute(v,[2 1 3 (4:ndims(v))]),1),2)
+%                   Yannick AudioBOLD  raw=(−R,−A,+S):
+%                     @(v) flip(flip(v,1),2)
+%                   Yiwei 2.0 T1w LIBRE (MID00030) raw=(−S,+R,−A):
+%                     @(v) flip(flip(permute(v,[2 3 1 (4:ndims(v))]),2),3)
+%                   Yiwei 2.0 T2w LIBRE (MID00025) raw=(+R,−S,−A):
+%                     @(v) flip(flip(permute(v,[1 3 2 (4:ndims(v))]),2),3)
 
-if nargin < 6
-    twixMetaFile = '';
-end
+if nargin < 6, twixMetaFile = ''; end
+if nargin < 7, reorientFcn  = []; end
 
 assert(exist(matFile,  'file') == 2, 'MAT file not found: %s',         matFile);
 assert(exist(twixFile, 'file') == 2, 'Twix file not found: %s',        twixFile);
@@ -36,32 +50,18 @@ assert(exist(refNifti, 'file') == 2, 'Reference NIfTI not found: %s',  refNifti)
 % -----------------------------------------------------------------------
 % Step 1 — Load and reorient the reconstruction volume
 %
-% The reconstruction pipeline outputs the volume with axes:
-%   dim1 = −A (posterior),  dim2 = −R (left),  dim3 = +S (superior)
-%
-% The DICOM MPRAGE affine expects columns in the order (+R, +A, +S), so
-% we permute and flip to match:
-%   permute([2,1,3])  swap dims 1↔2  →  (−R, −A, +S)
-%   flip(1)           negate dim1    →  (+R, −A, +S)
-%   flip(2)           negate dim2    →  (+R, +A, +S)  ✓
-%
-% For 4D volumes (e.g. BOLD timeseries stored as a cell array of 3D frames)
-% the permute extends to [2,1,3,4] so the time dimension is untouched.
+% Raw MAT axes vary by reconstruction pipeline.  Pass reorientFcn in the
+% calling script to map them to (+R, +A, +S) before the affine is applied.
+% See the function header for known conventions.
 % -----------------------------------------------------------------------
 fprintf('Loading reconstruction volume:\n  %s\n', matFile);
 vol = load_recon_volume(matFile);
 vol = single(abs(vol));
 fprintf('Raw MAT size: %s\n', mat2str(size(vol)));
 
-% MR-EyeTrack
-% vol = permute(vol, [2 1 3 (4:ndims(vol))]);
-% vol = flip(vol, 1);
-% vol = flip(vol, 2);
-
-% Yannick AudioBOLD
-vol = flip(vol, 1);   % −R → +R
-vol = flip(vol, 2);   % −A → +A
-% dim3 = +S already correct, no flip needed
+if ~isempty(reorientFcn)
+    vol = reorientFcn(vol);
+end
 
 fprintf('Oriented size: %s\n', mat2str(size(vol)));
 
