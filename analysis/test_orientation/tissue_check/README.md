@@ -158,11 +158,27 @@ All three sit within 0.05 Dice of their ceiling, with residual rotations of
 inter-scan head motion, not signed axis permutations. The `reorientFcn`
 conventions recorded in `mat2nii_twix.m` are confirmed correct for all three.
 
-The eye check on sub-004 gives a median displacement of 6.00 mm across 13
+![Brain mask overlap, MR-EyeTrack sub-004](results/mreyetrack_sub004/qc_mreyetrack_sub004.png)
+
+*Green = reference brain mask, red = test brain mask, resampled through the two
+affines with no registration. Top row the MPRAGE, bottom row the LIBRE recon.
+The contours nearly coincide; the small offset — red sitting higher anteriorly
+and lower posteriorly in the sagittal view — is the 7.6° pitch rotation between
+the two acquisitions, i.e. the subject nodded. Note how different the two
+contrasts look, and that SynthStrip segmented both anyway.*
+
+The eye check on sub-004 gives a median displacement of 6.00 mm across 27
 structures, against a brain-level residual of 6.98 mm mean / 11.71 mm p95, with
 the displacement dominated by the −S direction in agreement with the
 brain-level translation. Orbit and brain agree, which is what a correct header
 plus ordinary head motion looks like.
+
+![A-eye orbit masks propagated into the LIBRE recon](results/eye_both_sub004/qc_eye_correct.png)
+
+*Yellow = the nine A-eye labels per orbit, segmented on the MPRAGE and pushed
+into the LIBRE volume through the headers alone. They land on both orbits. A-eye
+never ran on the LIBRE — it cannot, see below — so this checks the geometry at
+the orbit without asking the model to work out of distribution.*
 
 ## Sensitivity, and the one blind spot
 
@@ -222,9 +238,17 @@ deliberately L–R-flipped copy:
 
 Paired difference +0.93 ± 2.60 mm; the flipped volume is worse for 17 of 27
 structures where a coin flip gives 14; Cohen's d = 0.41, where a usable test
-needs roughly d > 2. `qc_eye_LRflipped.png` shows the masks sitting cleanly on
-both orbits of the flipped volume — visually indistinguishable from the correct
-result.
+needs roughly d > 2.
+
+![Orbit masks on a deliberately L–R-flipped volume](results/eye_both_sub004/qc_eye_LRflipped.png)
+
+*The same masks on a volume that has been deliberately L–R flipped. They still
+land cleanly on both orbits — compare against the correct version above and the
+two are, for practical purposes, indistinguishable. The yellow contours are in
+fact **bit-identical** between the two figures: mask propagation depends only on
+the affine, which mirroring the data array does not change. Only the background
+differs, which is enough to make one look like a better fit than the other
+depending on which orbit you attend to.*
 
 So **visual inspection of which orbit was segmented cannot settle L–R**, and
 neither can the displacement numbers. The bias is in the right direction but far
@@ -266,10 +290,24 @@ comes from DICOM through dcm2niix, whose handling of the patient coordinate
 system is well tested), and absence of visible asymmetry is not evidence of
 correctness.
 
-For sub-004 the panel is at `results/lr_inspect/`. The occipital horn at
-S = +12 mm and the ventricle body at S = +22 mm are visibly asymmetric and
-appear to favour TEST — worth confirming at full resolution in a viewer before
-recording it.
+![Left–right inspection panel, MR-EyeTrack sub-004](results/lr_inspect/lr_inspect_mreyetrack_sub004.png)
+
+*Reference, test, and a mirrored copy of the test at matched anatomical planes.
+The occipital horn at S = +12 mm and the ventricle body at S = +22 mm are
+visibly asymmetric, and they favour TEST — worth confirming at full resolution
+in a viewer before recording it. This is the asymmetry the mask-based metrics
+average away and that `lr_flip_test.py` measures.*
+
+**And the case where this does not work.** The same panel for Yiwei's T2w, whose
+`reorientFcn` really was flipped, is far less useful:
+
+![Left–right panel for the flipped T2w — uninformative](results/lr_inspect/lr_inspect_yiwei_t2w_BUG.png)
+
+*The T2w's internal contrast is washed out, so the ventricles that carry the
+asymmetry are barely visible and neither row below is clearly the better match —
+even though this volume genuinely was mirrored. Visual inspection would have
+missed this bug. It is also why the T2w-against-MPRAGE comparison was
+underpowered, and why the same-session T1w LIBRE was needed as the reference.*
 
 ### `lr_flip_test.py` — the test that resolves it
 
