@@ -1,3 +1,11 @@
+%% paths
+repoRoot = '/home/debi/jaime/repos/MR-EyeTrack';
+addpath(genpath(fullfile(repoRoot, 'analysis')));
+addpath(genpath(fullfile(repoRoot, 'recon')));
+addpath(genpath('/home/debi/MatTechLab/monalisa'));
+addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
+
+
 %% check_nifti_orientation_test.m -- MR-Eye Track
 % Test script: compare the DICOM MPRAGE reference against the Twix-converted
 % reconstruction for sub-XXX using check_nifti_orientation.
