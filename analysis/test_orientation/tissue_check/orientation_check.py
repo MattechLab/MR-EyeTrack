@@ -25,10 +25,12 @@ Registration is deliberately NOT initialised by centre-of-mass or by moments:
 it starts from the identity in physical space, i.e. from what the headers say,
 so the recovered transform measures the header error directly.
 
-Blind spot: the brain is close to left-right symmetric, so a pure L-R flip
-leaves the header-only Dice high (typically ~0.85) and is NOT detected here.
-Catching that needs a physically asymmetric fact -- a unilateral fiducial, or
-opposed gaze-direction bins.  This is reported in the output as a reminder.
+Blind spot: a brain mask is the outer envelope of the brain, which is close to
+mirror-symmetric, so a pure L-R flip scores within a fraction of a percent of
+the truth here and is NOT resolved by this script.  Use lr_flip_test.py for
+that -- it compares the images rather than their masks, where the ventricles and
+sulcal patterns are strongly asymmetric.  This is reported in the output as a
+reminder.
 
 Usage
 -----
@@ -122,9 +124,9 @@ def synthstrip(work, name):
         "-i", f"/data/{name}.nii.gz",
         "-m", f"/data/{name}_mask.nii.gz",
     ]
-    # The Docker VM on debi has ~7.7 GiB, and a 480^3 volume comes close enough
-    # to that ceiling that a concurrent job can get this one killed mid-frame.
-    # It succeeds on a retry once the other job has released its memory.
+    # Kept as cheap insurance: the Docker VM used to have ~7.7 GiB, where a 480^3
+    # volume sat close enough to the ceiling that a concurrent job could get this
+    # one killed mid-frame. It is now 64 GiB, so this should no longer trigger.
     for attempt in range(3):
         res = subprocess.run(cmd, capture_output=True, text=True)
         if res.returncode == 0 and mask.exists():
@@ -467,7 +469,8 @@ def main():
 
     verdict = interpret(header_dice, reg_dice, rigid)
     print(f"\n  VERDICT: {verdict}")
-    print("  NOTE: a pure left-right flip is NOT detectable by these metrics.")
+    print("  NOTE: mask overlap cannot resolve a left-right flip -- run "
+          "lr_flip_test.py for that.")
     print("=" * 68 + "\n")
 
     results = {

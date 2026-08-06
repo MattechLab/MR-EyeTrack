@@ -34,6 +34,24 @@ mask is the most robust such object across MPRAGE and LIBRE.
 These names are printed in the reports, so the per-structure rows are readable
 without cross-referencing the label numbers.
 
+**Why the results below say "27 measurements".** Each label is scored per orbit,
+and then split into connected components, because a label arriving in several
+disconnected pieces is several independent places to check rather than one. The
+9 labels across 2 orbits give 18 label-side pairs; for sub-004, splitting adds
+9 more rows:
+
+| | rows |
+|---|---|
+| 16 label-side pairs arriving as a single component | 16 |
+| `ext_fat-L` and `ext_fat-R`, 5 components each | 10 |
+| `inf_mus-L`, 2 components | 2 |
+| **total** | **27** |
+
+So it is 27 *measurements*, not 27 anatomical structures — there are 18 of
+those. Worth remembering when reading a median across them: the small
+extraconal-fat fragments are noisier than the globe or the muscles, and they
+are counted equally.
+
 ## Why it is not circular
 
 The obvious approach — register the test image to the MPRAGE, then compare
@@ -132,10 +150,21 @@ quadrant and finds no eye at all. Reorienting first makes the assumption true
 for any input. Worth porting back into `a-eye_web` if it ever sees data from
 another site.
 
-`run_aeye.py` also corrects the crop affine for the offset, which `quadrant.py`
-leaves at the original origin. The merge is unaffected (it reassembles by index),
-but an intermediate file with a wrong origin is a trap for anyone who opens one
-to debug.
+`run_aeye.py` also shifts the crop affine to the corner the crop starts at,
+where `quadrant.py` keeps the uncropped origin. **Do not port that part back
+into `a-eye_web`** — it is safe here and breaks things there.
+
+The difference is what each pipeline does with the crop's affine afterwards.
+`run_aeye.py` builds the merged mask with the *original* affine, so the crop's
+origin is never reused. `a-eye_web`'s `uncrop_quadrant` returns
+`nib.Nifti1Image(full_data, cropped_img.affine, ...)` — it puts the crop's
+affine on the full-size array. That only gives the right answer if the crop
+still carries the uncropped origin, so keeping it there is load-bearing, not an
+oversight. Shifting it displaces the result by the crop offset: measured
+round-trip error of 128 mm for the left quadrant and 160 mm for the right, which
+puts the mask well off the head.
+
+The canonical-RAS reorientation above is a separate change and is safe in both.
 
 GPU: plain `--gpus all` fails on this host — the unprivileged Docker daemon has
 no NVIDIA container toolkit configured — but it works under `sudo`, which is
@@ -168,7 +197,7 @@ the two acquisitions, i.e. the subject nodded. Note how different the two
 contrasts look, and that SynthStrip segmented both anyway.*
 
 The eye check on sub-004 gives a median displacement of 6.00 mm across 27
-structures, against a brain-level residual of 6.98 mm mean / 11.71 mm p95, with
+measurements, against a brain-level residual of 6.98 mm mean / 11.71 mm p95, with
 the displacement dominated by the −S direction in agreement with the
 brain-level translation. Orbit and brain agree, which is what a correct header
 plus ordinary head motion looks like.
@@ -227,7 +256,7 @@ volume lands it on the physical right orbit *mirrored*, which by bilateral
 symmetry is nearly a left orbit. The only residual is the subject's true orbital
 asymmetry — a couple of mm, swamped by head motion.
 
-Measured on sub-004, both orbits, 27 structures, correct volume vs a
+Measured on sub-004, both orbits, 27 measurements, correct volume vs a
 deliberately L–R-flipped copy:
 
 | | correct | flipped |
@@ -237,7 +266,7 @@ deliberately L–R-flipped copy:
 | separability median | 0.246 | 0.199 |
 
 Paired difference +0.93 ± 2.60 mm; the flipped volume is worse for 17 of 27
-structures where a coin flip gives 14; Cohen's d = 0.41, where a usable test
+measurements where a coin flip gives 14; Cohen's d = 0.41, where a usable test
 needs roughly d > 2.
 
 ![Orbit masks on a deliberately L–R-flipped volume](results/eye_both_sub004/qc_eye_LRflipped.png)
@@ -419,9 +448,11 @@ Until one of those exists, treat L–R as **unverified** rather than confirmed.
 
 - Docker only bind-mounts paths under `/home/debi`; a work dir in `/tmp` fails.
   The scripts warn about this.
-- The Docker VM has ~7.7 GiB. A 480³ volume is close enough to that ceiling
-  that two concurrent SynthStrip jobs can kill each other mid-frame; the
-  scripts retry up to 3 times, and running large cases serially is safer.
+- The Docker VM now has 64 GiB (raised from ~7.7 GiB). At the old limit a 480³
+  volume sat close enough to the ceiling that two concurrent SynthStrip jobs
+  could kill each other mid-frame — the retry in `synthstrip()` was written for
+  that and is kept as cheap insurance, but it should no longer be triggered, and
+  large cases can now be run in parallel.
 - ANTs is at `/usr/local/ants-2.6.3-ubuntu-24.04-X64-gcc/ants-2.6.3/bin`
   (override with `$ANTSPATH`).
 - **Reproducibility.** The header-only Dice is fully deterministic and repeats
