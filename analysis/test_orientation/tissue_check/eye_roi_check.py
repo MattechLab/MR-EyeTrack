@@ -23,13 +23,24 @@ brain-level rigid residual is motion, and only a large excess indicates a
 geometry problem.
 
 Like the brain-mask test, this cannot detect a left-right flip: it maps the
-left globe onto the right globe and every measurement stays small.
+left globe onto the right globe and every measurement stays small.  That holds
+even with --rigid, which was added on the theory that inter-scan head motion was
+masking the effect.  It is not: measured on sub-004 against a deliberately
+mirrored volume, discrimination went from Cohen's d = 0.41 header-only to 0.20
+with the motion removed, where a usable test needs roughly d > 2.  Both volumes
+simply align well once motion is gone, because the orbits are near-symmetric
+about the midline.  Use lr_flip_test.py for left-right.
+
+--rigid is still worth passing when the question is geometry rather than
+handedness: it halves the median displacement on sub-004 from 6.00 mm to
+2.24 mm, which is what confirms the residual was head motion and not a header
+error.
 
 Usage
 -----
   python eye_roi_check.py --ref MPRAGE.nii.gz --test recon.nii.gz \
       --masks globe_ex_lens.nii.gz lens.nii.gz optic_nerve.nii.gz \
-      --out WORKDIR [--search-mm 8]
+      --out WORKDIR [--search-mm 8] [--rigid rigid0GenericAffine.mat]
 
 Masks must be in the reference image's space (that is, A-eye run on --ref).
 They may be binary or multi-label; each label, and each disconnected component
@@ -110,6 +121,9 @@ def main():
     p.add_argument("--test", required=True, help="NIfTI produced by mat2nii")
     p.add_argument("--masks", required=True, nargs="+", help="A-eye masks in --ref space")
     p.add_argument("--out", required=True, help="work/output dir")
+    p.add_argument("--rigid", default=None,
+                   help="ANTs rigid0GenericAffine.mat aligning test to ref; removes "
+                        "inter-scan head motion so a genuine L-R flip stands out")
     p.add_argument("--search-mm", type=float, default=8.0,
                    help="half-width of the local translation search (default 8 mm)")
     p.add_argument("--label", default=None)
@@ -130,6 +144,26 @@ def main():
 
     ref_img = prepare(args.ref, work / "eye_ref.nii.gz")
     test_img = prepare(args.test, work / "eye_test.nii.gz")
+
+    if args.rigid:
+        # Take out the head motion before judging where the masks land.  Without
+        # this the orbit displacement is dominated by the few degrees of rotation
+        # between the two acquisitions, which swamps the much smaller mismatch a
+        # mirror produces.  A rigid transform is determinant +1 and so cannot
+        # create or undo a mirror -- it removes the nuisance without touching the
+        # question.  Warping test into ref space also puts the masks and the image
+        # on one grid, so the propagation below becomes a no-op resample.
+        import subprocess
+        from orientation_check import ants
+        warped = work / "eye_test_rigid.nii.gz"
+        subprocess.run([ants("antsApplyTransforms"), "-d", "3",
+                        "-i", str(work / "eye_test.nii.gz"),
+                        "-r", str(work / "eye_ref.nii.gz"),
+                        "-t", str(args.rigid), "-n", "Linear",
+                        "-o", str(warped)], check=True, capture_output=True)
+        test_img = nib.load(str(warped))
+        print("  test rigidly aligned to the reference (head motion removed)")
+
     test_data = np.asanyarray(test_img.dataobj).astype(np.float32)
 
     zooms = np.abs(test_img.header.get_zooms()[:3])

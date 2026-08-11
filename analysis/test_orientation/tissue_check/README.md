@@ -283,6 +283,30 @@ So **visual inspection of which orbit was segmented cannot settle L–R**, and
 neither can the displacement numbers. The bias is in the right direction but far
 too small to act on for a single subject.
 
+**Removing the head motion does not rescue it either.** The obvious objection is
+that the ~6 mm of inter-scan motion swamps the smaller mismatch a mirror
+produces, so `--rigid` was added to warp the test into reference space first. A
+rigid transform is determinant +1 and cannot create or undo a mirror, so this
+removes the nuisance without touching the question. Re-measured on sub-004 with
+each volume given its own optimal rigid alignment:
+
+| | header-only | with `--rigid` |
+|---|---|---|
+| displacement median, correct | 6.00 mm | **2.24 mm** |
+| displacement median, flipped | 7.81 mm | 3.74 mm |
+| flipped worse for | 17 of 27 | 15 of 27 (chance = 14) |
+| Cohen's d | 0.41 | **0.20** |
+
+Discrimination got *worse*, not better: both volumes align well once motion is
+gone, because the orbits are near-symmetric about the midline and the mirrored
+volume's own registration places them almost where the true ones sit. Three of
+the four globes and lenses favour the flipped volume.
+
+`--rigid` is still worth using — halving the median displacement to 2.24 mm
+confirms the residual really was head motion, which is what makes this a clean
+*geometry* check. It is simply not an L–R check, with or without it. Use
+`lr_flip_test.py` for that.
+
 ### What can still settle it: your own eyes, on your own asymmetry
 
 The automated measures fail because they average over a near-symmetric object.

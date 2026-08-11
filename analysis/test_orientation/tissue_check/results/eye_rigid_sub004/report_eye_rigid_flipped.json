@@ -1,0 +1,467 @@
+{
+  "label": "rigid_flipped",
+  "ref": "/home/debi/jaime/repos/MR-EyeTrack/data/study/sub-004/dicom/csTFL_mp-rage_1mm-iso_CP_acc4.6_5_MR/sub-004.nii.gz",
+  "test": "results/test_LRflipped.nii.gz",
+  "search_mm": 8.0,
+  "structures": [
+    {
+      "structure": "lens-L",
+      "voxels": 123,
+      "displacement_mm": 10.816653739167071,
+      "displacement_ras_mm": [
+        6.810054279863834,
+        -2.736439485102892,
+        -7.94575721770525
+      ],
+      "separability_at_header": 0.04911338537931442,
+      "separability_at_best": 1.2590281963348389,
+      "centroid_ref_ras": [
+        -28.59968965114436,
+        109.59702086053423,
+        -13.782173981087482
+      ]
+    },
+    {
+      "structure": "lens-R",
+      "voxels": 115,
+      "displacement_mm": 9.43398110009461,
+      "displacement_ras_mm": [
+        -7.958948668092489,
+        3.2404899299144745,
+        3.892860196530819
+      ],
+      "separability_at_header": 0.011609078384935856,
+      "separability_at_best": 1.1089246273040771,
+      "centroid_ref_ras": [
+        33.05210492529946,
+        108.57293305353303,
+        -14.075410557117138
+      ]
+    },
+    {
+      "structure": "globe-L",
+      "voxels": 4598,
+      "displacement_mm": 5.9999999045678925,
+      "displacement_ras_mm": [
+        -0.18125948309898376,
+        -0.6954633593559265,
+        -5.956800699234009
+      ],
+      "separability_at_header": 0.4356400668621063,
+      "separability_at_best": 1.0253976583480835,
+      "centroid_ref_ras": [
+        -27.868361961578188,
+        101.25921526613064,
+        -13.477210234644858
+      ]
+    },
+    {
+      "structure": "globe-R",
+      "voxels": 4659,
+      "displacement_mm": 8.306623729103022,
+      "displacement_ras_mm": [
+        -1.2986639514565468,
+        1.033346962183714,
+        -8.13914392143488
+      ],
+      "separability_at_header": 0.4674975872039795,
+      "separability_at_best": 0.9998598694801331,
+      "centroid_ref_ras": [
+        32.79509649289855,
+        100.39296160522471,
+        -13.852662448800288
+      ]
+    },
+    {
+      "structure": "nerve-L",
+      "voxels": 567,
+      "displacement_mm": 3.7416573732320977,
+      "displacement_ras_mm": [
+        -1.02549472078681,
+        3.185391318053007,
+        1.6738108098506927
+      ],
+      "separability_at_header": 0.6851475834846497,
+      "separability_at_best": 1.1812806129455566,
+      "centroid_ref_ras": [
+        -19.460916789379993,
+        79.62439510888524,
+        -15.596586922567994
+      ]
+    },
+    {
+      "structure": "nerve-R",
+      "voxels": 611,
+      "displacement_mm": 2.2360679727764423,
+      "displacement_ras_mm": [
+        -0.9412650093436241,
+        -2.011123586446047,
+        0.2634427472949028
+      ],
+      "separability_at_header": 1.0375670194625854,
+      "separability_at_best": 1.0917270183563232,
+      "centroid_ref_ras": [
+        23.405570333780886,
+        77.80745962127713,
+        -15.986304764869075
+      ]
+    },
+    {
+      "structure": "int_fat-L",
+      "voxels": 2517,
+      "displacement_mm": 1.4142135470648234,
+      "displacement_ras_mm": [
+        0.05913982167840004,
+        -0.8770281970500946,
+        1.107846550643444
+      ],
+      "separability_at_header": 0.8787756562232971,
+      "separability_at_best": 1.1471956968307495,
+      "centroid_ref_ras": [
+        -24.238821906086102,
+        85.58731492790315,
+        -13.200570935060057
+      ]
+    },
+    {
+      "structure": "int_fat-R",
+      "voxels": 2799,
+      "displacement_mm": 0.9999999983030645,
+      "displacement_ras_mm": [
+        -0.028929907828569412,
+        0.992938756942749,
+        -0.1150464341044426
+      ],
+      "separability_at_header": 1.0031931400299072,
+      "separability_at_best": 1.0801401138305664,
+      "centroid_ref_ras": [
+        27.869119780663183,
+        84.83665295876494,
+        -13.347583070849893
+      ]
+    },
+    {
+      "structure": "ext_fat-L",
+      "voxels": 2533,
+      "displacement_mm": 2.9999999688755867,
+      "displacement_ras_mm": [
+        1.117404468357563,
+        -1.7288103215396404,
+        2.1823432222008705
+      ],
+      "separability_at_header": 0.30967438220977783,
+      "separability_at_best": 0.6830973625183105,
+      "centroid_ref_ras": [
+        -33.46369598436316,
+        90.13527664199233,
+        -19.460530066956096
+      ]
+    },
+    {
+      "structure": "ext_fat-L",
+      "voxels": 78,
+      "displacement_mm": 10.677078235309796,
+      "displacement_ras_mm": [
+        -7.195103123784065,
+        7.882698107510805,
+        0.30587779730558395
+      ],
+      "separability_at_header": 0.3707498013973236,
+      "separability_at_best": 1.5718255043029785,
+      "centroid_ref_ras": [
+        -22.071499814709227,
+        69.52954417567415,
+        -13.820116063341132
+      ]
+    },
+    {
+      "structure": "ext_fat-L",
+      "voxels": 354,
+      "displacement_mm": 2.9999999522839462,
+      "displacement_ras_mm": [
+        0.09062974154949188,
+        0.34773167967796326,
+        2.9784003496170044
+      ],
+      "separability_at_header": 0.2231757789850235,
+      "separability_at_best": 1.2396167516708374,
+      "centroid_ref_ras": [
+        -17.025690631914657,
+        89.0371086674053,
+        -3.571444594211812
+      ]
+    },
+    {
+      "structure": "ext_fat-L",
+      "voxels": 51,
+      "displacement_mm": 10.049875570457763,
+      "displacement_ras_mm": [
+        0.9489450454711914,
+        8.664219487458467,
+        5.00307934731245
+      ],
+      "separability_at_header": 1.0233325958251953,
+      "separability_at_best": 2.5832552909851074,
+      "centroid_ref_ras": [
+        -12.796846352079328,
+        77.77918150403772,
+        -13.105673705976386
+      ]
+    },
+    {
+      "structure": "ext_fat-L",
+      "voxels": 338,
+      "displacement_mm": 8.602325251129416,
+      "displacement_ras_mm": [
+        -2.796145126223564,
+        -8.135158833116293,
+        0.027620993554592133
+      ],
+      "separability_at_header": 0.5161254405975342,
+      "separability_at_best": 0.8437493443489075,
+      "centroid_ref_ras": [
+        -11.666689801933629,
+        97.51931676791548,
+        -18.114791130591968
+      ]
+    },
+    {
+      "structure": "ext_fat-R",
+      "voxels": 552,
+      "displacement_mm": 5.099019506244166,
+      "displacement_ras_mm": [
+        3.082884192466736,
+        -4.011927369982004,
+        -0.6326640173792839
+      ],
+      "separability_at_header": 0.5351797938346863,
+      "separability_at_best": 0.8516296744346619,
+      "centroid_ref_ras": [
+        16.401171588004843,
+        94.23644520494196,
+        -18.782942685042187
+      ]
+    },
+    {
+      "structure": "ext_fat-R",
+      "voxels": 1479,
+      "displacement_mm": 1.999999996606129,
+      "displacement_ras_mm": [
+        -0.057859815657138824,
+        1.985877513885498,
+        -0.2300928682088852
+      ],
+      "separability_at_header": 0.6446344256401062,
+      "separability_at_best": 0.7596724629402161,
+      "centroid_ref_ras": [
+        37.175757395291214,
+        87.76280624182809,
+        -26.332959002698686
+      ]
+    },
+    {
+      "structure": "ext_fat-R",
+      "voxels": 74,
+      "displacement_mm": 3.741657373192045,
+      "displacement_ras_mm": [
+        2.9093047454953194,
+        1.94570517167449,
+        -1.3229426220059395
+      ],
+      "separability_at_header": 0.43805569410324097,
+      "separability_at_best": 1.654881238937378,
+      "centroid_ref_ras": [
+        23.558955950360456,
+        94.72453495965817,
+        -0.5424227736688749
+      ]
+    },
+    {
+      "structure": "ext_fat-R",
+      "voxels": 348,
+      "displacement_mm": 9.695359695292987,
+      "displacement_ras_mm": [
+        -7.076823480427265,
+        6.128641713410616,
+        2.521570898592472
+      ],
+      "separability_at_header": 0.19714206457138062,
+      "separability_at_best": 0.8539804816246033,
+      "centroid_ref_ras": [
+        36.609828106331065,
+        82.51553013763959,
+        -7.244148537323895
+      ]
+    },
+    {
+      "structure": "ext_fat-R",
+      "voxels": 145,
+      "displacement_mm": 7.3484691664921025,
+      "displacement_ras_mm": [
+        4.786714740097523,
+        1.5325550772249699,
+        -5.360842846333981
+      ],
+      "separability_at_header": 0.38613077998161316,
+      "separability_at_best": 1.054161787033081,
+      "centroid_ref_ras": [
+        35.49655637349292,
+        99.24869232579809,
+        0.005007250401490637
+      ]
+    },
+    {
+      "structure": "lat_mus-L",
+      "voxels": 528,
+      "displacement_mm": 2.236067950108199,
+      "displacement_ras_mm": [
+        -0.9387049973011017,
+        0.20657504722476006,
+        2.0189501121640205
+      ],
+      "separability_at_header": 0.9540825486183167,
+      "separability_at_best": 2.1947810649871826,
+      "centroid_ref_ras": [
+        -30.3177853484504,
+        80.97023715286261,
+        -17.325443776719496
+      ]
+    },
+    {
+      "structure": "lat_mus-R",
+      "voxels": 550,
+      "displacement_mm": 1.7320507963945062,
+      "displacement_ras_mm": [
+        -1.0004048310220242,
+        -1.1340953893959522,
+        -0.8444038033485413
+      ],
+      "separability_at_header": 1.9017295837402344,
+      "separability_at_best": 1.9073692560195923,
+      "centroid_ref_ras": [
+        34.421499573730586,
+        79.94732797505841,
+        -17.43960566635836
+      ]
+    },
+    {
+      "structure": "med_mus-L",
+      "voxels": 567,
+      "displacement_mm": 0.9999999840946487,
+      "displacement_ras_mm": [
+        0.030209913849830627,
+        0.11591055989265442,
+        0.9928001165390015
+      ],
+      "separability_at_header": 1.6348180770874023,
+      "separability_at_best": 1.9860949516296387,
+      "centroid_ref_ras": [
+        -14.514485747249537,
+        86.44460939125176,
+        -16.982151914709874
+      ]
+    },
+    {
+      "structure": "med_mus-R",
+      "voxels": 597,
+      "displacement_mm": 0.0,
+      "displacement_ras_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "separability_at_header": 2.1729931831359863,
+      "separability_at_best": 2.1729931831359863,
+      "centroid_ref_ras": [
+        18.5523921262685,
+        85.99537074675402,
+        -17.064314788297878
+      ]
+    },
+    {
+      "structure": "inf_mus-L",
+      "voxels": 241,
+      "displacement_mm": 4.242640672405911,
+      "displacement_ras_mm": [
+        1.1450543701648712,
+        -3.830598395317793,
+        1.4196359738707542
+      ],
+      "separability_at_header": 1.2550814151763916,
+      "separability_at_best": 2.023761749267578,
+      "centroid_ref_ras": [
+        -23.390345920201895,
+        91.03956232725398,
+        -25.228178110731108
+      ]
+    },
+    {
+      "structure": "inf_mus-L",
+      "voxels": 128,
+      "displacement_mm": 8.83176075255899,
+      "displacement_ras_mm": [
+        2.3543685860931873,
+        -4.102827720344067,
+        7.458133228123188
+      ],
+      "separability_at_header": 0.33872440457344055,
+      "separability_at_best": 1.5207074880599976,
+      "centroid_ref_ras": [
+        -17.832809888001066,
+        72.83313629892655,
+        -22.077033233013935
+      ]
+    },
+    {
+      "structure": "inf_mus-R",
+      "voxels": 419,
+      "displacement_mm": 1.414213551001064,
+      "displacement_ras_mm": [
+        0.9689149111509323,
+        -0.09066448733210564,
+        -1.026149995625019
+      ],
+      "separability_at_header": 0.9515010118484497,
+      "separability_at_best": 1.2149893045425415,
+      "centroid_ref_ras": [
+        23.639974716895196,
+        82.469909250634,
+        -23.75105814786899
+      ]
+    },
+    {
+      "structure": "sup_mus-L",
+      "voxels": 957,
+      "displacement_mm": 2.2360679446689016,
+      "displacement_ras_mm": [
+        0.08934973552823067,
+        -0.7611176371574402,
+        2.1006466671824455
+      ],
+      "separability_at_header": 0.13495676219463348,
+      "separability_at_best": 1.35202157497406,
+      "centroid_ref_ras": [
+        -23.0433084286512,
+        85.16353204431422,
+        -5.87678679095167
+      ]
+    },
+    {
+      "structure": "sup_mus-R",
+      "voxels": 954,
+      "displacement_mm": 2.2360679727764423,
+      "displacement_ras_mm": [
+        0.9412650093436241,
+        2.011123586446047,
+        -0.2634427472949028
+      ],
+      "separability_at_header": 0.9659532904624939,
+      "separability_at_best": 1.4192087650299072,
+      "centroid_ref_ras": [
+        27.53037486971205,
+        84.09400285830998,
+        -5.944973241725236
+      ]
+    }
+  ]
+}
