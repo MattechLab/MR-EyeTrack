@@ -141,21 +141,22 @@ else
 end
 if normalization
     x_tot = bmMathilda(y_tot, t_tot, ve_tot, C, N_u, N_u, dK_u, [], [], [], []);
-    % x_perm = permute(x_tot, [2,3,1]);
     x0=x_tot;
     bmImage(x0);
     
+    % ROI
     % temp_im = getimage(gca);
+    % temp_roi = roipoly;
+    % normalize_val = mean(temp_im(temp_roi(:)));
+
+    % Automatic ROI selection for normalization
     temp_im = x_tot(...
         round(matrix_size/4):round(matrix_size/4*3), ...
         round(matrix_size/4):round(matrix_size/4*3), ...
         round(matrix_size/2));
-    bmImage(temp_im);
+    normalize_val = mean(abs(temp_im(:)));
     
-    % temp_roi = roipoly;
-    % normalize_val = mean(temp_im(temp_roi(:)));
-
-    normalize_val = mean(temp_im(:));
+    bmImage(temp_im);
 
     % The normalize_val is super small, it is 5e-10, very small
     % again 3e-9
@@ -176,9 +177,9 @@ if real(y_tot)<1
 end
 
 %% Save x0 recon woBin
-% save(x0Path, 'x0', '-v7.3');
-% disp('x0 has been saved here:')
-% disp(x0Path)
+save(x0Path, 'x0', '-v7.3');
+disp('x0 has been saved here:')
+disp(x0Path)
 
 %% Prepare eye mask
 
