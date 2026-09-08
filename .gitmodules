@@ -1,0 +1,9 @@
+[submodule "eye_tracker/hcph-sops-fork"]
+	path = eye_tracker/hcph-sops-fork
+	url = https://github.com/Evelyn92/hcph-sops-fork
+[submodule "recon/Recon_scripts"]
+	path = recon/Recon_scripts
+	url = git@github-yiwei:Evelyn92/Recon_scripts.git
+[submodule "old_study/code/twixtools"]
+	path = old_study/code/twixtools
+	url = https://github.com/pehses/twixtools.git
