@@ -3,7 +3,7 @@ clc; clearvars; close all;
 %% Config
 
 % Variables
-subject_num = 6;
+subject_num = 5;
 mask_type = 'woBin';   % use char instead of string
 
 % Base directory
@@ -56,7 +56,7 @@ disp(['C is loaded from:', CfilePath]);
 %% compileScript()
 nFr     = 1; 
 % best achivable resolution is 1/ N_u*dK_u If you have enough coverage
-FoV = reader.acquisitionParams.FoV;  % Field of View
+FoV = 240;  % Field of View
 
 % ==============================================
 % Warning: due to the memory limit, all the voxel_size set on debi

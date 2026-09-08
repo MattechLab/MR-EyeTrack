@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=20
 #SBATCH --mem=220G
-#SBATCH --time=02:00:00
+#SBATCH --time=04:00:00
 #SBATCH --output=/home/jaime.barrancohernandez/shared_datasets/mreyetrack/recon/4-Recon/HPC/logs/%x_%j.out
 #SBATCH --error=/home/jaime.barrancohernandez/shared_datasets/mreyetrack/recon/4-Recon/HPC/logs/%x_%j.err
 #SBATCH --mail-type=begin
