@@ -3,5 +3,6 @@
     "MATLAB.installPath": "/usr/local/MATLAB/R2024b",
     "MATLAB.matlabConnectionTiming": "onStart",
     "editor.mouseWheelZoom": true,
-    "window.zoomLevel": 0.5
+    "window.zoomLevel": 0.25,
+    "terminal.integrated.mouseWheelZoom": true
 }
