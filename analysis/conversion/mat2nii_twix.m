@@ -42,10 +42,15 @@ function mat2nii_twix(matFile, twixFile, seqFile, refNifti, outputNiiGz, twixMet
 %                     @(v) flip(flip(permute(v,[2 1 3 (4:ndims(v))]),1),2)
 %                   Yannick AudioBOLD  raw=(−R,−A,+S):
 %                     @(v) flip(flip(v,1),2)
-%                   Yiwei 2.0 T1w LIBRE (MID00030) raw=(−S,+R,−A):
+%                   Yiwei 2.0 T1w LIBRE (MID00030) raw=(+R,−A,+S):
 %                     @(v) flip(flip(permute(v,[2 3 1 (4:ndims(v))]),2),3)
-%                   Yiwei 2.0 T2w LIBRE (MID00025) raw=(−R,−S,−A):
+%                   Yiwei 2.0 T2w LIBRE (MID00025) raw=(−A,−R,+S):
 %                     @(v) flip(permute(v,[1 3 2 (4:ndims(v))]),2)
+%
+%                 Raw axes above are relative to each dataset's REFERENCE
+%                 storage order (see note above), not to RAS.  Earlier
+%                 revisions labelled the Yiwei rows against an assumed RAS
+%                 target and did not reconcile; the formulas were unaffected.
 %
 %                 Visual checks cannot validate the left-right sign: a mirrored
 %                 brain looks plausible and a mirror changes neither axis
@@ -65,8 +70,12 @@ assert(exist(refNifti, 'file') == 2, 'Reference NIfTI not found: %s',  refNifti)
 % Step 1 — Load and reorient the reconstruction volume
 %
 % Raw MAT axes vary by reconstruction pipeline.  Pass reorientFcn in the
-% calling script to map them to (+R, +A, +S) before the affine is applied.
-% See the function header for known conventions.
+% calling script to map them to the REFERENCE's storage order before the
+% affine is applied -- that is (+R, +A, +S) only when the reference is
+% RAS-stored.  Yiwei's MPRAGEs are ('P','I','L'), so their target is
+% (-A, -S, -R); assuming RAS there is what mirrored the T2w left-right.
+% See the function header for known conventions, and
+% README_reorientFcn.md for the derivation procedure.
 % -----------------------------------------------------------------------
 fprintf('Loading reconstruction volume:\n  %s\n', matFile);
 vol = load_recon_volume(matFile);
