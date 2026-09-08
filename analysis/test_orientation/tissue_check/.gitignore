@@ -9,3 +9,10 @@
 # also swallows the ANTs transforms. Those are ~130 bytes and are what let
 # lr_inspect.py align planes without re-running the registration, so keep them.
 !*GenericAffine.mat
+
+# A-eye runs nnU-Net, which writes its own bookkeeping next to the segmentations:
+# the training plans, the postprocessing config and a timing log. These describe
+# the pretrained model and the run, not our data, and are re-emitted every time.
+plans.pkl
+postprocessing.json
+prediction_time.txt
