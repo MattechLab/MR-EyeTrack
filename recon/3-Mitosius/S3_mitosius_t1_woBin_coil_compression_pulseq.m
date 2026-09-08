@@ -7,7 +7,7 @@ addpath(genpath('/home/debi/yiwei/forclone/pulseq'));
 addpath(genpath('/home/debi/jaime/repos/MR-EyeTrack/analysis/comparison/matlab'));
 
 % Config
-subject_num = 10;
+subject_num = 5;
 nChCompressed = 20;  % Number of virtual coils after compression
 coilCompression = 3;  % 0: SVD-based compression; 1: coil selection based on energy; 2: coil selection with eye ROIs; 3: topN coils from analysis
 
@@ -156,14 +156,25 @@ if coilCompression == 0
     ntviews = size(y_tot, 3);
 
     % --- Compress k-space data ---
-    % Reshape to [nCh x (nx*ntviews)]
-    D = reshape(y_tot, nx * ntviews, nCh);
+    % D must be [(nx*ntviews) x nCh], i.e. ONE COLUMN PER COIL.
+    %
+    % `reshape(y_tot, nx*ntviews, nCh)` does NOT do this. y_tot is
+    % [nCh x nx x ntviews] and reshape preserves column-major order, so the
+    % coil index (which varies fastest) gets scattered across rows and every
+    % column ends up holding a mix of all coils. The sizes still match, so it
+    % ran silently and the SVD basis was built from interleaved data.
+    % Permuting the coil axis last, then reshaping, is the fix.
+    D = reshape(permute(y_tot, [2 3 1]), nx * ntviews, nCh);
     [U, S, V] = svd(D, 'econ');
     singular_values = diag(S);
     total_variance = sum(singular_values .^ 2);
     explained_variance = singular_values(1:nChCompressed) .^ 2;
     percentage_explained = (explained_variance / total_variance) * 100;
-    y_tot_comp = reshape(D * V(:, 1:nChCompressed), nChCompressed, nx, ntviews);
+    % Same trap in reverse: D*V is [(nx*ntviews) x nChCompressed], so a bare
+    % reshape to [nChCompressed x nx x ntviews] would re-interleave. Reshape
+    % with the coil axis still last, then permute it back to the front.
+    y_tot_comp = permute(reshape(D * V(:, 1:nChCompressed), nx, ntviews, nChCompressed), ...
+                         [3 1 2]);
     
     % Save the compressed k-space data
     y_outputDir = mDir;
