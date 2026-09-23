@@ -59,7 +59,7 @@ Two pulseq `.seq` files in `data/study/pulseq/` define the k-space trajectory: i
 Reads body-coil and head-coil prescan `.dat` files, computes 3D coil sensitivity maps via `mlComputeCoilSensitivity`, and saves `C.mat` to `data/study/sub-NNN/recon/`.
 
 ### S2 — Binning Mask (`recon/2-Binning/`)
-Reads the raw measurement file and the pre-computed eye-tracking masks from `data/study/sub-NNN/eyemasks/`. Uses a sliding window (`winLen=10`, `th_ratio=0.75`) over ET timestamps (1 ms sampling) to decide which MRI readouts (TR ≈ 6–8 ms) to keep per gaze direction. Saves one `eMask_th0.75_regionN.mat` per region into `data/study/sub-NNN/recon/bins/<mask_type>/`.
+Reads the raw measurement file and the pre-computed eye-tracking masks from `data/study/sub-NNN/eyemasks/`. Uses a sliding window over ET timestamps (1 ms sampling) to decide which MRI readouts (TR = 8 ms) to keep per gaze direction. **Three label generations now coexist** — see *Readout labels* below. Saves into `data/study/sub-NNN/recon/bins/<mask_type>/`.
 
 ### S3 — Mitosius (`recon/3-Mitosius/`)
 Loads the full raw dataset and normalises it, then applies the binning masks via `bmMitosis` to split k-space into per-gaze-direction subsets. Saves the split k-space (`y`, `t`, `ve`) with `bmMitosius_create` into `data/study/sub-NNN/recon/mitosius/<mask_type>/mask_N/`.
@@ -114,3 +114,120 @@ Post-reconstruction Python/MATLAB scripts and Jupyter notebooks:
 - `analysis/comparison/iqms_mriqc/` — MRIQC image quality metrics
 - `analysis/comparison/ssim/` — SSIM comparison between reconstruction variants
 - `analysis/comparison/matlab/` — visualisation and comparison scripts for binning quality
+
+
+## Readout indexing — the convention that silently breaks things
+
+Every mask, label and exported k-space array uses the same readout ordering.
+Getting it wrong produces plausible-looking output with scrambled labels, so it
+is asserted rather than assumed in `model/dataset.py`.
+
+```
+nSeg = 44, nShot = 1872            -> 82 368 acquired readouts
+drop segment 1 of every shot       -> SI navigator, removed by the reader
+drop the first nShotOff = 14 shots -> warm-up
+43 x 1858                          -> 79 894 readouts  (the exported `y`)
+```
+
+MATLAB reshapes column-major, so in numpy an 82 368-long ET mask maps on with
+`m.reshape(nShot, nSeg)[NOFF:, 1:].ravel()` — **not** the transpose.
+
+`y` in the compressed exports is already stripped: 79 894 readouts, nothing
+further to remove.
+
+## Readout labels — three generations
+
+Filenames carry the parameters; nothing is overwritten.
+
+| file | window | timing |
+|---|---|---|
+| `eMask_th0.75_winLen10.mat` | 80 ms | uncorrected (original) |
+| `eMask_th0.75_winLen3.mat` | 24 ms | uncorrected |
+| `eMask_th0.75_winLen3_sync.mat` | 24 ms | per-subject corrected — **use this** |
+
+`winLen=10` is a purity filter appropriate for *reconstruction binning*; as an
+ML label it erases saccades (a 40 ms saccade cannot fill 75% of an 80 ms window,
+so only 37.9% of expected saccade readouts survived). `winLen=3` raises that to
+70% and removes a per-subject duration bias.
+
+Rebuild every mask type for all subjects in one pass (one raw read per subject,
+no prompts):
+
+```bash
+matlab -batch "run('recon/2-Binning/S2_batch_all_winLen.m')"   # winLen + applySync at the top
+```
+
+## ET–MRI synchronisation
+
+The scanner trigger is in the **PsychoPy log** (`Keypress: s`, every ~2.5 s), not
+the ET log. `model/sync_table.py` derives per-subject corrections into
+`data/study/sync_corrections.mat`, applied as
+
+```
+et_index(k) = ratio * (offset_ms + TimeStamp_ms(k))
+```
+
+- `offset_ms` ≈ **+61 ms** on every subject, and was missing from all pre-`_sync`
+  bins: the first readout lands ~55 ms after its trigger (`PMUTimeStamp` at
+  readout 0 is the time since the preceding trigger). A trigger-only estimate
+  misses this.
+- `ratio` is the EyeLink rate error, **−92 to +118 ppm** — per subject, not a
+  constant, up to 75 ms across a scan.
+- sub-007 and sub-009 have genuine −451/−456 ms offsets (ET started after the
+  scan). sub-014's apparent −2955 ms was a stray trigger, resolved to +63.5 ms.
+
+Two traps: the *first* trigger interval is systematically short (~1.99 s), so
+filtering the train for regular 2.5 s spacing discards the genuine first trigger;
+and trigger-train alignment cannot resolve an offset, because the train is
+periodic and any whole-period shift fits equally well.
+
+## Coil compression (`recon/ROI-PCA/`, `recon/ROVir/`)
+
+Shared solver, different ranking of the same generalised eigenproblem. **ROI-PCA
+nv=8 (6.5x) is the operating point.** See `recon/ROI-PCA/README.md`.
+
+`kspace_ROI-PCA_8_woBin.mat` holds `y`, `t`, `ve`, `meta` — **no `C`**; the
+matching virtual coil maps are `C_rovir_8.mat` in the same folder. `t` and `ve`
+are **bit-identical across all 15 subjects** (same `.seq`) and stored float64,
+so a third of each 3.2 GiB file is duplicated 15 times.
+
+## Eye decoding (`model/`)
+
+Self-contained investigation into classifying gaze/motion from raw k-space.
+**Read `model/README.md` first** — `model/DESIGN.md` is the chronological log
+including wrong turns. Outcome: the eye demonstrably rotates between bins, but
+the motion does not reach individual readouts at a level any model can use.
+
+Derived data (~180 GB, gitignored) under `data/derived/`: `kband` (ROI-PCA bands
+plus detrend caches), `kband_raw52`, `svd`, `features`, `features_raw`.
+
+## Environments and gotchas
+
+| env | contents |
+|---|---|
+| `mreye-ml` | torch 2.13+cu130, finufft, nibabel, sklearn — all `model/` work |
+| `mreyetrack` | h5py, scipy, pandas — mask and k-space inspection |
+| MATLAB | `/usr/local/MATLAB/R2024b/bin/matlab -batch "run('script.m')"` |
+
+- **twixtools needs a shim**: `scipy.integrate.cumtrapz` was removed in modern
+  scipy. Alias it to `cumulative_trapezoid` before importing, and redirect its
+  stdout (a tqdm bar floods output).
+- **NIfTI ↔ `.mat` array indices**: `mat = (239 - y, 239 - x, z)` for an
+  ITK-SNAP cursor `(x, y, z)`, verified at correlation 1.000000. `h5py` also
+  returns MATLAB arrays with axes reversed — `masks.mat` needs `.T`.
+- Raw `.dat` files are ~16 GB; `twixtools.read_twix` indexes one in ~10 s, so
+  prefer one read per subject over one per task.
+
+## Eye segmentation (`analysis/test_orientation/tissue_check/`)
+
+`run_aeye.py` drives the A-eye nnUNetv1 `Task313_Eye` model in Docker
+(`jaimebarran/fw_gear_aeye:0.0.1`), segmenting lens, globe, optic nerve, fat and
+the four recti from an MPRAGE. It is a single-orbit model run per quadrant, and
+the quadrant crop keeps the **full z range**, so the mouth is inside the search
+volume and fat labels leak there (~2% of voxels). `aeye_gate.py` drops components
+further than a threshold from the detected globe. Docker cannot mount the
+scratchpad — write outputs under the repo.
+
+To carry labels into LIBRE space, register **once** against `woBin` and apply
+that single transform to all bins; a per-bin deformable registration would
+absorb the eye displacement being measured.
