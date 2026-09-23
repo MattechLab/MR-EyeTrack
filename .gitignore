@@ -201,7 +201,6 @@ visual_stimuli/data_archive/
 /recon/3-Mitosius/.runs*
 
 # Other
-CLAUDE.md
 .codex
 *.trl
 *.ses

@@ -1,0 +1,116 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+MR-EyeTrack is a motion-resolved MRI reconstruction pipeline that simultaneously acquires 3D radial-spiral k-space data and synchronized eye-tracking data (SR Research EyeLink). K-space readouts are labeled and binned by gaze direction (up/down/left/right), then each bin is independently reconstructed into a T1-weighted 3D image. The result is 4 motion-resolved images — one per gaze direction — per subject.
+
+## Running the Reconstruction Pipeline
+
+The pipeline runs in MATLAB with the **monalisa** library (not in this repo, at `/home/debi/MatTechLab/monalisa`) and the **pulseq** library (`/home/debi/yiwei/forclone/pulseq`). Each script `addpath(genpath(...))` these at the top.
+
+**Single subject, single config** — run interactively in MATLAB by setting variables at the top then calling the script:
+```matlab
+% Set variables in the workspace, then run:
+subject_num = 5;
+mask_type   = 'clean_0.50';   % 'clean' | 'clean_0.50' | 'clean_0.75' | 'clean_0.95'
+region_idx  = 0;              % 0=up 1=down 2=left 3=right
+run('recon/1-CoilSensitivity/S1_CalCoilSensitivity_jb_pulseq.m')
+run('recon/2-Binning/S2_eyeMask_t1_binning_pulseq.m')
+run('recon/3-Mitosius/S3_mitosius_binning_pulseq.m')
+run('recon/4-Recon/S4_recon_debi_4fr_pulseq.m')
+```
+
+**Batch all subjects** — runs subjects 1-15 across all 4 mask types and 4 region indices, with skip logic if output already exists:
+```bash
+bash recon/4-Recon/run_resume_recon_logged.sh
+# Logs to /tmp/S4_resume_recon_debi_4fr_pulseq.log
+```
+
+**Sync reconstruction results** from a remote server/mounted volume:
+```bash
+bash recon/Recon_scripts/sync_recon.sh -d 251216 [--dry-run]
+bash recon/Recon_scripts/sync_recon.sh -s user@server -d 251216
+```
+
+**Convert reconstructed `.mat` files to NIfTI**:
+```matlab
+mat2nii_single('/path/to/x_steva_regionidx_0_nIter_20_delta_1.000.mat', 'ReconType', 'th8')
+mat2nii_single('/path/to/x0_regionidx0.mat', 'ReconType', 'x0')
+```
+
+**Convert EDF eye-tracking files to BIDS**:
+```bash
+cd eye_tracker/hcph-sops-fork/code/eyetracking_250423/
+python convert.py <edf_recordings_folder> <bids_file_path>
+```
+
+## Pipeline Architecture (S1 → S4)
+
+All four steps share the same `baseDir = 'data/study'` and subject path convention `sub-NNN` (zero-padded 3 digits). Raw data per subject lives in `data/study/sub-NNN/rawdata/` as three `.dat` files:
+- `*_BC.dat` — body coil reference scan (prescan)
+- `*_HC.dat` — head coil array scan (prescan)
+- `*_T1wLIBRE.dat` — main T1w LIBRE acquisition
+
+Two pulseq `.seq` files in `data/study/pulseq/` define the k-space trajectory: index `{1}` is the prescan, index `{2}` is the main sequence. `extract_seq_params()` (in `recon/pulseq/`) reads `nshot` and `nseg` from these.
+
+### S1 — Coil Sensitivity (`recon/1-CoilSensitivity/`)
+Reads body-coil and head-coil prescan `.dat` files, computes 3D coil sensitivity maps via `mlComputeCoilSensitivity`, and saves `C.mat` to `data/study/sub-NNN/recon/`.
+
+### S2 — Binning Mask (`recon/2-Binning/`)
+Reads the raw measurement file and the pre-computed eye-tracking masks from `data/study/sub-NNN/eyemasks/`. Uses a sliding window (`winLen=10`, `th_ratio=0.75`) over ET timestamps (1 ms sampling) to decide which MRI readouts (TR ≈ 6–8 ms) to keep per gaze direction. Saves one `eMask_th0.75_regionN.mat` per region into `data/study/sub-NNN/recon/bins/<mask_type>/`.
+
+### S3 — Mitosius (`recon/3-Mitosius/`)
+Loads the full raw dataset and normalises it, then applies the binning masks via `bmMitosis` to split k-space into per-gaze-direction subsets. Saves the split k-space (`y`, `t`, `ve`) with `bmMitosius_create` into `data/study/sub-NNN/recon/mitosius/<mask_type>/mask_N/`.
+
+### S4 — Reconstruction (`recon/4-Recon/`)
+Loads the Mitosius data, coil maps, and computes an initial estimate `x0` via `bmMathilda` (gridding). Runs `bmSteva` (compressed-sensing iterative recon, 20 iterations, δ=1). Outputs:
+- `data/study/sub-NNN/recon/<mask_type>/x0/x0_regionidxN.mat`
+- `data/study/sub-NNN/recon/<mask_type>/x/x_steva_regionidx_N_nIter_20_delta_1.000.mat`
+
+Skip logic: if `xPath` already exists, the script returns immediately — safe to re-run.
+
+**Memory constraint**: The `debi` workstation limits matrix size to 240³. `voxel_size = round(FoV/240)` is always ≥ 1; coil maps `C` are resized from 48³ to 240³ with `bmImResize`.
+
+**Subject-specific rotations**: `rotationMap` in S3/S4 corrects orientation for certain subjects (currently subject 2 is rotated).
+
+## Key Variables and Conventions
+
+| Variable | Values | Meaning |
+|---|---|---|
+| `subject_num` | 1–15 | Subject index |
+| `mask_type` | `'clean'` | Fixation-only ET mask (blinks + saccades removed) |
+| `mask_type` | `'clean_0.50'`, `'clean_0.75'`, `'clean_0.95'` | Random undersampling of `clean`: the number is the fraction of valid readouts randomly zeroed out (e.g. `clean_0.95` keeps only 5%). Generated by `S2_1_eyeMask_undersampling_study.m` for the undersampling study. |
+| `region_idx` | 0=up, 1=down, 2=left, 3=right | Gaze direction bin |
+| `nShotOff` | 14 | Warm-up shots discarded at acquisition start |
+| `nIter` | 20 | STEVA iterations |
+| `delta` | 1.0 | STEVA regularisation parameter |
+
+## Eye Tracking Processing (`eye_tracker/`)
+
+`hcph-sops-fork/` is a fork of the HCP-h SOPs project (Apache 2.0). The active development folders for MR-EyeTrack are `eyetracking_250127/` and `eyetracking_250423/`. Core modules:
+
+- `eyetrackingrun.py` — `EyeTrackingRun` class: parses EDF metadata (calibration, gaze coords, thresholds, events) and converts column names to BIDS standard
+- `convert.py` — CLI entry point; reads a `schedule.tsv` to map sessions → EDF filenames, calls `EyeTrackingRun.from_edf()` then `write_bids()`
+- `mask_gen.py` / `mask_clean.py` — generate and clean the ET masks used as input to S2
+
+Dependencies (Python): `numpy`, `scipy`, `matplotlib`, `pandas`, `pyedfread`, `pylink`, `psychopy`, `psychtoolbox`, `psychopy-eyetracker-sr-research`
+
+## Visual Stimuli (`visual_stimuli/`)
+
+PsychoPy scripts for the in-scanner experiment. Participants fixate on one of 16 positions (4×4 grid) displayed for 5 s each. Key scripts:
+
+- `mreyetrack_16points.py` — 16-position grid paradigm (main study)
+- `mreyetrack_4points.py` — 4-position paradigm
+- `flickering_checkerboard.py` — localiser stimulus
+
+## Analysis (`analysis/`)
+
+Post-reconstruction Python/MATLAB scripts and Jupyter notebooks:
+
+- `analysis/conversion/` — `mat2nii_single.m` / `mat2nii_batch.m` convert `.mat` reconstructions to `.nii.gz`; `nii2bids.ipynb` organises them into BIDS; `dcm2nii.ipynb` converts raw DICOM
+- `analysis/comparison/dcte/` — dCTE (dynamic contrast-to-edge) metric across subjects/runs
+- `analysis/comparison/iqms_mriqc/` — MRIQC image quality metrics
+- `analysis/comparison/ssim/` — SSIM comparison between reconstruction variants
+- `analysis/comparison/matlab/` — visualisation and comparison scripts for binning quality
