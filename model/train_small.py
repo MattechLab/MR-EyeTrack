@@ -77,8 +77,11 @@ def gaze_labels(sub, kind='filtered'):
     return lab
 
 
+LABEL_TAG = 'winLen3_sync'   # rebuilt labels: 24 ms window + per-subject timing
+
+
 def _bin(sub, name):
-    p = f'{STUDY}/sub-{sub:03d}/recon/bins/{name}/eMask_th0.75_winLen10.mat'
+    p = f'{STUDY}/sub-{sub:03d}/recon/bins/{name}/eMask_th0.75_{LABEL_TAG}.mat'
     m = np.asarray(sio.loadmat(p)['eMaskN']).squeeze().reshape(NSHOT, NSEG)
     return m[NOFF:, 1:].ravel().astype(bool)
 
@@ -97,7 +100,14 @@ def motion_labels(sub, kind=None):
         mot |= _bin(sub, n)
     lab[_bin(sub, 'fixation-ok') & ~mot] = 0
     lab[mot] = 1
+    if SHIFT:
+        # circular-shift null: same class structure and duty cycle, but no longer
+        # time-locked to the data. The model must beat this, not just chance.
+        lab = np.roll(lab, SHIFT)
     return lab
+
+
+SHIFT = 0
 
 
 class Windows(torch.utils.data.Dataset):
@@ -183,9 +193,13 @@ def main():
     ap.add_argument('--kind', default='filtered')
     ap.add_argument('--variant', default='ROI-PCA_8', choices=list(SRC))
     ap.add_argument('--task', default='gaze', choices=['gaze', 'motion'])
+    ap.add_argument('--shift', type=int, default=0,
+                    help='circular-shift the labels: a null control')
+    ap.add_argument('--label-tag', default='winLen3_sync')
     a = ap.parse_args()
-    global VARIANT, NV, NCLS
+    global VARIANT, NV, NCLS, SHIFT, LABEL_TAG
     VARIANT = a.variant; NV = SRC[VARIANT][2]
+    SHIFT = a.shift; LABEL_TAG = a.label_tag
     NCLS = 4 if a.task == 'gaze' else 2
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     si = {s: i for i, s in enumerate(a.subs)}
@@ -201,6 +215,7 @@ def main():
     print(f'window {W} readouts ({W*0.008:.2f} s), TCN receptive field {net.rf} '
           f'({net.rf*0.008:.2f} s), {npar/1e3:.0f}k params')
     print(f'windows: train {len(tr)}, val {len(va)}, test {len(te)}, device {dev}')
+    print(f'labels: {LABEL_TAG}, task {a.task}, shift {SHIFT}')
     opt = torch.optim.AdamW(net.parameters(), lr=a.lr, weight_decay=1e-3)
     best = (-1, -1, None)
     for ep in range(a.epochs):

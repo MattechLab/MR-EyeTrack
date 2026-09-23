@@ -1,3 +1,6 @@
+> **Start with [README.md](README.md).** This file is the chronological log,
+> including wrong turns and their corrections. The README is the summary.
+
 # Eye state from raw k-space — data choice and model design
 
 Decisions and measurements behind training a classifier on the compressed
@@ -1302,3 +1305,167 @@ Note the ratios sit slightly *below* 1 rather than at 1. Cross-bin pairs are
 marginally more similar than same-bin pairs, most likely a time-gap confound
 (same-bin pairs span longer intervals and accrue more drift). It does not affect
 the conclusion, which only requires the excess not to be positive.
+
+---
+
+# Motion detection on rebuilt labels: no signal, and this time with a null
+
+Labels rebuilt at `winLen=3` with the per-subject timing correction
+(`_sync`), roughly doubling the motion class and removing its duration bias.
+Same FiLM/TCN, 64-readout (0.5 s) windows, 60/20/20 split.
+
+| run | best val | TEST balanced acc |
+|---|---:|---:|
+| true labels | 0.5352 | **0.5147** |
+| circular-shift null (20 000 readouts) | 0.5273 | **0.5206** |
+
+**The null scores higher than the true labels.** The ~0.52 both runs reach is
+what the architecture produces from any temporally blocky label, not from
+motion. The earlier 0.5200 on the winLen10 labels was the same artifact,
+reported without a control.
+
+This is the measurement the earlier run should have had. Both runs share
+identical event clustering (blinks span 25-50 consecutive readouts), so the
+question of whether readout-level standard errors apply -- which cost a whole
+exchange last time -- simply does not arise.
+
+## What is now closed
+
+Every combination has been tested against its own control:
+
+| task | input | result |
+|---|---|---|
+| 4-way gaze | raw k-space, 3 compressions + uncompressed | 0.26-0.29 vs 0.25, insensitive to every representational choice |
+| 4-way gaze | per-readout statistics, 8 and 52 channels | chance |
+| binary motion | per-readout statistics, 8 and 52 channels | chance |
+| binary motion | raw k-space + TCN, winLen10 labels | 0.52, no control |
+| **binary motion** | **raw k-space + TCN, winLen3_sync labels** | **0.5147 vs null 0.5206** |
+
+Both pair tests agree: no per-readout excess for gaze (CI entirely below 1 on
+every subject) and none for motion (point estimate ~0, one marginal hit that
+failed to replicate on the same subject's uncompressed data).
+
+**The eye moves and the binning works** -- the optic nerve profile is
+unambiguous. The motion simply does not reach individual readouts at a level any
+model can use. That is a property of the acquisition, and no label fix,
+compression choice, architecture or window length changes it.
+
+## What the label rebuild was still worth
+
+The `_sync` labels are better regardless of this result: saccade retention 38% ->
+70%, per-subject spread 13x -> under 2x, and a systematic ~61 ms offset removed
+that every previous bin carried (the first readout lands ~55 ms after its
+trigger, which a trigger-only estimate misses). Those bins are the right input
+for reconstruction binning and for any future work, independent of decoding.
+
+
+---
+
+# Input specification: how data actually reached the models
+
+Recorded because it is the part hardest to reconstruct from the scripts alone.
+
+## Source array
+
+Per subject, precomputed: `[79894 readouts, 160 samples, nv channels]` complex64.
+
+- **160 samples, not 480.** Samples `160:320` of each readout, i.e.
+  `|k| <= 0.333` normalised — structure down to ~6 mm, covering the globe
+  (24 mm) and the lens (~9 mm). Outer `|k|` is mostly noise and was dropped.
+- **nv channels**: 8 (ROI-PCA or SVD), 16 (SVD-16), 52 (uncompressed).
+- **Detrended before anything.** Per-direction-cluster local detrend, 600
+  clusters, 11-neighbour moving average. Not optional: without it the models
+  decode *time* through scanner drift, which is what made `probe_gaze.py` v1
+  and v2 uninterpretable.
+
+## Complex handling
+
+Real and imaginary parts are **concatenated along the channel axis**, not
+converted to magnitude/phase:
+
+```python
+x = np.concatenate([x.real, x.imag], axis=2)   # [W, 160, 2*nv]
+x = x.permute(0, 2, 1)                          # [W, 2*nv, 160]
+```
+
+8 complex channels -> **16 real planes**; 52 -> **104**. Each readout enters as
+a 1D signal of length 160 with 2*nv channels, and `Conv1d` slides along the
+**sample axis** (the `|k|` direction), never across readouts at that stage.
+
+## The three tensors per window
+
+| tensor | shape | meaning |
+|---|---|---|
+| `x` | `[B, W, 2*nv, 160]` | k-space, real+imag planes |
+| `dirs` | `[B, W, 3]` | spoke unit vector per readout |
+| `y` | `[B, W]` | label per readout, -1 = ignore |
+
+`dirs` passes through a small MLP and **FiLM-modulates** the conv channels.
+Mandatory — without it the dominant input variance is the trajectory rotating,
+not the eye moving. Output is **per readout**, `Conv1d(d, n_classes, 1)` giving
+`[B, W, n_classes]`; loss is cross-entropy with `ignore_index=-1`, so unlabelled
+readouts affect neither training nor evaluation.
+
+## Window sizes used
+
+| run | W (readouts) | duration | stride | overlap | batch |
+|---|---:|---:|---:|---:|---:|
+| first gaze (`train_gaze.py`) | 384 | 3.07 s | 64 | **6x** | 8 |
+| shrunken gaze (`train_small.py`) | 256 | 2.05 s | W/2 | 2x | 16 |
+| motion | **64** | **0.51 s** | 32 | 2x | 16 |
+| unsupervised AE | 256 | 2.05 s | W | none | 8 |
+| linear probe (swept) | 64–1024 | 0.5–8.2 s | 64 | — | — |
+
+There is no single window size: `W` was a deliberate variable, and the sweep is
+itself part of the evidence — accuracy stayed **flat from 0.5 s to 5 s**, which
+is why the per-readout evidence was judged too correlated to accumulate.
+
+**Why 64 for motion.** A blink spans 25–50 readouts and a saccade 4–10. A
+256-readout window would put one blink among ~200 still readouts, so the event
+drowns. 64 readouts brackets a blink roughly one-to-one.
+
+**Why 256 for gaze.** Gaze blocks last 5 s (625 readouts), so anything up to
+that is valid. 256 was the best-controlled point in the sweep — 1024 started
+failing the 70% label-purity filter because windows straddled two gaze blocks.
+
+**For scale**, one 256-readout window at nv=8 is `[256, 16, 160]` = **655 360
+numbers**, and the training set was ~4100 such windows across 11 subjects.
+
+The 6x overlap in the first run was a mistake: 9548 "training windows" were
+really ~1500 independent ones, and the model memorised (train loss 1.42 ->
+0.105 with test flat).
+
+**Splits are 60/20/20 by time, never random** — a blink spans 25–50 consecutive
+readouts, so a random split puts the same event on both sides.
+
+## The other two input formats
+
+**Per-readout statistics** (`features/`) — no window at all. Each readout
+collapses to one vector: 23 statistics (min, max, median, IQR, skew, kurtosis,
+autocorrelation, entropy, zero-crossings, …) x **4 measures {real, imaginary,
+magnitude, phase}** x channels, computed on the **full 480-sample** readout.
+736 features at 8 channels, **4784 at 52**. One row per readout into
+HistGradientBoosting / LinearSVC.
+
+**Unsupervised autoencoder** — same tensors as supervised, trained only to
+reconstruct `x` (MSE), no labels. Encoder -> 32-d code per readout -> TCN ->
+decoder. Labels touched only afterwards, to probe the frozen code.
+
+## Every training run
+
+| # | model | input | task | result | chance |
+|---|---|---|---|---|---|
+| 1 | FiLM/TCN, 296k | raw k-space, W=384, ROI-PCA 8ch | 4-way gaze | 0.2695 (peeked test) | 0.250 |
+| 2 | FiLM/TCN, 170k | raw k-space, W=256, ROI-PCA 8ch | 4-way gaze | **0.2833** | 0.250 |
+| 3 | FiLM/TCN, 170k | SVD 8ch | 4-way gaze | 0.2728 | 0.250 |
+| 4 | FiLM/TCN, 296k | uncompressed 52ch (104 planes) | 4-way gaze | 0.2557 | 0.250 |
+| 5 | HistGB / LinearSVC | 736 stats, 8ch | binary motion | 0.5018 / 0.4984 | 0.500 |
+| 6 | HistGB | 4784 stats, 52ch | binary motion | 0.4992 / 0.5000 | 0.500 |
+| 7 | HistGB | 4784 stats, 52ch | 4-way gaze | 0.2518 | 0.250 |
+| 8 | FiLM/TCN, 136k | raw k-space, W=64, winLen10 labels | binary motion | 0.5200 (no null) | 0.500 |
+| 9 | FiLM/TCN, 136k | raw k-space, W=64, `_sync` labels | binary motion | **0.5147 vs null 0.5206** | 0.500 |
+| 10 | autoencoder, 32-d code | raw k-space, W=256 | unsupervised | probe z +0.68, p 0.035 | — |
+
+Run 4 is worth noting: the 52-channel model scored **lowest** despite carrying
+the most information. 296k parameters against the same ~1500 independent
+windows — the extra capacity bought overfitting and nothing else.
