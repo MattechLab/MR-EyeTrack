@@ -212,3 +212,11 @@ visual_stimuli/data_archive/
 *~
 
 /analysis/test_orientation/results/
+
+# graphify (knowledge graph + its hooks)
+graphify-out/
+.graphify*
+.claude/
+
+# manuscript/abstract drafts
+*.docx
