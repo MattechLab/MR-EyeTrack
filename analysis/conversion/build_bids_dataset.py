@@ -2,25 +2,24 @@
 
     python analysis/conversion/build_bids_dataset.py [--mode symlink|hardlink|copy]
                                                      [--subjects 1 2 ...] [--dry-run]
-                                                     [--include-roipca] [--include-mitosius]
+                                                    
 
 Layout (BIDS 1.9: sourcedata/ and derivatives/ live at the dataset root)
 
     study_bids/
-      dataset_description.json  participants.tsv  README.md  CHANGES  .bidsignore
-      sub-NNN/anat/   sub-NNN_acq-full_rec-steva_T1w.nii.gz   <- LIBRE, no binning (main image)
-                      sub-NNN_acq-mprage_T1w.nii.gz            <- IDEA/Siemens reference MPRAGE
-      sub-NNN/beh/    sub-NNN_task-*_recording-eye1_physio.*   <- ET converted to BIDS
-      sourcedata/sub-NNN/{dicom,rawdata,et}   raw twix .dat, DICOM, EDF/psydat/log
+      dataset_description.json  participants.tsv  README.md  CHANGES
+      sub-NNN/anat/   sub-NNN_acq-full_rec-regu_T1w.nii.gz   <- LIBRE, no binning (main image)
+                      sub-NNN_acq-mprage_T1w.nii.gz            <- IDEA/Siemens reference MPRAGE (sub-010/011: none)
+      sourcedata/sub-NNN/{rawdata,et}         raw twix .dat, EDF/psydat/log/csv + BIDS-converted ET
       sourcedata/pulseq/                      the two .seq files (shared by all subjects)
       derivatives/mreyetrack-recon/sub-NNN/anat/
-                      sub-NNN_acq-{up,down,left,right}_rec-{steva,mathilda}_T1w      (clean)
-                      sub-NNN_acq-full_rec-mathilda_T1w                               (no binning)
+                      sub-NNN_acq-{up,down,left,right}_rec-{regu,grid}_T1w      (clean)
+                      sub-NNN_acq-full_rec-grid_T1w                               (no binning)
                       ..._desc-keep{50,25,5}_T1w                                      (random undersampling)
       derivatives/mreyetrack-binning/sub-NNN/{eyemasks,bins}   gaze labels per readout
 
-`acq` = which gaze bin (or `full` = all readouts), `rec` = algorithm (steva = iterative
-compressed-sensing, mathilda = gridding). `desc-keepNN` = NN % of the clean readouts kept.
+`acq` = which gaze bin (or `full` = all readouts), `rec` = algorithm (regu = regularised iterative
+compressed-sensing/STEVA, grid = gridding/MATHILDA). `desc-keepNN` = NN % of the clean readouts kept.
 """
 import argparse
 import csv
@@ -38,8 +37,8 @@ GAZE = {0: "up", 1: "down", 2: "left", 3: "right"}
 MASKS = {"clean": (None, 1.0), "clean_0.50": ("keep50", 0.50),
          "clean_0.75": ("keep25", 0.25), "clean_0.95": ("keep5", 0.05)}
 RECS = {  # rec label -> (subfolder of recon/<mask>, filename pattern, long name)
-    "steva": ("x", "x_steva_regionidx_{r}_nIter_20_delta_1.000.nii.gz", "STEVA"),
-    "mathilda": ("x0", "x0_regionidx{r}.nii.gz", "MATHILDA"),
+    "regu": ("x", "x_steva_regionidx_{r}_nIter_20_delta_1.000.nii.gz", "STEVA"),
+    "grid": ("x0", "x0_regionidx{r}.nii.gz", "MATHILDA"),
 }
 SEQ_MAIN = "yj_seq202_t1w_libre_main_TR8.0ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872_gdsp.seq"
 
@@ -118,52 +117,46 @@ class Linker:
         Path(dst).write_text(text)
 
 
-def dicom_demographics(sub):
-    """(age, sex) from the DICOM header; 'n/a' when unavailable."""
-    try:
-        import pydicom
-        f = next((SRC / sub / "dicom").rglob("*.dcm"))
-        d = pydicom.dcmread(f, stop_before_pixels=True)
-        age = str(d.get("PatientAge", "")).rstrip("Y").lstrip("0")
-        return age or "n/a", str(d.get("PatientSex", "")) or "n/a"
-    except Exception:
-        return "n/a", "n/a"
+# (age, sex) read from the twix headers of each subject's own scan (flPatientAge, lPatientSex;
+# Siemens codes 1 = female, 2 = male).
+DEMOGRAPHICS = {1: (30, "M"), 2: (26, "F"), 3: (44, "M"), 4: (42, "M"), 5: (32, "M"), 6: (40, "M"),
+                7: (28, "M"), 8: (40, "M"), 9: (25, "M"), 10: (21, "F"), 11: (28, "M"), 12: (27, "M"),
+                13: (27, "M"), 14: (30, "M"), 15: (24, "F")}
+BAD_DICOM = {10, 11}  # their dicom/ folder is a byte-identical copy of sub-001's, not their own scan
 
 
-def build_subject(L, sub, include_roipca, include_mitosius):
+def build_subject(L, sub):
     s = SRC / sub
     anat = DST / sub / "anat"
     der = DST / "derivatives" / "mreyetrack-recon" / sub / "anat"
 
     # --- main image: LIBRE without binning, STEVA
-    stem = f"{sub}_acq-full_rec-steva_T1w"
+    stem = f"{sub}_acq-full_rec-regu_T1w"
     if L.put(s / "recon/woBin/x_steva_nIter_20_delta_1.000.nii.gz", anat / f"{stem}.nii.gz"):
         L.write_json(anat / f"{stem}.json", {**ACQ, "ReconstructionAlgorithm": "STEVA",
                      "GazeBin": "none (all fixation readouts)", "NumberOfIterations": 20, "Delta": 1.0,
                      "SourceDatasets": [{"URL": f"sourcedata/{sub}/rawdata/{sub}_T1wLIBRE.dat"}]})
 
+    stem = f"{sub}_acq-full_rec-grid_T1w"
+    if L.put(s / "recon/woBin/x0.nii.gz", anat / f"{stem}.nii.gz"):
+        L.write_json(anat / f"{stem}.json", {**ACQ, "ReconstructionAlgorithm": "MATHILDA (gridding)",
+                     "GazeBin": "none (all fixation readouts)",
+                     "SourceDatasets": [{"URL": f"sourcedata/{sub}/rawdata/{sub}_T1wLIBRE.dat"}]})
+
     # --- reference MPRAGE converted from the IDEA DICOM
+    num = int(sub.split("-")[1])
     mp = next(iter(sorted((s / "dicom").glob("*/*.nii.gz"))), None)
-    if mp is not None:
+    if mp is not None and num not in BAD_DICOM:
         stem = f"{sub}_acq-mprage_T1w"
         L.put_3d(mp, anat / f"{stem}.nii.gz")
         L.put(mp.with_suffix("").with_suffix(".json"), anat / f"{stem}.json")
 
-    # --- eye tracking converted to BIDS (physio-style, BEP020)
-    for p in sorted((s / "et").glob("*")):
-        if p.name.endswith(".tsv.gz") or (p.suffix == ".json"):
-            task = "mreyetrack" + p.name.split("mreyetrack_")[1].split("_20")[0].replace("_", "")
-            ext = ".tsv.gz" if p.name.endswith(".tsv.gz") else ".json"
-            L.put(p, DST / sub / "beh" / f"{sub}_task-{task}_recording-eye1_physio{ext}")
-
     # --- sourcedata
     sd = DST / "sourcedata" / sub
-    L.tree(s / "dicom", sd / "dicom")
     L.tree(s / "rawdata", sd / "rawdata")
     L.tree(s / "et", sd / "et")
 
     # --- derivatives: other reconstructions
-    L.put(s / "recon/woBin/x0.nii.gz", der / f"{sub}_acq-full_rec-mathilda_T1w.nii.gz")
     for mask, (desc, kept) in MASKS.items():
         for rec, (folder, pat, algo) in RECS.items():
             for r, gaze in GAZE.items():
@@ -174,7 +167,7 @@ def build_subject(L, sub, include_roipca, include_mitosius):
                             "FractionOfCleanReadoutsKept": kept,
                             "Sources": [f"bids::sourcedata/{sub}/rawdata/{sub}_T1wLIBRE.dat",
                                         f"bids::derivatives/mreyetrack-binning/{sub}"]}
-                    if rec == "steva":
+                    if rec == "regu":
                         meta.update(NumberOfIterations=20, Delta=1.0)
                     L.write_json(der / f"{stem}.json", meta)
     L.put(s / "recon/C.mat", DST / "derivatives/mreyetrack-recon" / sub / "coilmaps" / f"{sub}_desc-coilsens_coilmap.mat")
@@ -184,11 +177,6 @@ def build_subject(L, sub, include_roipca, include_mitosius):
     L.tree(s / "eyemasks", b / "eyemasks")
     L.tree(s / "recon/bins", b / "bins")
 
-    # --- optional bulk derivatives
-    if include_roipca:
-        L.tree(s / "recon/ROI-PCA", DST / "derivatives/mreyetrack-roipca" / sub)
-    if include_mitosius:
-        L.tree(s / "recon/mitosius", DST / "derivatives/mreyetrack-mitosius" / sub)
 
 
 def top_level(L, subs):
@@ -217,17 +205,15 @@ def top_level(L, subs):
     L.put(SRC / "sync_corrections.mat", DST / "derivatives/mreyetrack-binning/sync_corrections.mat")
     L.tree(SRC / "pulseq", DST / "sourcedata" / "pulseq")
 
-    rows = [(f"sub-{n:03d}", *dicom_demographics(f"sub-{n:03d}")) for n in subs]
+    rows = [(f"sub-{n:03d}", *DEMOGRAPHICS[n]) for n in subs]
     if not L.dry:
         with open(DST / "participants.tsv", "w", newline="") as f:
             w = csv.writer(f, delimiter="\t", lineterminator="\n")
             w.writerow(["participant_id", "age", "sex"])
             w.writerows(rows)
     L.write_json(DST / "participants.json", {
-        "age": {"Description": "Age at scan, from the DICOM header", "Units": "years"},
-        "sex": {"Description": "Sex, from the DICOM header", "Levels": {"M": "male", "F": "female"}}})
-    L.write_text(DST / ".bidsignore", "# eye-tracking physio files follow BEP020, not yet in the validator\n"
-                 "sub-*/beh/\nsourcedata/\n")
+        "age": {"Description": "Age at scan", "Units": "years"},
+        "sex": {"Description": "Sex", "Levels": {"M": "male", "F": "female"}}})
     L.write_text(DST / "CHANGES", "1.0.0 TODO-date\n  - Initial release.\n")
     L.write_text(DST / "README.md", README)
 
@@ -242,11 +228,11 @@ and each bin is reconstructed independently, giving four motion-resolved images 
 
 | path | content |
 | --- | --- |
-| `sub-*/anat/*_acq-full_rec-steva_T1w` | LIBRE image from all fixation readouts (no gaze binning), STEVA |
+| `sub-*/anat/*_acq-full_rec-regu_T1w` | LIBRE image from all fixation readouts (no gaze binning), regularised (STEVA) |
+| `sub-*/anat/*_acq-full_rec-grid_T1w` | same readouts, gridding (MATHILDA) |
 | `sub-*/anat/*_acq-mprage_T1w` | reference MPRAGE from the scanner (Siemens IDEA), converted from DICOM |
-| `sub-*/beh/*_recording-eye1_physio` | eye-tracking recording converted to BIDS |
 | `sourcedata/sub-*/rawdata` | Siemens twix `.dat`: `_T1wLIBRE` (main), `_HC` / `_BC` (head / body coil prescans), `_AdjCoilSens` |
-| `sourcedata/sub-*/dicom`, `et` | DICOM and original EyeLink / PsychoPy files (EDF, csv, log, psydat) |
+| `sourcedata/sub-*/et` | eye tracking: original EyeLink / PsychoPy files (EDF, csv, log, psydat) and the BIDS conversion (`.tsv.gz` + `.json`) |
 | `sourcedata/pulseq` | the `.seq` files defining the k-space trajectory (prescan and main) |
 | `derivatives/mreyetrack-recon` | gaze-binned and other reconstructions, coil sensitivity maps |
 | `derivatives/mreyetrack-binning` | ET masks and per-readout gaze labels, ET-MRI sync corrections |
@@ -254,8 +240,8 @@ and each bin is reconstructed independently, giving four motion-resolved images 
 ## File naming
 
 - `acq-up|down|left|right` gaze bin, `acq-full` all readouts.
-- `rec-steva` iterative compressed-sensing reconstruction (20 iterations, delta 1);
-  `rec-mathilda` gridding (initial estimate).
+- `rec-regu` regularised iterative compressed-sensing reconstruction (STEVA, 20 iterations, delta 1);
+  `rec-grid` gridding (MATHILDA, the initial estimate of the iterative recon).
 - `desc-keep50|keep25|keep5` random undersampling study: percentage of the clean readouts kept.
 - Images are 240 x 240 x 240, about 1 mm isotropic, float32, RAS.
 
@@ -267,12 +253,15 @@ In numpy: `mask.reshape(1872, 44)[14:, 1:].ravel()`; MATLAB is column-major.
 
 ## Not included
 
-Mitosius (the split k-space, ~50 GB per subject) and the ROI-PCA compressed k-space are reproducible from
-`sourcedata` + `derivatives/mreyetrack-binning` with the code at TODO.
+The split k-space (mitosius, ~50 GB per subject) and the ROI-PCA compressed k-space are not shared; they
+can be rebuilt from `sourcedata` + `derivatives/mreyetrack-binning` with the MR-EyeTrack pipeline.
+The reference MPRAGE is not available for sub-010 and sub-011.
 
 ## Known issues
 
-TODO: sub-007 and sub-009 ET started after the scan (offsets -451 / -456 ms, corrected in sync_corrections.mat).
+- Eye tracking of sub-007 and sub-009 started after the scan began (offsets -451 / -456 ms), unlike the
+  other subjects (about +61 ms). All offsets, plus the per-subject EyeLink clock-rate error, are in
+  `derivatives/mreyetrack-binning/sync_corrections.mat` and are already applied to the `_sync` labels.
 """
 
 
@@ -281,13 +270,11 @@ def main():
     ap.add_argument("--mode", choices=["symlink", "hardlink", "copy"], default="symlink")
     ap.add_argument("--subjects", type=int, nargs="*", default=list(range(1, 16)))
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--include-roipca", action="store_true")
-    ap.add_argument("--include-mitosius", action="store_true")
     a = ap.parse_args()
 
     L = Linker(a.mode, a.dry_run)
     for n in a.subjects:
-        build_subject(L, f"sub-{n:03d}", a.include_roipca, a.include_mitosius)
+        build_subject(L, f"sub-{n:03d}")
     top_level(L, a.subjects)
     print(f"{'would link' if a.dry_run else 'linked'} {L.n} files into {DST} ({a.mode})")
     if L.missing:
