@@ -42,8 +42,22 @@ RECS = {  # rec label -> (subfolder of recon/<mask>, filename pattern, long name
 }
 SEQ_MAIN = "yj_seq202_t1w_libre_main_TR8.0ms_TE3.6ms_swap1_FA6_RF2_mreye_track_trajPTP_44_1872_gdsp.seq"
 
-LICENSE = "CC-BY-4.0"
+LICENSE = "CC0"
 BIDS_VERSION = "1.9.0"
+
+AUTHORS = ["Jaime Barranco", "Yiwei Jia", "Eleonora Fornari", "Oscar Esteban", "Jean-Baptiste Ledoux",
+           "Mauro Leidi", "Helene Vitali", "Cédric Campos Carvalho", "Elena Najdenovska",
+           "Laura Elena Raileanu", "Jessica Bastiaansen", "Micah M. Murray", "Benedetta Franceschiello"]
+FUNDING = [
+    "Fondation Asile des aveugles (grant #232933 to M.M.M.)",
+    "A grantor advised by Carigest SA (#232920 to M.M.M.)",
+    "Swiss National Science Foundation (grants #169206 to M.M.M., #220433 and #229214 to B.F.)",
+    "HES-SO University of Applied Sciences and Arts Western Switzerland (grant 129816/IA-RECHERCHE23-19)",
+]
+ETHICS = ["MR-Eye Track protocol: positive approval from the local ethics committee via the Swiss BASEC "
+          "(Business Administration System for Ethics Committees) on 27 June 2024, protocol number 2024-00165",
+          "Original protocol (Franceschiello et al.): approved by the cantonal ethics committee, "
+          "protocol number 2018-00240"]
 
 ACQ = {  # shared by every LIBRE image
     "Manufacturer": "Siemens", "ManufacturersModelName": "MAGNETOM Prisma Fit",
@@ -183,16 +197,15 @@ def top_level(L, subs):
     L.write_json(DST / "dataset_description.json", {
         "Name": "MR-EyeTrack: gaze-resolved 3D T1w MRI of the eye with simultaneous eye tracking",
         "BIDSVersion": BIDS_VERSION, "DatasetType": "raw", "License": LICENSE,
-        "Authors": ["TODO: author list"], "Acknowledgements": "TODO", "Funding": ["TODO"],
-        "EthicsApprovals": ["TODO: committee and approval number"],
-        "ReferencesAndLinks": ["TODO: paper / repository URL"], "DatasetDOI": "TODO: Zenodo DOI",
+        "Authors": AUTHORS, "Funding": FUNDING, "EthicsApprovals": ETHICS,
+        "ReferencesAndLinks": ["https://github.com/MattechLab/MR-EyeTrack"],
     })
     L.write_json(DST / "derivatives/mreyetrack-recon/dataset_description.json", {
         "Name": "MR-EyeTrack gaze-resolved reconstructions", "BIDSVersion": BIDS_VERSION,
         "DatasetType": "derivative", "License": LICENSE,
         "GeneratedBy": [{"Name": "monalisa", "Description": "bmMathilda (gridding) and bmSteva "
                          "(compressed-sensing, 20 iterations, delta 1) on pulseq 3D radial-spiral k-space"},
-                        {"Name": "MR-EyeTrack", "CodeURL": "TODO: repository URL"}],
+                        {"Name": "MR-EyeTrack", "CodeURL": "https://github.com/MattechLab/MR-EyeTrack"}],
         "SourceDatasets": [{"URL": "../../"}],
     })
     L.write_json(DST / "derivatives/mreyetrack-binning/dataset_description.json", {
@@ -214,7 +227,7 @@ def top_level(L, subs):
     L.write_json(DST / "participants.json", {
         "age": {"Description": "Age at scan", "Units": "years"},
         "sex": {"Description": "Sex", "Levels": {"M": "male", "F": "female"}}})
-    L.write_text(DST / "CHANGES", "1.0.0 TODO-date\n  - Initial release.\n")
+    L.write_text(DST / "CHANGES", "1.0.0 2026-10-22\n  - Initial release.\n")
     L.write_text(DST / "README.md", README)
 
 
@@ -251,6 +264,37 @@ Of 82 368 acquired readouts (44 segments x 1872 shots), segment 1 of each shot (
 first 14 shots (warm-up) are dropped, leaving 79 894 (43 x 1858). Labels use the same ordering.
 In numpy: `mask.reshape(1872, 44)[14:, 1:].ravel()`; MATLAB is column-major.
 
+## Authors
+
+Jaime Barranco (1,2,3), Yiwei Jia (1,2,4), Eleonora Fornari (3,5), Oscar Esteban (1), Jean-Baptiste Ledoux (3,5),
+Mauro Leidi (1,2), Helene Vitali (6,7), Cédric Campos Carvalho (8), Elena Najdenovska (8),
+Laura Elena Raileanu (8), Jessica Bastiaansen (9,10), Micah M. Murray (2,3), Benedetta Franceschiello (1,2).
+
+1. HES-SO University of Applied Sciences and Arts Western Switzerland.
+2. The Sense Innovation and Research Centre, Lausanne and Sion, Switzerland.
+3. Department of Radiology, Lausanne University Hospital and University of Lausanne, Lausanne, Switzerland.
+4. Graduate School for Cellular and Biomedical Sciences, University of Bern, Bern, Switzerland.
+5. CIBM Center for Biomedical Imaging, Lausanne, Switzerland.
+6. Unit for visually impaired people, Italian Institute of Technology, Genova, Italy.
+7. Department of Computer Science, Bioengineering, Robotics and Systems, University of Genoa, Genova, Italy.
+8. School of Engineering and Management Vaud (HEIG-VD), HES-SO University of Applied Sciences and Arts Western
+   Switzerland, Yverdon-les-Bains, Switzerland.
+9. Department of Diagnostic, Interventional and Pediatric Radiology (DIPR), Inselspital, Bern University Hospital,
+   University of Bern, Switzerland.
+10. Translation Imaging Center (TIC), Swiss Institute for Translational and Entrepreneurial Medicine, Bern, Switzerland.
+
+Lead contact: Benedetta Franceschiello (benedetta.franceschiello@hevs.ch).
+Technical contact: Jaime Barranco (jaime.barrancohernandez@hevs.ch).
+Code: https://github.com/MattechLab/MR-EyeTrack
+
+## Ethics, funding and competing interests
+
+The MR-Eye Track protocol was approved by the local ethics committee through the Swiss BASEC
+(protocol number 2024-00165, 27 June 2024). The original protocol was approved by the cantonal ethics
+committee (protocol number 2018-00240). Funding is listed in `dataset_description.json`.
+The authors had a previous patent application related to the original study; it has expired, and the
+authors declare no competing interests.
+
 ## Not included
 
 The split k-space (mitosius, ~50 GB per subject) and the ROI-PCA compressed k-space are not shared; they
@@ -262,6 +306,9 @@ The reference MPRAGE is not available for sub-010 and sub-011.
 - Eye tracking of sub-007 and sub-009 started after the scan began (offsets -451 / -456 ms), unlike the
   other subjects (about +61 ms). All offsets, plus the per-subject EyeLink clock-rate error, are in
   `derivatives/mreyetrack-binning/sync_corrections.mat` and are already applied to the `_sync` labels.
+- The `acq-full_rec-grid` images of sub-001 to sub-005 are stored without intensity normalization (values
+  around 1e-8, against about 1-10 for every other image). They are intact, but a viewer with a fixed display
+  window shows them black; rescale the display window to view them.
 """
 
 
