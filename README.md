@@ -61,5 +61,6 @@ internals are documented in [CLAUDE.md](CLAUDE.md).
 
 ## License
 
-CC0 1.0, see [LICENSE](LICENSE). `eye_tracker/hcph-sops-fork` is a fork of the HCPh SOPs and keeps its original Apache 2.0
-license.
+Apache License 2.0, see [LICENSE](LICENSE). The MATLAB reconstruction depends on monalisa, which has its own license.
+`eye_tracker/hcph-sops-fork` is a fork of the HCPh SOPs and keeps its original Apache 2.0 license. The dataset on OpenNeuro is
+released under CC0.
